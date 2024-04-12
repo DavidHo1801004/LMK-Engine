@@ -13,10 +13,33 @@
       <UniqueIdentifier>{67DA6AB6-F800-4c08-8B7A-83BB121AAD01}</UniqueIdentifier>
       <Extensions>rc;ico;cur;bmp;dlg;rc2;rct;bin;rgs;gif;jpg;jpeg;jpe;resx;tiff;tif;png;wav;mfcribbon-ms</Extensions>
     </Filter>
+    <Filter Include="Header Files\LMK">
+      <UniqueIdentifier>{c8bd41a3-b40f-4d88-a332-ebe4b205c6a8}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Source.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="LMK\LMK_coremdl.h">
+      <Filter>Header Files\LMK</Filter>
+    </ClInclude>
+    <ClInclude Include="LMK\LMK_root.h">
+      <Filter>Header Files\LMK</Filter>
+    </ClInclude>
+    <ClInclude Include="LMK\LMK_stdinc.h">
+      <Filter>Header Files\LMK</Filter>
+    </ClInclude>
+    <ClInclude Include="LMK\LMK.h">
+      <Filter>Header Files\LMK</Filter>
+    </ClInclude>
+    <ClInclude Include="LMK\LMK_engine.h">
+      <Filter>Header Files\LMK</Filter>
+    </ClInclude>
+    <ClInclude Include="SuperMarioClone.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
 </Project>
