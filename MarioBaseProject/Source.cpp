@@ -3,12 +3,19 @@
 int main(int argc, char* args[])
 {
 	lmk::Rect rect(0, 0, 5, 5);
+	lmk::Rect otherRect(1, 1, 3, 3);
+	lmk::Vector2 point(3, 3);
 
-	std::cout << (std::string)rect;
+	std::cout << (std::string)rect << std::endl;
+	std::cout << (std::string)otherRect << std::endl;
+	std::cout << rect.Contains(point) << std::endl;
+	std::cout << rect.Overlaps(otherRect) << std::endl;
 
-	rect.Offset({2, 2});
-
-	std::cout << (std::string)rect;
+	rect.Offset({8, 8});
+	std::cout << (std::string)rect << std::endl;
+	std::cout << rect.Contains(point) << std::endl;
+	std::cout << rect.Overlaps(otherRect) << std::endl;
+	
 
 	/*SuperMarioClone game(
 		SDL_WINDOWPOS_CENTERED,

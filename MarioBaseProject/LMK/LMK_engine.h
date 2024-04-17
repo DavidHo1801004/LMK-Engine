@@ -93,7 +93,7 @@ private:
 		return true;
 	}
 
-public: // Accessors & Mutators
+public: // Property Modifiers
 	inline bool isRunning() {
 		return m_running;
 	}

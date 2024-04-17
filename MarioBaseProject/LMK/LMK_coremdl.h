@@ -755,27 +755,30 @@ public: // Operators
 
 public: // Functions
 	//
+	// Offset the position of the rectangle and reserve its size.
 	// 
+	// @param _x:
+	//		The offset amount in the X axis;
+	// @param _y:
+	//		The offset amount in the Y axis;
+	//
+	inline void Offset(coord_t _x, coord_t _y) noexcept {
+		xMin += _x;
+		xMax += _x;
+		yMin += _y;
+		yMax += _y;
+	}
+	//
+	// Offset the position of the rectangle and reserve its size.
+	// 
+	// @param _offset:
+	//		The offset amount.
 	//
 	inline void Offset(Vector2_t _offset) noexcept {
 		xMin += _offset.x;
 		xMax += _offset.x;
 		yMin += _offset.y;
 		yMax += _offset.y;
-	}
-
-	//
-	// 
-	//
-	inline void Offset(coord_t _x, coord_t _y) noexcept {
-		Offset({_x, _y});
-	}
-
-	//
-	//
-	//
-	inline void SetMinMax() noexcept {
-
 	}
 
 	// 
@@ -823,7 +826,7 @@ public: // Functions
 			return false;
 
 		// If one rectangle is above the other.
-		if (yMax > _other.yMin || _other.yMax > yMin)
+		if (yMin > _other.yMax || _other.yMin > yMax)
 			return false;
 
 		return true;
@@ -837,47 +840,47 @@ protected:
 		return w * h;
 	}
 
-public: // Accessors & Mutators
-	//
-	// 
-	//
+public: // Property Modifiers
+	inline void setMin(coord_t _x, coord_t _y) noexcept {
+		xMin = _x;
+		yMin = _y;
+	}
+	inline void setMin(Vector2_t _minPos) noexcept {
+		xMin = _minPos.x;
+		yMin = _minPos.y;
+	}
+
+	inline void setMax(coord_t _x, coord_t _y) noexcept {
+		xMax = _x;
+		yMax = _y;
+	}
+	inline void setMax(Vector2_t _maxPos) noexcept {
+		xMax = _maxPos;
+		yMax = _maxPos;
+	}
+
 	inline void setPosition(Vector2_t _newPos) noexcept {
 		xMin = _newPos.x;
 		yMin = _newPos.y;
 	}
-	//
-	// 
-	//
 	inline void setPosition(coord_t _x, coord_t _y) noexcept {
 		xMin = _x;
 		yMin = _y;
 	}
 
-	//
-	// Returns m_size.x.
-	// 
 	_NODISCARD inline coord_t getWidth() const noexcept {
 		return w;
 	}
-	//
-	// Set m_size.x.
-	// 
-	inline void setWidth(coord_t _newVal) noexcept {
-		w = _newVal;
+	inline void setWidth(coord_t _width) noexcept {
+		w = _width;
 		xMax = xMin + w;
 	}
-
-	//
-	// Returns m_size.y.
-	// 
+ 
 	_NODISCARD inline coord_t getHeight() const noexcept {
 		return h;
 	}
-	//
-	// Set m_size.y.
-	// 
-	inline void setHeight(coord_t _newVal) noexcept {
-		h = _newVal;
+	inline void setHeight(coord_t _height) noexcept {
+		h = _height;
 		yMax = yMin + h;
 	}
 
@@ -886,6 +889,9 @@ protected: // Properties
 	coord_t yMin, yMax;
 
 	coord_t w, h;
+
+	// The m_position of the center of the rectangle.
+	Vector2 m_center;
 };
 IMPL_END
 
@@ -917,62 +923,6 @@ public: // Operator overloads
 		return (m_position == _right.m_position) && (m_size == _right.m_size);
 	}
 
-public: // Functions
-	// 
-	// Returns true if the x and y components of _point is a point inside this rectangle.
-	// 
-	// If _allowInverse is present and true, the width and height of the Rect are allowed 
-	// to take negative values (ie, the min value is greater than the max), and the test will still work.
-	// 
-	// @param _point:
-	//		Point to test.
-	// @param _allowInverse:
-	//		Does the test allow the Rect's width and height to be negative?
-	// 
-	// @return
-	//		True if the point lies within the specified rectangle.
-	// 
-	_NODISCARD inline bool Contains(Vector2 _point, bool _allowInverse = false) const noexcept {
-		// If X and Y coordinate of _point falls within Min and Max range of Rect -> Contains.
-		bool cond = LMK_InRange(_point.x, getMin().x, getMax().x) && LMK_InRange(_point.y, getMin().y, getMax().y);
-
-		// If _allowInverse is true -> we also check for LMK_InRange with the other way around (ie, Min becomes Max).
-		if (_allowInverse)
-			return cond || (LMK_InRange(_point.x, getMax().x, getMin().x) && LMK_InRange(_point.y, getMax().y, getMin().y));
-		else
-			return cond;
-	}
-
-	// 
-	// Returns true if the other rectangle overlaps this one.
-	// 
-	// @param _other:
-	//		Other rectangle to test overlapping with.
-	// 
-	_NODISCARD inline bool Overlaps(Rect _other) const noexcept {
-		// If either rectangle has area of 0 -> no overlap possible.
-		if (area() == 0 || _other.area() == 0)
-			return false;
-
-		// If one rectangle is on left side of the other.
-		if (getMin().x > _other.getMax().x || _other.getMin().x > getMax().x)
-			return false;
-
-		// If one rectangle is above the other.
-		if (getMax().y > _other.getMin().y || _other.getMax().y > getMin().y)
-			return false;
-
-		return true;
-	}
-
-private:
-	// 
-	// Get the area of this Rect.
-	// 
-	_NODISCARD inline coord_t area() const noexcept {
-		return m_size.x * m_size.y;
-	}
-
 public: // Static Functions
 	// 
 	// Shorthand for writing Rect(0, 0, 0, 0).
@@ -981,169 +931,51 @@ public: // Static Functions
 		return Rect(0, 0, 0, 0);
 	}
 
+	//
+	// 
+	//
 	_NODISCARD static Rect MinMaxRect(coord_t xmin, coord_t ymin, coord_t xmax, coord_t ymax) {}
+
+	//
+	// 
+	//
 	_NODISCARD static Vector2 NormalizedToPoint(Rect rectangle, Vector2 normalizedRectCoordinates) {}
 
-public: // Accessors & Mutators
-	//
-	// Returns the virtual center as a Vector2.
-	// 
-	_NODISCARD inline Vector2 getCenter() const noexcept {
-		return (Vector2)getCenter();
-	}
-	//
-	// Set the virtual center of this Rect.
-	// 
-	inline void setCenter(Vector2 _newVal) noexcept {
-		m_center = _newVal;
-	}
- 
-	//
-	// Returns m_size.x.
-	// 
-	_NODISCARD inline coord_t getWidth() const noexcept {
-		return m_size.x;
-	}
-	//
-	// Set m_size.x.
-	// 
-	inline void setWidth(coord_t _newVal) noexcept {
-		m_size.x = _newVal;
-	}
+public: // Property Modifiers
 
-	//
-	// Returns m_size.y.
-	// 
-	_NODISCARD inline coord_t getHeight() const noexcept {
-		return m_size.y;
-	}
-	//
-	// Set m_size.y.
-	// 
-	inline void setHeight(coord_t _newVal) noexcept {
-		m_size.y = _newVal;
-	}
-
-	//
-	// Returns the m_position of the maximum corner of the rectangle (See ).
-	//
-	_NODISCARD inline Vector2 getMax() const noexcept {
-		return m_position + m_size;
-	}
-	//
-	// Set the m_position of the maximum corner of the rectangle.
-	//
-	inline void setMax(Vector2 _newVal) noexcept {
-		m_size.x = _newVal.x - m_position.x;
-	}
-
-	//
-	// Returns the m_position of the maximum corner of the rectangle (See ).
-	//
-	_NODISCARD inline Vector2 getMin() const noexcept {
-		return m_position;
-	}
-	inline void setMin(Vector2 _newVal) noexcept {
-		m_size -= _newVal - m_position;
-		m_position = _newVal;
-	}
 
 private:
 	// The X and Y position of the rectangle.
 	Vector2 m_position;
 	// The width and height of the rectangle.
 	Vector2 m_size;
-	// The m_position of the center of the rectangle.
-	Vector2 m_center;
 };
 
-class RectInt {
+class RectInt : public impl::BaseRect<int> {
 public: // Typedef
-	using coord_t = Vector2Int::coord_t;
+	using coord_t = BaseRect::coord_t;
 
 public:	// Constructors & Destructors
 	//
+	// 
 	//
-	//
-	inline RectInt(Vector2Int _position, Vector2Int _size) : m_position(_position), size(_size) {}
+	inline RectInt(coord_t _x, coord_t _y, coord_t _w, coord_t _h) : BaseRect(_x, _y, _w, _h) {}
 
 	//
+	// 
 	//
-	//
-	inline RectInt(coord_t _x, coord_t _y, coord_t _w, coord_t _h) : RectInt(Vector2Int(_x, _y), Vector2Int(_w, _h)) {}
+	inline RectInt(Vector2Int _position, Vector2Int _size) : RectInt(_position.x ,_position.y, _size.x, _size.y) {}
 
 	//
-	//
+	// 
 	//
 	inline RectInt() : RectInt(0, 0, 0, 0) {}
 
 public: // Operator overloads
-	// 
-	// Returns a formatted string for this RectInt.
-	// 
-	_NODISCARD inline operator std::string() {
-		return (std::string)m_position + ": " + std::to_string(size.x) + " x " + std::to_string(size.y);
-	}
 
-	_NODISCARD inline bool operator==(const RectInt& _right) const noexcept {
-		return (m_position == _right.m_position) && (size == _right.size);
-	}
 
 public: // Functions
-	// 
-	// Returns true if the x and y components of _point is a point inside this rectangle.
-	// 
-	// If _allowInverse is present and true, the width and height of the Rect are allowed 
-	// to take negative values (ie, the min value is greater than the max), and the test will still work.
-	// 
-	// @param _point:
-	//		Point to test.
-	// @param _allowInverse:
-	//		Does the test allow the Rect's width and height to be negative?
-	// 
-	// @return
-	//		True if the point lies within the specified rectangle.
-	// 
-	_NODISCARD inline bool Contains(Vector2Int _point, bool _allowInverse = false) const noexcept {
-		// If X and Y coordinate of _point falls within Min and Max range of Rect -> Contains.
-		bool cond = LMK_InRange(_point.x, getMin().x, getMax().x) && LMK_InRange(_point.y, getMin().y, getMax().y);
 
-		// If _allowInverse is true -> we also check for LMK_InRange with the other way around (ie, Min becomes Max).
-		if (_allowInverse)
-			return cond || (LMK_InRange(_point.x, getMax().x, getMin().x) && LMK_InRange(_point.y, getMax().y, getMin().y));
-		else
-			return cond;
-	}
-
-	// 
-	// Returns true if the other rectangle overlaps this one.
-	// 
-	// @param _other:
-	//		Other rectangle to test overlapping with.
-	//  
-	_NODISCARD inline bool Overlaps(RectInt _other) const noexcept {
-		// If either rectangle has area of 0 -> no overlap possible.
-		if (area() == 0 || _other.area() == 0)
-			return false;
-
-		// If one rectangle is on left side of the other.
-		if (getMin().x > _other.getMax().x || _other.getMin().x > getMax().x)
-			return false;
-
-		// If one rectangle is above the other.
-		if (getMax().y > _other.getMin().y || _other.getMax().y > getMin().y)
-			return false;
-
-		return true;
-	}
-
-private:
-	// 
-	// Get the area of this Rect.
-	// 
-	_NODISCARD inline coord_t area() const noexcept {
-		return size.x * size.y;
-	}
 
 public: // Static Functions
 	// 
@@ -1153,57 +985,14 @@ public: // Static Functions
 		return RectInt(0, 0, 0, 0);
 	}
 
-public: // Accessors & Mutators
-	_NODISCARD inline Vector2Int getCenter() const noexcept {
-		return m_center;
-	}
+public: // Property Modifiers
 
-	inline void setCenter(Vector2Int _newVal) noexcept {
-		m_center = _newVal;
-	}
-
-	_NODISCARD inline coord_t getWidth() const noexcept {
-		return size.x;
-	}
-
-	inline void setWidth(coord_t _newVal) noexcept {
-		size.x = _newVal;
-	}
-
-	_NODISCARD inline coord_t getHeight() const noexcept {
-		return size.y;
-	}
-
-	inline void setHeight(coord_t _newVal) noexcept {
-		size.y = _newVal;
-	}
-
-	_NODISCARD inline Vector2Int getMax() const noexcept {
-		return m_position + size;
-	}
-
-	inline void setMax(Vector2Int _newVal) noexcept {
-		size.x = _newVal.x - m_position.x;
-	}
-
-	_NODISCARD inline Vector2Int getMin() const noexcept {
-		return m_position;
-	}
-
-	inline void setMin(Vector2Int _newVal) noexcept {
-		size -= _newVal - m_position;
-		m_position = _newVal;
-	}
 
 public:	// Properties
 	// Coordinate of the top left point of the Rect.
 	Vector2Int m_position;
 	// The width and height of the rectangle.
 	Vector2Int size;
-
-private:
-	// The m_position of the center of the rectangle.
-	Vector2Int m_center;
 };
 #pragma warning(default : 4244)
 
