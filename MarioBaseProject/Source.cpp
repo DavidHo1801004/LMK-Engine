@@ -2,11 +2,15 @@
 
 int main(int argc, char* args[])
 {
-	lmk::RectInt rect(0, 0, 5, 5);
+	lmk::Rect rect(0, 0, 5, 5);
 
 	std::cout << (std::string)rect;
 
-	SuperMarioClone game(
+	rect.Offset({2, 2});
+
+	std::cout << (std::string)rect;
+
+	/*SuperMarioClone game(
 		SDL_WINDOWPOS_CENTERED,
 		SDL_WINDOWPOS_CENTERED,
 		500,
@@ -18,7 +22,7 @@ int main(int argc, char* args[])
 		game.Render();
 	}
 
-	game.OnExit();
+	game.OnExit();*/
 
 	return 0;
 }

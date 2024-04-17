@@ -15,8 +15,8 @@ public: // Constructors & Destructors
 	}
 	inline lmkEngine(std::string _title, Vector2Int _pos, Vector2Int _size, bool _fullscr = true)
 		: lmkEngine(_title, _pos.x, _pos.y, _size.x, _size.y, _fullscr) {}
-	inline lmkEngine(std::string _title, RectInt _wndRect, bool _fullscr = true)
-		: lmkEngine(_title, _wndRect.position, _wndRect.size, _fullscr) {}
+	/*inline lmkEngine(std::string _title, RectInt _wndRect, bool _fullscr = true)
+		: lmkEngine(_title, _wndRect.position(), _wndRect.size(), _fullscr) {}*/
 
 	inline ~lmkEngine() {
 

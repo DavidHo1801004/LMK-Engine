@@ -86,17 +86,17 @@
 
 #ifndef LMK_Clamp
 // Clamp value to range.
-#define LMK_Clamp(_val, _min, _max)	min(max((_val), (_min)), (_max))
+#define LMK_Clamp(_val, _min, _max)		min(max((_val), (_min)), (_max))
 #endif
 
 #ifndef LMK_DtoR
 // Convert degree to radian.
-#define LMK_DtoR(degree)	degree / 180 * M_PI
+#define LMK_DtoR(_degree)	_degree / 180 * M_PI
 #endif
 
 #ifndef LMK_RtoD
 // Convert radian to degree.
-#define LMK_RtoD(radian)	radian / M_PI * 180
+#define LMK_RtoD(_radian)	_radian / M_PI * 180
 #endif
 
 #ifndef LMK_InRange
@@ -106,7 +106,7 @@
 
 #ifndef LMK_ArraySize
 // The number of elements in an array.
-#define LMK_ArraySize(array)	(sizeof(array) / sizeof(array[0]))
+#define LMK_ArraySize(_array)	(sizeof(_array) / sizeof(_array[0]))
 #endif
 
 #endif // !LMK_STDINC_H_
