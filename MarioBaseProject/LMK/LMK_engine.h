@@ -1,6 +1,8 @@
 #ifndef LMK_ENGINE_H_
 #define LMK_ENGINE_H_
 
+#if (LMK_HAVE_SDL) && (LMK_HAVE_SDL_IMAGE)
+
 #include "LMK_stdinc.h"
 #include "LMK_coremdl.h"
 
@@ -15,8 +17,8 @@ public: // Constructors & Destructors
 	}
 	inline lmkEngine(std::string _title, Vector2Int _pos, Vector2Int _size, bool _fullscr = true)
 		: lmkEngine(_title, _pos.x, _pos.y, _size.x, _size.y, _fullscr) {}
-	/*inline lmkEngine(std::string _title, RectInt _wndRect, bool _fullscr = true)
-		: lmkEngine(_title, _wndRect.position(), _wndRect.size(), _fullscr) {}*/
+	inline lmkEngine(std::string _title, RectInt _wndRect, bool _fullscr = true)
+		: lmkEngine(_title, _wndRect.getPosition(), _wndRect.getSize(), _fullscr) {}
 
 	inline ~lmkEngine() {
 
@@ -111,4 +113,5 @@ private:
 };
 LMK_END
 
+#endif // (LMK_HAVE_SDL) && (LMK_HAVE_SDL_IMAGE) 
 #endif // !LMK_ENGINE_H_

@@ -11,6 +11,9 @@ LMK_BEGIN
 IMPL_BEGIN
 //
 // The base class for Vector2 and Vector2Int.
+// 
+// @tparam coord_type:
+//		Single coordinate type (e.g. int, float, ...).
 //
 template<typename coord_type>
 class BaseVector2 {
@@ -35,28 +38,27 @@ public:	// Constructors & Destructors
 
 public:	// Operator overloads
 	//
-	// Returns a formatted string for this BaseVector2.
+	// Returns a formatted string for this vector.
 	//
 	// @return
 	//		A formatted string: (x; y)
 	//
-	_NODISCARD inline operator std::string() {
+	_NODISCARD inline operator std::string() const {
 		return "(" + std::to_string(x) + "; " + std::to_string(y) + ")";
 	}
 
 	//
 	// Access the x or y component using [0] or [1] respectively.
 	//
-	_NODISCARD constexpr coord_t operator[](int _index) noexcept {
+	_NODISCARD constexpr coord_t operator[](int _index) {
 		switch (_index) {
 		case 0:
 			return x;
 		case 1:
 			return y;
 		default:
-			return 0;	
-			// I have no idea what to do here.
-			// Returning 0 is just a temporary solution.
+			throw std::out_of_range("lmk::BaseVector2: index out of range for operator[] (index should be 0 or 1 only).");
+			return 0;
 		}
 	}
 
@@ -183,17 +185,28 @@ public: // Functions
 	// When normalized, a vector keeps the same direction but its length is 1.0.
 	// Note: This function will change the current vector. If you want to keep the current vector unchanged, use normalized().
 	//		
-	inline void Normalize() noexcept {
+	inline Vector2& Normalize() {
 		x /= magnitude();
 		y /= magnitude();
+		return *this;
 	}
 
 	// 
 	// Multiplies every component of this vector by the same component of _scale.
 	// 
-	_NODISCARD inline void Scale(Vector2 _scale) {
+	inline Vector2& Scale(Vector2 _scale) noexcept {
 		x *= _scale.x;
 		y *= _scale.y;
+		return *this;
+	}
+
+	// 
+	// Multiplies every component of this vector by the same component of _scale.
+	// 
+	inline Vector2& Clamp01() noexcept {
+		x = LMK_Clamp(x, 0, 1);
+		y = LMK_Clamp(y, 0, 1);
+		return *this;
 	}
 
 public: // Static Functions
@@ -522,8 +535,20 @@ public: // Operator overloads
 		return temp;
 	}
 
+	_NODISCARD inline Vector2 operator+(Vector2 _right) const noexcept {
+		Vector2 temp(this->x, this->y);
+		temp += _right;
+		return temp;
+	}
+
 	_NODISCARD inline Vector2Int operator-(Vector2Int _right) const noexcept {
 		Vector2Int temp = *this;
+		temp -= _right;
+		return temp;
+	}
+
+	_NODISCARD inline Vector2 operator-(Vector2 _right) const noexcept {
+		Vector2 temp(this->x, this->y);
 		temp -= _right;
 		return temp;
 	}
@@ -544,9 +569,10 @@ public: // Functions
 	// 
 	// Clamps the Vector2Int to the bounds given by _min and _max.
 	// 
-	inline void Clamp(Vector2Int _min, Vector2Int _max) noexcept {
+	inline Vector2Int& Clamp(Vector2Int _min, Vector2Int _max) noexcept {
 		x = LMK_Clamp(x, _min.x, _max.x);
 		y = LMK_Clamp(y, _min.y, _max.y);
+		return *this;
 	}
 
 	// 
@@ -670,7 +696,7 @@ public: // Static Functions
 };
 
 // +--------------------------------------------------------------------------------+
-// | RECT																			|
+// | RECTANGLE																		|
 // +--------------------------------------------------------------------------------+
 //
 // LMK Engine uses a coordinate system similar to that of Window Application, 
@@ -706,29 +732,34 @@ public: // Static Functions
 
 IMPL_BEGIN
 //
+// The base class for Rect and RectInt.
 // 
+// @tparam coord_type:
+//		Single coordinate type (e.g. int, float, ...).
+// @tparam My_Vector2_type:
+//		Vector2 type (e.g. Vector2Int, Vector2, ...).
 //
-template<typename coord_type>
+template<typename coord_type, class My_Vector2_type = BaseVector2<coord_type>>
 class BaseRect {
-public: // Typedef
-	using coord_t	= coord_type;
-	using Vector2_t	= BaseVector2<coord_t>;
+protected: // Typedef
+	using coord_t		= coord_type;
+	using My_Vector2_t	= My_Vector2_type;
 
 public: // Constructors & Destructors
 	//
 	// Creates a BaseRect<coord_type>.
 	// 
 	// @param _x:
-	//		The minimum X value of the RectInt.
+	//		The minimum X value of the rectangle.
 	// @param _y:
-	//		The minimum Y value of the RectInt.
+	//		The minimum Y value of the rectangle.
 	// @param _w:
 	//		Width of the rectangle.
 	// @param _h:
 	//		Height of the rectangle.
 	//
 	inline BaseRect(coord_t _x, coord_t _y, coord_t _w, coord_t _h) 
-		: xMin(_x), yMin(_y), xMax(_x + _w), yMax(_y + _h), w(_w), h(_h) {}
+		:  xMin(_x), yMin(_y), xMax(_x + _w), yMax(_y + _h), width(_w), height(_h) {}
 
 	//
 	// Creates a BaseRect<coord_type>.
@@ -738,47 +769,37 @@ public: // Constructors & Destructors
 	// @param _size:
 	//		The width (x) and height (y) of the rectangle.
 	//
-	inline BaseRect(Vector2_t _pos, Vector2_t _size) : BaseRect(_pos.x, _pos.y, _size.x, _size.y) {}
+	inline BaseRect(My_Vector2_t _pos, My_Vector2_t _size) : BaseRect(_pos.x, _pos.y, _size.x, _size.y) {}
 
 public: // Operators
 	//
-	// Returns the virtual center as a Vector2.
+	// Returns a formatted string for this rectangle.
+	//
+	// @return
+	//		A formatted string: (xMin; yMin) : (xMax; yMax)
 	// 
-	_NODISCARD inline operator std::string() {
-		return (std::string)Vector2_t(xMin, yMin) + " : " + (std::string)Vector2_t(xMax, yMax);
+	_NODISCARD inline operator std::string() const {
+		return (std::string)My_Vector2_t(xMin, yMin) + " : " + (std::string)My_Vector2_t(xMax, yMax);
 	}
 
-	template<typename right_coord_t>
-	_NODISCARD inline bool operator==(const BaseRect<right_coord_t>& _right) const noexcept {
-		return (xMin == _right.xMin) && (yMin == _right.yMin) && (w == _right.w) && (h == _right.h);
+	template<typename right_coord_t, class My_Vector2_t>
+	_NODISCARD inline bool operator==(const BaseRect<right_coord_t, My_Vector2_t>& _right) const noexcept {
+		return (xMin == _right.xMin) && (yMin == _right.yMin) && (width == _right.width) && (height == _right.height);
 	}
 
 public: // Functions
 	//
-	// Offset the position of the rectangle and reserve its size.
-	// 
-	// @param _x:
-	//		The offset amount in the X axis;
-	// @param _y:
-	//		The offset amount in the Y axis;
+	// Offset the position of the rectangle.
+	//
+	inline void Offset(My_Vector2_t _offset) noexcept {
+		setPosition(getPosition() + _offset);
+	}
+
+	//
+	// Offset the position of the rectangle.
 	//
 	inline void Offset(coord_t _x, coord_t _y) noexcept {
-		xMin += _x;
-		xMax += _x;
-		yMin += _y;
-		yMax += _y;
-	}
-	//
-	// Offset the position of the rectangle and reserve its size.
-	// 
-	// @param _offset:
-	//		The offset amount.
-	//
-	inline void Offset(Vector2_t _offset) noexcept {
-		xMin += _offset.x;
-		xMax += _offset.x;
-		yMin += _offset.y;
-		yMax += _offset.y;
+		Offset(My_Vector2_t(_x, _y));
 	}
 
 	// 
@@ -795,7 +816,7 @@ public: // Functions
 	// @return
 	//		True if the point lies within the specified rectangle.
 	// 
-	_NODISCARD inline bool Contains(Vector2_t _point, bool _allowInverse = false) const noexcept {
+	_NODISCARD inline bool Contains(My_Vector2_t _point, bool _allowInverse = false) const noexcept {
 		// If X and Y coordinate of _point falls within Min and Max range of Rect -> Contains.
 		bool cond = LMK_InRange(_point.x, xMin, xMax) && LMK_InRange(_point.y, yMin, yMax);
 
@@ -815,8 +836,8 @@ public: // Functions
 	// @tparam right_coord_t: 
 	//		The <coord_type> of the other rectangle.
 	// 
-	template<typename right_coord_t>
-	_NODISCARD inline bool Overlaps(BaseRect<right_coord_t> _other) const noexcept {
+	template<typename right_coord_t, class Right_Vector2_t>
+	_NODISCARD inline bool Overlaps(BaseRect<right_coord_t, Right_Vector2_t> _other) const noexcept {
 		// If either rectangle has area of 0 -> no overlap possible.
 		if (area() == 0 || _other.area() == 0)
 			return false;
@@ -833,95 +854,169 @@ public: // Functions
 	}
 
 protected:
-	// 
 	// Get the area of this Rect.
-	// 
 	_NODISCARD inline coord_t area() const noexcept {
-		return w * h;
+		return width * height;
 	}
 
 public: // Property Modifiers
+	// Returns the width of the rectangle, measured from the X position.
+	_NODISCARD inline coord_t getWidth() const noexcept {
+		return width;
+	}
+
+	// Set the width of the rectangle, measured from the X position.
+	// Setting this property will preserve the Min coordinate but changes and Max coordinate.
+	inline void setWidth(coord_t _width) noexcept {
+		width = _width;
+		xMax = xMin + width;
+	}
+ 
+	// Returns the height of the rectangle, measured from the Y position.
+	_NODISCARD inline coord_t getHeight() const noexcept {
+		return height;
+	}
+
+	// Set the height of the rectangle, measured from the Y position.
+	// Setting this property will preserve the Min coordinate but changes and Max coordinate.
+	inline void setHeight(coord_t _height) noexcept {
+		height = _height;
+		yMax = yMin + height;
+	}
+
+	// Get the position of the minimum corner of the rectangle.
+	_NODISCARD inline My_Vector2_t getMin() const noexcept {
+		return My_Vector2_t(xMin, yMin);
+	}
+
+	// Set the position of the minimum corner of the rectangle.
+	// Setting this property will resize the rectangle and preserve the position of the Max coordinate.
 	inline void setMin(coord_t _x, coord_t _y) noexcept {
 		xMin = _x;
 		yMin = _y;
-	}
-	inline void setMin(Vector2_t _minPos) noexcept {
-		xMin = _minPos.x;
-		yMin = _minPos.y;
+		width = xMax - xMin;
+		height = yMax - yMin;
 	}
 
+	// Set the position of the minimum corner of the rectangle.
+	// Setting this property will resize the rectangle and preserve the position of the Max coordinate.
+	inline void setMin(My_Vector2_t _minPos) noexcept {
+		setMin(_minPos.x, _minPos.y);
+	}
+
+	// Get the position of the maximum corner of the rectangle.
+	_NODISCARD inline My_Vector2_t getMax() const noexcept {
+		return My_Vector2_t(xMax, yMax);
+	}
+
+	// Set the position of the maximum corner of the rectangle.
+	// Setting this property will resize the rectangle and preserve the position of the Min coordinate.
 	inline void setMax(coord_t _x, coord_t _y) noexcept {
 		xMax = _x;
 		yMax = _y;
-	}
-	inline void setMax(Vector2_t _maxPos) noexcept {
-		xMax = _maxPos;
-		yMax = _maxPos;
+		width = xMax - xMin;
+		height = yMax - yMin;
 	}
 
-	inline void setPosition(Vector2_t _newPos) noexcept {
-		xMin = _newPos.x;
-		yMin = _newPos.y;
+	// Set the position of the maximum corner of the rectangle.
+	// Setting this property will resize the rectangle and preserve the position of the Min coordinate.
+	inline void setMax(My_Vector2_t _maxPos) noexcept {
+		setMax(_maxPos.x, _maxPos.y);
 	}
+
+	// Get the X and Y position of the rectangle.
+	_NODISCARD inline My_Vector2_t getPosition() const noexcept {
+		return My_Vector2_t(xMin, yMin);
+	}
+
+	// Set the X and Y position of the rectangle. 
+	// Setting this property will preserve the size of the rectangle but changes the Min and Max coordinate.
 	inline void setPosition(coord_t _x, coord_t _y) noexcept {
 		xMin = _x;
 		yMin = _y;
+		xMax = _x + width;
+		yMax = _y + height;
 	}
 
-	_NODISCARD inline coord_t getWidth() const noexcept {
-		return w;
-	}
-	inline void setWidth(coord_t _width) noexcept {
-		w = _width;
-		xMax = xMin + w;
-	}
- 
-	_NODISCARD inline coord_t getHeight() const noexcept {
-		return h;
-	}
-	inline void setHeight(coord_t _height) noexcept {
-		h = _height;
-		yMax = yMin + h;
+	// Set the X and Y position of the rectangle.
+	// Setting this property will preserve the size of the rectangle but changes the Min and Max coordinate.
+	inline void setPosition(My_Vector2_t _pos) noexcept {
+		setPosition(_pos.x, _pos.y);
 	}
 
-protected: // Properties
-	coord_t xMin, xMax;
-	coord_t yMin, yMax;
+	// Get the width and height of the rectangle.
+	_NODISCARD inline My_Vector2_t getSize() const noexcept {
+		return My_Vector2_t(width, height);
+	}
 
-	coord_t w, h;
+	// Set the width and height of the rectangle.
+	// Setting this property will preserve the Min coordinate but changes and Max coordinate.
+	inline void setSize(coord_t _width, coord_t _height) noexcept {
+		width = _width;
+		height = _height;
+		xMax = xMin + width;
+		yMax = yMin + height;
+	}
 
-	// The m_position of the center of the rectangle.
-	Vector2 m_center;
+	// Set the width and height of the rectangle.
+	// Setting this property will preserve the Min coordinate but changes and Max coordinate.
+	inline void setSize(My_Vector2_t _size) noexcept {
+		setSize(_size.x, _size.y);
+	}
+
+public: // Properties
+	//
+	// The vertial center of the rectangle.
+	// This property acts as a pivot for Rect-based components to perform scale and rotation functions.
+	//
+	Vector2 center	= Vector2(0.5f, 0.5f);
+
+protected:
+	// The position of the minimum corner of the rectangle.
+	coord_t xMin, yMin;
+	// The position of the maximum corner of the rectangle.
+	coord_t xMax, yMax;
+
+	coord_t width, height;
 };
 IMPL_END
 
 //
 // A 2D Rectangle defined by X and Y m_position, width and height.
 // 
-class Rect : public impl::BaseRect<float> {
-public:
-	using coord_t = BaseRect::coord_t;
-
+class Rect : public impl::BaseRect<float, Vector2> {
 public:	// Constructors & Destructors
 	//
+	// Creates a new Rect.
 	// 
+	// @param _x:
+	//		The minimum X value of the rectangle.
+	// @param _y:
+	//		The minimum Y value of the rectangle.
+	// @param _w:
+	//		Width of the rectangle.
+	// @param _h:
+	//		Height of the rectangle.
 	//
-	inline Rect(coord_t _x, coord_t _y, coord_t _w, coord_t _h) : BaseRect(_x, _y, _w, _h) {}
+	_NODISCARD inline Rect(coord_t _x, coord_t _y, coord_t _w, coord_t _h) : BaseRect(_x, _y, _w, _h) {}
 
 	//
+	// Creates a new Rect.
 	// 
+	// @param _pos:
+	//		The position (x, y) of the rectangle.
+	// @param _size:
+	//		The width (x) and height (y) of the rectangle.
 	//
-	inline Rect(Vector2 _position, Vector2 _size) : Rect(_position.x, _position.y, _size.x, _size.y) {}
+	_NODISCARD inline Rect(My_Vector2_t _position, My_Vector2_t _size) : Rect(_position.x, _position.y, _size.x, _size.y) {}
 
 	//
-	// 
+	// Creates a new Rect with position and size of (0, 0).
 	//
-	inline Rect() : Rect(0, 0, 0, 0) {}
+	_NODISCARD inline Rect() : Rect(0, 0, 0, 0) {}
 
 public: // Operator overloads
-	_NODISCARD inline bool operator==(const Rect& _right) const noexcept {
-		return (m_position == _right.m_position) && (m_size == _right.m_size);
-	}
+
 
 public: // Static Functions
 	// 
@@ -932,50 +1027,76 @@ public: // Static Functions
 	}
 
 	//
+	// Get a point inside a rectangle, given normalized coordinates.
 	// 
-	//
-	_NODISCARD static Rect MinMaxRect(coord_t xmin, coord_t ymin, coord_t xmax, coord_t ymax) {}
-
-	//
+	// @param _rect:
+	//		The rectangle to get a point inside.
+	// @param _normRectCoord:
+	//		Normalized coordinates to get a point for.
 	// 
+	// @return:
+	//		A Vector2 represent the 
 	//
-	_NODISCARD static Vector2 NormalizedToPoint(Rect rectangle, Vector2 normalizedRectCoordinates) {}
+	_NODISCARD inline static My_Vector2_t NormalizedToPoint(const Rect& _rect, My_Vector2_t _normRectCoord) {
+		return My_Vector2_t::Scale(_normRectCoord, _rect.getSize());
+	}
 
-public: // Property Modifiers
+	//
+	// Get the normalized coordinates cooresponding the the point.
+	// 
+	// @return:
+	//		A Vector2 in the range 0 to 1 with values more 1 or less than zero clamped.
+	//
+	_NODISCARD inline static My_Vector2_t PointToNormalized(const Rect& _rect, My_Vector2_t _point) {
 
-
-private:
-	// The X and Y position of the rectangle.
-	Vector2 m_position;
-	// The width and height of the rectangle.
-	Vector2 m_size;
+	}
 };
 
-class RectInt : public impl::BaseRect<int> {
-public: // Typedef
-	using coord_t = BaseRect::coord_t;
-
+//
+// A 2D Rectangle defined by x, y, width, height with integers.
+//
+class RectInt : public impl::BaseRect<int, Vector2Int> {
 public:	// Constructors & Destructors
 	//
+	// Creates a new Rect.
 	// 
+	// @param _x:
+	//		The minimum X value of the RectInt.
+	// @param _y:
+	//		The minimum Y value of the RectInt.
+	// @param _w:
+	//		Width of the rectangle.
+	// @param _h:
+	//		Height of the rectangle.
 	//
 	inline RectInt(coord_t _x, coord_t _y, coord_t _w, coord_t _h) : BaseRect(_x, _y, _w, _h) {}
 
 	//
+	// Creates a new Rect.
 	// 
+	// @param _pos:
+	//		The position (x, y) of the RectInt.
+	// @param _size:
+	//		The width (x) and height (y) of the RectInt.
 	//
-	inline RectInt(Vector2Int _position, Vector2Int _size) : RectInt(_position.x ,_position.y, _size.x, _size.y) {}
+	inline RectInt(My_Vector2_t _position, My_Vector2_t _size) : RectInt(_position.x ,_position.y, _size.x, _size.y) {}
 
 	//
-	// 
+	// Creates a new RectInt with position and size of (0, 0).
 	//
 	inline RectInt() : RectInt(0, 0, 0, 0) {}
 
-public: // Operator overloads
-
-
 public: // Functions
-
+	//
+	// Clamps the position and size of the RectInt to the given _bounds.
+	// 
+	// @param _bounds:
+	//		Bounds to clamp the RectInt.
+	//
+	inline void ClampToBounds(const RectInt& _bounds) {
+		setMin(getMin().Clamp(_bounds.getMin(), _bounds.getMax()));
+		setMax(getMax().Clamp(_bounds.getMin(), _bounds.getMax()));
+	}
 
 public: // Static Functions
 	// 
@@ -984,15 +1105,6 @@ public: // Static Functions
 	_NODISCARD inline static RectInt zero() {
 		return RectInt(0, 0, 0, 0);
 	}
-
-public: // Property Modifiers
-
-
-public:	// Properties
-	// Coordinate of the top left point of the Rect.
-	Vector2Int m_position;
-	// The width and height of the rectangle.
-	Vector2Int size;
 };
 #pragma warning(default : 4244)
 
@@ -1074,19 +1186,19 @@ public: // Accesors & Mutators
 	inline void setParent(Transform* _p) {}
 	inline void setParent(Transform* _parent, bool _worldPositionStays) {}
 
-protected:	// Properies
-	Vector2 m_lossyScale;
-	Vector2 m_localscale	= Vector2::one();
+protected:	// Properties
+	Vector2 lossyScale;
+	Vector2 localscale	= Vector2::one();
 
-	Vector2 m_position;
-	Vector2 m_localPosition	= Vector2::zero();
+	Vector2 position;
+	Vector2 localPosition	= Vector2::zero();
 
-	float m_rotation;
-	float m_localrotation	= 0;
+	float rotation;
+	float localrotation	= 0;
 
-	bool m_isRoot;
-	int m_siblingIndex;
-	Transform* m_parent		= nullptr;
+	bool isRoot;
+	int siblingIndex;
+	Transform* parent		= nullptr;
 };
 
 // +--------------------------------------------------------------------------------+

@@ -24,14 +24,14 @@
 // https://learn.microsoft.com/en-us/cpp/preprocessor/predefined-macros?view=msvc-170
 //
 #if defined(__cplusplus)
-#if defined(_MSVC_LANG) && (_MSVC_LANG > __cplusplus)
-#define CPP_VER _MSVC_LANG
-#else
-#define CPP_VER __cplusplus
-#endif
+	#if defined(_MSVC_LANG) && (_MSVC_LANG > __cplusplus)
+		#define CPP_VER _MSVC_LANG
+	#else
+		#define CPP_VER __cplusplus
+	#endif
 #else	
 	// If no C++ supports available.
-#error LMK Engine: Missing C++ stadard support.
+	#error LMK Engine: Missing C++ stadard support.
 #endif
 
 //
@@ -41,36 +41,36 @@
 // (see https://github.com/cpredef/predef/blob/master/Standards.md)
 //
 #ifndef HAVE_CPP14
-#if CPP_VER > 201103L
-#define HAVE_CPP14 1
-#else
-#define HAVE_CPP14 0
-#error	LMK Engine: C++14 or better is required.
-#endif
+	#if CPP_VER > 201103L
+		#define HAVE_CPP14 1
+	#else
+		#define HAVE_CPP14 0
+		#error	LMK Engine: C++14 or better is required.
+	#endif
 #endif
 
 #ifndef HAVE_CPP17
-#if HAVE_CPP14 && CPP_VER > 201402L
-#define HAVE_CPP17 1
-#else
-#define HAVE_CPP17 0
-#endif
+	#if HAVE_CPP14 && CPP_VER > 201402L
+		#define HAVE_CPP17 1
+	#else
+		#define HAVE_CPP17 0
+	#endif
 #endif
 
 #ifndef HAVE_CPP20
-#if HAVE_CPP17 && CPP_VER > 201703L
-#define HAVE_CPP20 1
-#else
-#define HAVE_CPP20 0
-#endif
+	#if HAVE_CPP17 && CPP_VER > 201703L
+		#define HAVE_CPP20 1
+	#else
+		#define HAVE_CPP20 0
+	#endif
 #endif
 
 #ifndef HAVE_CPP23
-#if HAVE_CPP20 && CPP_VER > 202002L
-#define HAVE_CPP23 1
-#else
-#define HAVE_CPP23 0
-#endif
+	#if HAVE_CPP20 && CPP_VER > 202002L
+		#define HAVE_CPP23 1
+	#else
+		#define HAVE_CPP23 0
+	#endif
 #endif
 
 // +--------------------------------------------------------------------------------+
@@ -84,20 +84,20 @@
 // according to SDL availability.
 //
 #if defined(__has_include) && __has_include(<SDL.h>)
-#define LMK_HAVE_SDL	1
-// Check for SDL extensions
-#if __has_include(<SDL_image.h>)
-#define LMK_HAVE_SDL_IMAGE	1
+	#define LMK_HAVE_SDL	1
+	// Check for SDL extensions
+	#if __has_include(<SDL_image.h>)
+		#define LMK_HAVE_SDL_IMAGE	1
+	#else
+		#define LMK_HAVE_SDL_IMAGE	0
+	#endif
+	#if __has_include(<SDL_ttf.h>)
+		#define LMK_HAVE_SDL_TTF	1
+	#else
+		#define LMK_HAVE_SDL_TTF	0
+	#endif
 #else
-#define LMK_HAVE_SDL_IMAGE	0
-#endif
-#if __has_include(<SDL_ttf.h>)
-#define LMK_HAVE_SDL_TTF	1
-#else
-#define LMK_HAVE_SDL_TTF	0
-#endif
-#else
-#define LMK_HAVE_SDL	0
+	#define LMK_HAVE_SDL	0
 #endif
 
 // +--------------------------------------------------------------------------------+

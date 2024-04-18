@@ -11,11 +11,12 @@ int main(int argc, char* args[])
 	std::cout << rect.Contains(point) << std::endl;
 	std::cout << rect.Overlaps(otherRect) << std::endl;
 
-	rect.Offset({8, 8});
+	rect.Offset(8, 8);
 	std::cout << (std::string)rect << std::endl;
 	std::cout << rect.Contains(point) << std::endl;
 	std::cout << rect.Overlaps(otherRect) << std::endl;
-	
+
+	std::cout << (std::string)rect.getPosition() << std::endl;
 
 	/*SuperMarioClone game(
 		SDL_WINDOWPOS_CENTERED,

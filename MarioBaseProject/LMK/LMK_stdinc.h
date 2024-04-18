@@ -10,37 +10,40 @@
 #include "LMK_root.h"
 
 // +--------------------------------------------------------------------------------+
-// | LIBRARY HEADER INCLUSION														|
+// | STANDARD LIBRARIES INCLUSION													|
 // +--------------------------------------------------------------------------------+
 
+#include <cstdint>
+#include <typeinfo>
+#include <stdexcept>
+
+#include <cstdio>
+#include <iostream>
+#include <fstream>
+#include <streambuf>
+#include <sstream>
+
+#include <cstring>
+#include <string>
+
+#include <vector>
+#include <list>
+#include <array>
+#include <map>
+
+#include <chrono>
+#include <atomic>
+
+#include <thread>
+#include <functional>
+#include <algorithm>
+
+#include <windows.h>
+
+#define _USE_MATH_DEFINES
+#include <cmath>
+
 #if HAVE_CPP14	// C++14
-	#include <windows.h>
-
-	#include <cstdio>
-	#include <cstdint>
-	#include <cstring>
-	#include <cmath>
-
-	#include <iostream>
-	#include <fstream>
-	#include <streambuf>
-	#include <sstream>
-
-	#include <chrono>
-	#include <atomic>
-
-	#include <typeinfo>
-	#include <string>
-	#include <vector>
-	#include <list>
-	#include <array>
-	#include <map>
-
-	#include <thread>
-
-	#include <functional>
-	#include <algorithm>
-
 	#if !HAVE_CPP17
 		#define _SILENCE_EXPERIMENTAL_FILESYSTEM_DEPRECATION_WARNING
 		#include <experimental/filesystem>
@@ -67,8 +70,12 @@
 	//
 #endif
 
+// +--------------------------------------------------------------------------------+
+// | VENDOR LIBRARIES INCLUSION														|
+// +--------------------------------------------------------------------------------+
+
 //
-// Includes SDL library extensions.
+// SDL extensions.
 //
 #if LMK_HAVE_SDL
 	#include <SDL.h>
@@ -83,6 +90,10 @@
 // +--------------------------------------------------------------------------------+
 // | STANDARD VERSION INDEPENDENT MACROS											|
 // +--------------------------------------------------------------------------------+
+
+#ifndef M_PI
+#define M_PI	3.14159265358979323846
+#endif
 
 #ifndef LMK_Clamp
 // Clamp value to range.
