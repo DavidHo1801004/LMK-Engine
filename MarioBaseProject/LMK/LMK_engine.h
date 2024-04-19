@@ -1,9 +1,9 @@
 #ifndef LMK_ENGINE_H_
 #define LMK_ENGINE_H_
 
-#if (LMK_HAVE_SDL) && (LMK_HAVE_SDL_IMAGE)
-
 #include "LMK_stdinc.h"
+
+#if (LMK_HAVE_SDL) && (LMK_HAVE_SDL_IMAGE)
 #include "LMK_coremdl.h"
 
 LMK_BEGIN
@@ -25,11 +25,17 @@ public: // Constructors & Destructors
 	}
 
 public: // Functions
-	virtual void HandleEvents() {
-		SDL_Event event;
-		SDL_PollEvent(&event);
+	virtual void UserUpdate();
+	virtual void UserHandleEvents(const SDL_Event& _event);
 
-		switch (event.type)
+private: 
+	inline void HandleEvents() {
+		SDL_Event curEvent;
+		SDL_PollEvent(&curEvent);
+
+		UserHandleEvents(curEvent);
+
+		switch (curEvent.type)
 		{
 		case SDL_QUIT:
 			m_running = false;
@@ -40,9 +46,9 @@ public: // Functions
 		}
 	}
 
-	virtual void Update() {}
+	inline void Update() {}
 
-	virtual void Render() {
+	inline void Render() {
 		SDL_RenderClear(renderer);
 
 
@@ -50,7 +56,7 @@ public: // Functions
 		SDL_RenderPresent(renderer);
 	}
 
-	virtual void OnExit() {
+	inline void OnExit() {
 		SDL_DestroyWindow(window);
 		SDL_DestroyRenderer(renderer);
 

@@ -38,8 +38,6 @@
 #include <functional>
 #include <algorithm>
 
-#include <windows.h>
-
 #define _USE_MATH_DEFINES
 #include <cmath>
 
@@ -93,6 +91,14 @@
 
 #ifndef M_PI
 #define M_PI	3.14159265358979323846
+#endif
+
+#ifndef min
+#define min(_a, _b)		(((_a) < (_b)) ? (_a) : (_b))
+#endif
+
+#ifndef max
+#define max(_a, _b)		(((_a) > (_b)) ? (_a) : (_b))
 #endif
 
 #ifndef LMK_Clamp

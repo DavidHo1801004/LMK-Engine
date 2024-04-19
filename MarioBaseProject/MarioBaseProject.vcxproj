@@ -170,6 +170,8 @@
     <ClInclude Include="LMK\LMK.h" />
     <ClInclude Include="LMK\LMK_coremdl.h" />
     <ClInclude Include="LMK\LMK_engine.h" />
+    <ClInclude Include="LMK\LMK_gizmo.h" />
+    <ClInclude Include="LMK\LMK_render.h" />
     <ClInclude Include="LMK\LMK_root.h" />
     <ClInclude Include="LMK\LMK_stdinc.h" />
     <ClInclude Include="SuperMarioClone.h" />

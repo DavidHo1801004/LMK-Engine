@@ -41,5 +41,11 @@
     <ClInclude Include="SuperMarioClone.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="LMK\LMK_gizmo.h">
+      <Filter>Header Files\LMK</Filter>
+    </ClInclude>
+    <ClInclude Include="LMK\LMK_render.h">
+      <Filter>Header Files\LMK</Filter>
+    </ClInclude>
   </ItemGroup>
 </Project>

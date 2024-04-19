@@ -8,7 +8,9 @@ public:	// Constructors & Destructors
 	SuperMarioClone(int _x, int _y, int _w, int _h, bool _fullscr = false)	: lmkEngine("Super Mario Clone", _x, _y, _w, _h, _fullscr) {}
 
 public: // Functions
+	inline void UserUpdate() override {
 
+	}
 
 private: // Properties
 
