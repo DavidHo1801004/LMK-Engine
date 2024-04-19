@@ -65,7 +65,7 @@ public:	// Operator overloads
 	}
 
 	template<typename right_coord_t>
-	_NODISCARD constexpr bool operator==(BaseVector2<right_coord_t> _right) const noexcept {
+	_NODISCARD constexpr bool operator==(const BaseVector2<right_coord_t>& _right) const noexcept {
 		return (x == _right.x) && (y == _right.y);
 	}
 
@@ -119,13 +119,13 @@ public:	// Constructors & Destructors
 	explicit inline Vector2() : BaseVector2() {}
 
 public: // Operator overloads
-	inline Vector2& operator+=(Vector2 _right) noexcept {
+	inline Vector2& operator+=(const Vector2& _right) noexcept {
 		x += _right.x;
 		y += _right.y;
 		return *this;
 	}	
 
-	inline Vector2& operator-=(Vector2 _right) noexcept {
+	inline Vector2& operator-=(const Vector2& _right) noexcept {
 		x -= _right.x;
 		y -= _right.y;
 		return *this;
@@ -143,13 +143,13 @@ public: // Operator overloads
 		return *this;
 	}
 
-	_NODISCARD inline Vector2 operator+(Vector2 _right) const {
+	_NODISCARD inline Vector2 operator+(const Vector2& _right) const {
 		Vector2 temp = *this;
 		temp += _right;
 		return temp;
 	}
 
-	_NODISCARD inline Vector2 operator-(Vector2 _right) const {
+	_NODISCARD inline Vector2 operator-(const Vector2& _right) const {
 		Vector2 temp = *this;
 		temp -= _right;
 		return temp;
@@ -196,7 +196,7 @@ public: // Functions
 	// 
 	// Multiplies every component of this vector by the same component of _scale.
 	// 
-	inline Vector2& Scale(Vector2 _scale) noexcept {
+	inline Vector2& Scale(const Vector2& _scale) noexcept {
 		x *= _scale.x;
 		y *= _scale.y;
 		return *this;
@@ -260,7 +260,7 @@ public: // Static Functions
 	// @return
 	//		A normalized Vector2 represents the calculated direction.
 	// 
-	_NODISCARD inline static Vector2 Direction(Vector2 _from, Vector2 _to) noexcept {
+	_NODISCARD inline static Vector2 Direction(const Vector2& _from, const Vector2& _to) noexcept {
 		return (_to - _from).normalized();
 	}
 
@@ -270,7 +270,7 @@ public: // Static Functions
 	// @return
 	//		The distance between _a and _b.
 	// 
-	_NODISCARD inline static float Distance(Vector2 _a, Vector2 _b) noexcept {
+	_NODISCARD inline static float Distance(const Vector2& _a, const Vector2& _b) noexcept {
 		return (_b - _a).magnitude();
 	}
 
@@ -280,7 +280,7 @@ public: // Static Functions
 	// @return
 	//		A copy of _vector with its magnitude clamped to _maxLength.
 	// 
-	_NODISCARD inline static Vector2 ClampMagnitude(Vector2 _vector, float _maxLength) {
+	_NODISCARD inline static Vector2 ClampMagnitude(const Vector2& _vector, float _maxLength) {
 		return _vector.normalized() * _maxLength;
 	}
 
@@ -297,7 +297,7 @@ public: // Static Functions
 	// @return
 	//		Returns (_lhs . _rhs).
 	// 
-	_NODISCARD inline static float Dot(Vector2 _lhs, Vector2 _rhs) noexcept {
+	_NODISCARD inline static float Dot(const Vector2& _lhs, const Vector2& _rhs) noexcept {
 		return _lhs.x * _rhs.x + _lhs.y * _rhs.y;
 	}
 
@@ -319,7 +319,7 @@ public: // Static Functions
 	// @return
 	//		The unsigned angle in degrees between the two vectors.
 	// 
-	_NODISCARD inline static float Angle(Vector2 _from, Vector2 _to) {
+	_NODISCARD inline static float Angle(const Vector2& _from, const Vector2& _to) {
 		return std::abs(SignedAngle(_from, _to));
 	}
 
@@ -341,7 +341,7 @@ public: // Static Functions
 	// @return
 	//		The signed angle in degrees between the two vectors.
 	// 
-	_NODISCARD inline static float SignedAngle(Vector2 _from, Vector2 _to) {
+	_NODISCARD inline static float SignedAngle(const Vector2& _from, const Vector2& _to) {
 		return LMK_RtoD(std::atan2(_from.x * _to.y - _from.y * _to.x, _from.x * _to.x + _from.y * _to.y));
 	}
 
@@ -351,7 +351,7 @@ public: // Static Functions
 	// @return
 	//		A copy of the larger Vector2.
 	// 
-	_NODISCARD inline static Vector2 Max(Vector2 _a, Vector2 _b) noexcept {
+	_NODISCARD inline static Vector2 Max(const Vector2& _a, const Vector2& _b) noexcept {
 		return (_a.sqrMagnitude() > _b.sqrMagnitude()) ? _a : _b;
 	}
 
@@ -361,7 +361,7 @@ public: // Static Functions
 	// @return
 	//		A copy of the smaller Vector2.
 	// 
-	_NODISCARD inline static Vector2 Min(Vector2 _a, Vector2 _b) noexcept {
+	_NODISCARD inline static Vector2 Min(const Vector2& _a, const Vector2& _b) noexcept {
 		return (_a.sqrMagnitude() < _b.sqrMagnitude()) ? _a : _b;
 	}
 
@@ -374,7 +374,7 @@ public: // Static Functions
 	// When _t = 1 return _b.
 	// When _t = 0.5 returns the midpoint of _a and _b.
 	// 
-	_NODISCARD inline static Vector2 Lerp(Vector2 _from, Vector2 _to, float _t) noexcept {
+	_NODISCARD inline static Vector2 Lerp(const Vector2& _from, const Vector2& _to, float _t) noexcept {
 		return _from + ((_to - _from) * LMK_Clamp(_t, 0.0f, 1.0f));
 	}
 
@@ -385,7 +385,7 @@ public: // Static Functions
 	// When _t = 1 return _b.
 	// When _t = 0.5 returns the midpoint of _a and _b.
 	// 
-	_NODISCARD inline static Vector2 LerpUnclamped(Vector2 _from, Vector2 _to, float _t) noexcept {
+	_NODISCARD inline static Vector2 LerpUnclamped(const Vector2& _from, const Vector2& _to, float _t) noexcept {
 		return _from + ((_to - _from) * _t);
 	}
 
@@ -397,7 +397,7 @@ public: // Static Functions
 	//		
 	// Negative values of maxDistanceDelta pushes the vector away from target.
 	// 
-	_NODISCARD inline static Vector2 MoveTowards(Vector2 _current, Vector2 _target, float _maxDistanceDelta) {
+	_NODISCARD inline static Vector2 MoveTowards(const Vector2& _current, const Vector2& _target, float _maxDistanceDelta) {
 		if (Distance(_current, _target) <= _maxDistanceDelta)
 			return _target;
 		return _current + (Direction(_current, _target) * _maxDistanceDelta);
@@ -415,7 +415,7 @@ public: // Static Functions
 	// @return
 	//		The perpendicular vector.
 	// 
-	_NODISCARD inline static Vector2 Perpendicular(Vector2 _inDirection) {
+	_NODISCARD inline static Vector2 Perpendicular(const Vector2& _inDirection) {
 		coord_t x = std::cos(LMK_DtoR(90)) * _inDirection.x - std::sin(LMK_DtoR(90)) * _inDirection.y;
 		coord_t y = std::sin(LMK_DtoR(90)) * _inDirection.x + std::cos(LMK_DtoR(90)) * _inDirection.y;
 		return Vector2(x, y);
@@ -440,7 +440,7 @@ public: // Static Functions
 	// @return
 	//		The reflected vector.
 	// 
-	_NODISCARD inline static Vector2 Reflect(Vector2 _inDirection, Vector2 _inNormal) {
+	_NODISCARD inline static Vector2 Reflect(const Vector2& _inDirection, const Vector2& _inNormal) {
 		return _inDirection - (_inNormal * 2) * Dot(_inDirection, _inNormal);
 	}
 
@@ -449,7 +449,7 @@ public: // Static Functions
 	// 
 	// Every component in the result is a component of _a multiplied by the same component of _b.
 	// 
-	_NODISCARD inline static Vector2 Scale(Vector2 _a, Vector2 _b) {
+	_NODISCARD inline static Vector2 Scale(const Vector2& _a, const Vector2& _b) {
 		coord_t x = _a.x * _b.x;
 		coord_t y = _a.y * _b.y;
 		return Vector2(x, y);
@@ -471,7 +471,7 @@ public: // Static Functions
 	// @param _maxSpeed: 
 	//		Optionally allows you to LMK_Clamp the maximum speed.	
 	//
-	_NODISCARD inline static Vector2 SmoothDamp(Vector2 _current, Vector2 _target, Vector2& _currentVelocity,
+	_NODISCARD inline static Vector2 SmoothDamp(const Vector2& _current, const Vector2& _target, Vector2& _currentVelocity,
 		float _smoothTime, float _maxSpeed = INFINITY) {
 
 		float deltaTime = 0;
@@ -507,13 +507,13 @@ public: // Operator overloads
 		return Vector2(x, y);
 	}
 
-	inline Vector2Int& operator+=(Vector2Int _right) noexcept {
+	inline Vector2Int& operator+=(const Vector2Int& _right) noexcept {
 		x += _right.x;
 		y += _right.y;
 		return *this;
 	}
 
-	inline Vector2Int& operator-=(Vector2Int _right) noexcept {
+	inline Vector2Int& operator-=(const Vector2Int& _right) noexcept {
 		x -= _right.x;
 		y -= _right.y;
 		return *this;
@@ -531,7 +531,7 @@ public: // Operator overloads
 		return *this;
 	}
 
-	_NODISCARD inline Vector2Int operator+(Vector2Int _right) const noexcept {
+	_NODISCARD inline Vector2Int operator+(const Vector2Int& _right) const noexcept {
 		Vector2Int temp = *this;
 		temp += _right;
 		return temp;
@@ -543,7 +543,7 @@ public: // Operator overloads
 		return temp;
 	}
 
-	_NODISCARD inline Vector2Int operator-(Vector2Int _right) const noexcept {
+	_NODISCARD inline Vector2Int operator-(const Vector2Int& _right) const noexcept {
 		Vector2Int temp = *this;
 		temp -= _right;
 		return temp;
@@ -571,7 +571,7 @@ public: // Functions
 	// 
 	// Clamps the Vector2Int to the bounds given by _min and _max.
 	// 
-	inline Vector2Int& Clamp(Vector2Int _min, Vector2Int _max) noexcept {
+	inline Vector2Int& Clamp(const Vector2Int& _min, const Vector2Int& _max) noexcept {
 		x = LMK_Clamp(x, _min.x, _max.x);
 		y = LMK_Clamp(y, _min.y, _max.y);
 		return *this;
@@ -580,7 +580,7 @@ public: // Functions
 	// 
 	// Multiplies every component of this vector by the same component of _scale.
 	// 
-	_NODISCARD inline void Scale(Vector2Int _scale) {
+	_NODISCARD inline void Scale(const Vector2Int& _scale) {
 		x *= _scale.x;
 		y *= _scale.y;
 	}
@@ -634,7 +634,7 @@ public: // Static Functions
 	// @return
 	//		The distance between _a and _b.
 	// 
-	_NODISCARD inline static float Distance(Vector2Int _from, Vector2Int _to) noexcept {
+	_NODISCARD inline static float Distance(const Vector2Int& _from, const Vector2Int& _to) noexcept {
 		return (_to - _from).magnitude();
 	}
 
@@ -643,7 +643,7 @@ public: // Static Functions
 	//
 	// As there is a conversion of float to integer, there is a loss of precision.
 	// 
-	_NODISCARD inline static Vector2Int CeilToInt(Vector2 _v) noexcept {
+	_NODISCARD inline static Vector2Int CeilToInt(const Vector2& _v) noexcept {
 		return Vector2Int(std::ceil(_v.x), std::ceil(_v.y));
 	}
 
@@ -652,7 +652,7 @@ public: // Static Functions
 	// 
 	// As there is a conversion of float to integer, there is a loss of precision.
 	// 
-	_NODISCARD inline static Vector2Int FloorToInt(Vector2 _v) noexcept {
+	_NODISCARD inline static Vector2Int FloorToInt(const Vector2& _v) noexcept {
 		return Vector2Int(std::floor(_v.x), std::floor(_v.y));
 	}
 
@@ -661,7 +661,7 @@ public: // Static Functions
 	// 
 	// As there is a conversion of float to integer, there is a loss of precision.
 	// 
-	_NODISCARD inline static Vector2Int RoundToInt(Vector2 _v) noexcept {
+	_NODISCARD inline static Vector2Int RoundToInt(const Vector2& _v) noexcept {
 		return Vector2Int(std::round(_v.x), std::round(_v.y));
 	}
 
@@ -671,7 +671,7 @@ public: // Static Functions
 	// @return
 	//		A copy of the larger Vector2Int.
 	// 
-	_NODISCARD inline static Vector2Int Max(Vector2Int _a, Vector2Int _b) noexcept {
+	_NODISCARD inline static Vector2Int Max(const Vector2Int& _a, const Vector2Int& _b) noexcept {
 		return (_a.sqrMagnitude() > _b.sqrMagnitude()) ? _a : _b;
 	}
 
@@ -681,7 +681,7 @@ public: // Static Functions
 	// @return
 	//		A copy of the smaller Vector2Int.
 	// 
-	_NODISCARD inline static Vector2Int Min(Vector2Int _a, Vector2Int _b) noexcept {
+	_NODISCARD inline static Vector2Int Min(const Vector2Int& _a, const Vector2Int& _b) noexcept {
 		return (_a.sqrMagnitude() < _b.sqrMagnitude()) ? _a : _b;
 	}
 
@@ -690,7 +690,7 @@ public: // Static Functions
 	// 
 	// Every component in the result is a component of _a multiplied by the same component of _b.
 	// 
-	_NODISCARD inline static Vector2Int Scale(Vector2Int _a, Vector2Int _b) {
+	_NODISCARD inline static Vector2Int Scale(const Vector2Int& _a, const Vector2Int& _b) {
 		coord_t x = _a.x * _b.x;
 		coord_t y = _a.y * _b.y;
 		return Vector2Int(x, y);
@@ -795,7 +795,7 @@ public: // Functions
 	//
 	// Offset the position of the rectangle.
 	//
-	inline void Offset(My_Vector2_t _offset) noexcept {
+	inline void Offset(const My_Vector2_t& _offset) noexcept {
 		setPosition(getPosition() + _offset);
 	}
 
@@ -820,7 +820,7 @@ public: // Functions
 	// @return
 	//		True if the point lies within the specified rectangle.
 	// 
-	_NODISCARD inline bool Contains(My_Vector2_t _point, bool _allowInverse = false) const noexcept {
+	_NODISCARD inline bool Contains(const My_Vector2_t& _point, bool _allowInverse = false) const noexcept {
 		// If X and Y coordinate of _point falls within Min and Max range of Rect -> Contains.
 		bool cond = LMK_InRange(_point.x, xMin, xMax) && LMK_InRange(_point.y, yMin, yMax);
 
@@ -841,7 +841,7 @@ public: // Functions
 	//		The <coord_type> of the other rectangle.
 	// 
 	template<typename right_coord_t, class Right_Vector2_t>
-	_NODISCARD inline bool Overlaps(BaseRect<right_coord_t, Right_Vector2_t> _other) const noexcept {
+	_NODISCARD inline bool Overlaps(const BaseRect<right_coord_t, Right_Vector2_t>& _other) const noexcept {
 		// If either rectangle has area of 0 -> no overlap possible.
 		if (area() == 0 || _other.area() == 0)
 			return false;
@@ -904,7 +904,7 @@ public: // Property Modifiers
 
 	// Set the position of the minimum corner of the rectangle.
 	// Setting this property will resize the rectangle and preserve the position of the Max coordinate.
-	inline void setMin(My_Vector2_t _minPos) noexcept {
+	inline void setMin(const My_Vector2_t& _minPos) noexcept {
 		setMin(_minPos.x, _minPos.y);
 	}
 
@@ -924,7 +924,7 @@ public: // Property Modifiers
 
 	// Set the position of the maximum corner of the rectangle.
 	// Setting this property will resize the rectangle and preserve the position of the Min coordinate.
-	inline void setMax(My_Vector2_t _maxPos) noexcept {
+	inline void setMax(const My_Vector2_t& _maxPos) noexcept {
 		setMax(_maxPos.x, _maxPos.y);
 	}
 
@@ -944,7 +944,7 @@ public: // Property Modifiers
 
 	// Set the X and Y position of the rectangle.
 	// Setting this property will preserve the size of the rectangle but changes the Min and Max coordinate.
-	inline void setPosition(My_Vector2_t _pos) noexcept {
+	inline void setPosition(const My_Vector2_t& _pos) noexcept {
 		setPosition(_pos.x, _pos.y);
 	}
 
@@ -964,7 +964,7 @@ public: // Property Modifiers
 
 	// Set the width and height of the rectangle.
 	// Setting this property will preserve the Min coordinate but changes and Max coordinate.
-	inline void setSize(My_Vector2_t _size) noexcept {
+	inline void setSize(const My_Vector2_t& _size) noexcept {
 		setSize(_size.x, _size.y);
 	}
 
@@ -1041,7 +1041,7 @@ public: // Static Functions
 	// @return:
 	//		A Vector2 represent the 
 	//
-	_NODISCARD inline static My_Vector2_t NormalizedToPoint(const Rect& _rect, My_Vector2_t _normRectCoord) {
+	_NODISCARD inline static My_Vector2_t NormalizedToPoint(const Rect& _rect, const My_Vector2_t& _normRectCoord) {
 		return My_Vector2_t::Scale(_normRectCoord, _rect.getSize());
 	}
 
@@ -1051,7 +1051,7 @@ public: // Static Functions
 	// @return:
 	//		A Vector2 in the range 0 to 1 with values more 1 or less than zero clamped.
 	//
-	_NODISCARD inline static My_Vector2_t PointToNormalized(const Rect& _rect, My_Vector2_t _point) {
+	_NODISCARD inline static My_Vector2_t PointToNormalized(const Rect& _rect, const My_Vector2_t& _point) {
 
 	}
 };
