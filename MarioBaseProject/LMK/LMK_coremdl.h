@@ -6,6 +6,264 @@
 LMK_BEGIN
 // +--------------------------------------------------------------------------------+
 // |																				|
+// | COLOR																			|
+// |																				|
+// +--------------------------------------------------------------------------------+
+
+class Color {
+public: // Constructors & Destructors
+	//
+	// 
+	//
+	inline Color(uint8_t _r, uint8_t _g, uint8_t _b, uint8_t _a) : r(_r), g(_g), b(_b), a(_a) {}
+
+public: // Operators Overloads
+#if LMK_HAVE_SDL
+	//
+	// Converts a lmk::Color to SDL_Color
+	//
+	_NODISCARD inline operator SDL_Color() noexcept {
+		return SDL_Color{ r, g, b, a };
+	}
+#endif
+
+	//
+	// Access the r, g, b, a components using [0], [1], [2], [3] respectively.
+	//
+	_NODISCARD inline uint8_t& operator[](uint8_t _index) {
+		switch (_index)
+		{
+		case 0:
+			return r;
+		case 1:
+			return g;
+		case 2:
+			return b;
+		case 3:
+			return a;
+		default:
+			throw std::out_of_range("lmk::Color: index out of range for operator[] (index should be 0, 1, 2 or 3).");
+			break;
+		}
+	}
+
+	inline Color& operator+=(const Color& _right) {
+		r += _right.r;
+		g += _right.g;
+		b += _right.b;
+		a += _right.a;
+		return *this;
+	}
+
+	inline Color& operator-=(const Color& _right) {
+		r -= _right.r;
+		g -= _right.g;
+		b -= _right.b;
+		a -= _right.a;
+		return *this;
+	}
+
+#pragma warning (disable : 4244)
+	inline Color& operator*=(float _right) {
+		for (uint8_t i = 0; i < 4; i++) {
+			(*this)[i] *= _right;
+		}
+		return *this;
+	}
+
+	inline Color& operator/=(float _right) {
+		for (uint8_t i = 0; i < 4; i++) {
+			(*this)[i] /= _right;
+		}
+		return *this;
+	}
+
+	_NODISCARD inline Color operator+(const Color& _right) const {
+		Color temp = *this;
+		temp += _right;
+		return temp;
+	}
+
+	_NODISCARD inline Color operator-(const Color& _right) const {
+		Color temp = *this;
+		temp -= _right;
+		return temp;
+	}
+
+	_NODISCARD inline Color operator*(float _right) const {
+		Color temp = *this;
+		temp *= _right;
+		return temp;
+	}
+
+	_NODISCARD inline Color operator/(float _right) const {
+		Color temp = *this;
+		temp /= _right;
+		return temp;
+	}
+
+public: // Static Functions
+	//
+	// Creates an RGB colour from HSV input.
+	// 
+	// @param _h:
+	//		Hue [0...1].
+	// @param _s:
+	//		Saturation [0...1].
+	// @param _v:
+	//		Brightness value [0...1].
+	// 
+	// @returns:
+	//		Color An opaque colour with HSV matching the input.
+	//
+	_NODISCARD inline static Color HSVToRGB(float _h, float _s, float _v) {
+		uint8_t r, g, b;
+
+		if (_s == 0) {		// no saturation ->
+			r = g = b = _v; // achromatic
+		}
+		else {
+			float q = _v < 0.5 ? _v * (1 + _s) : _v + _s - _v * _s;
+			float p = 2 * _v - q;
+			r = HueToRGB(p, q, _h + 1.0f / 3.0f);
+			g = HueToRGB(p, q, _h);
+			b = HueToRGB(p, q, _h - 1.0f / 3.0f);
+		}
+
+		return Color(std::round(r * 255), std::round(g * 255), std::round(b * 255), 1);
+	}
+
+	//
+	// Calculates the hue, saturation and value of an RGB input color.
+	// 
+	// @param _rgb:
+	//		An input RGB color.
+	// @param _h:
+	//		Output variable for hue.
+	// @param _s:
+	//		Output variable for saturation.
+	// @param _v:
+	//		Output variable for value.
+	// 
+	// @returns:
+	//		The H, S, and V are output in the range 0 to 1.
+	//
+	_NODISCARD inline static Color RGBToHSV(const Color& _rgb, float& _h, float& _s, float& _v) {
+		return Color::clear();
+	}
+
+	//
+	// Linearly interpolates between colors _a and _b by _t.
+	// 
+	// _t is clamped between 0 and 1. 
+	// When t is 0 returns a. 
+	// When t is 1 returns b.
+	//
+	_NODISCARD inline static Color Lerp(const Color& _a, const Color& _b, float _t) {
+		return LMK_Lerp(_a, _b, LMK_Clamp(_t, 0.0f, 1.0f));
+	}
+
+	//
+	// Linearly interpolates between colors _a and _b by _t.
+	// 
+	// When t is 0 returns a. 
+	// When t is 1 returns b.
+	//
+	_NODISCARD inline static Color LerpUnclamped(const Color& _a, const Color& _b, float _t) {
+		return LMK_Lerp(_a, _b, _t);
+	}
+
+private:
+	//
+	// 
+	//
+	_NODISCARD inline static uint8_t HueToRGB(float _p, float _q, float _t) {
+		if (_t < 0)				_t += 1;
+		if (_t > 1)				_t -= 1;
+		if (_t < 1.0f / 6.0f)	return _p + (_q - _p) * 6 * _t;
+		if (_t < 1.0f / 2.0f)	return _q;
+		if (_t < 2.0f / 3.0f)	return _p + (_q - _p) * (2.0f / 3.0f - _t) * 6;
+		return _p;
+	}
+#pragma warning (default : 4244)
+
+public: // Static Properties
+	//
+	// Completely transparent. RGBA is (0, 0, 0, 0).
+	//
+	_NODISCARD inline static Color clear() {
+		return Color(0, 0, 0, 0);
+	}
+
+	//
+	// Solid black. RGBA is (0, 0, 0, 255).
+	//
+	_NODISCARD inline static Color black() {
+		return Color(0, 0, 0, 255);
+	}
+
+	//
+	// Solid white. RGBA is (255, 255, 255, 255).
+	//
+	_NODISCARD inline static Color white() {
+		return Color(255, 255, 255, 255);
+	}
+
+	//
+	// Grey. RGBA is (128, 128, 128, 255).
+	//
+	_NODISCARD inline static Color grey() {
+		return Color(128, 128, 128, 255);
+	}
+
+	//
+	// Solid red. RGBA is (255, 0, 0, 255).
+	//
+	_NODISCARD inline static Color red() {
+		return Color(255, 0, 0, 255);
+	}
+
+	//
+	// Solid green. RGBA is (0, 255, 0, 255).
+	//
+	_NODISCARD inline static Color green() {
+		return Color(0, 255, 0, 255);
+	}
+
+	//
+	// Solid blue. RGBA is (0, 0, 255, 255).
+	//
+	_NODISCARD inline static Color blue() {
+		return Color(0, 0, 255, 255);
+	}
+
+	//
+	// Cyan. RGBA is (0, 255, 255, 255).
+	//
+	_NODISCARD inline static Color cyan() {
+		return Color(0, 255, 255, 255);
+	}
+
+	//
+	// Magenta. RGBA is (255, 0, 255, 255).
+	//
+	_NODISCARD inline static Color magenta() {
+		return Color(255, 0, 255, 255);
+	}
+
+	//
+	// Yellow. RGBA is (255, 235, 4, 255).
+	//
+	_NODISCARD inline static Color yellow() {
+		return Color(255, 235, 4, 255);
+	}
+
+public: // Properties
+	uint8_t r, g, b, a;
+};
+
+// +--------------------------------------------------------------------------------+
+// |																				|
 // | 2D VECTOR																		|
 // |																				|
 // +--------------------------------------------------------------------------------+
@@ -38,7 +296,7 @@ public:	// Constructors & Destructors
 	//
 	inline BaseVector2() : BaseVector2(0, 0) {}
 
-public:	// Operator overloads
+public:	// Operators Overloads
 	//
 	// Returns a formatted string for this vector.
 	//
@@ -52,14 +310,14 @@ public:	// Operator overloads
 	//
 	// Access the x or y component using [0] or [1] respectively.
 	//
-	_NODISCARD constexpr coord_t operator[](int _index) {
+	_NODISCARD constexpr coord_t& operator[](int _index) {
 		switch (_index) {
 		case 0:
 			return x;
 		case 1:
 			return y;
 		default:
-			throw std::out_of_range("lmk::BaseVector2: index out of range for operator[] (index should be 0 or 1 only).");
+			throw std::out_of_range("lmk::BaseVector2: index out of range for operator[] (index should be 0 or 1).");
 			return 0;
 		}
 	}
@@ -118,7 +376,16 @@ public:	// Constructors & Destructors
 	//
 	explicit inline Vector2() : BaseVector2() {}
 
-public: // Operator overloads
+public: // Operators Overloads
+#if LMK_HAVE_SDL
+	//
+	// Converts a lmk::Vector2 to SDL_FPoint.
+	//
+	_NODISCARD inline operator SDL_FPoint() {
+		return SDL_FPoint{ x, y };
+	}
+#endif
+
 	inline Vector2& operator+=(const Vector2& _right) noexcept {
 		x += _right.x;
 		y += _right.y;
@@ -212,48 +479,6 @@ public: // Functions
 	}
 
 public: // Static Functions
-	// 
-	// Shorthand for writing Vector2(0, 1).
-	// 
-	_NODISCARD inline static Vector2 up() noexcept {
-		return Vector2(0, 1);
-	}
-
-	// 
-	// Shorthand for writing Vector2(0, -1).
-	// 
-	_NODISCARD inline static Vector2 down() noexcept {
-		return Vector2(0, -1);
-	}
-
-	// 
-	// Shorthand for writing Vector2(1, 0).
-	// 
-	_NODISCARD inline static Vector2 right() noexcept {
-		return Vector2(1, 0);
-	}
-
-	// 
-	// Shorthand for writing Vector2(-1, 0).
-	// 
-	_NODISCARD inline static Vector2 left() noexcept {
-		return Vector2(-1, 0);
-	}
-
-	// 
-	// Shorthand for writing Vector2(1, 1).
-	// 
-	_NODISCARD inline static Vector2 one() noexcept {
-		return Vector2(1, 1);
-	}
-
-	// 
-	// Shorthand for writing Vector2(0, 0).
-	// 
-	_NODISCARD inline static Vector2 zero() noexcept {
-		return Vector2(0, 0);
-	}
-
 	// 
 	// Get the direction from one Vector2 to another by using: (_to - _from).
 	// 
@@ -375,7 +600,7 @@ public: // Static Functions
 	// When _t = 0.5 returns the midpoint of _a and _b.
 	// 
 	_NODISCARD inline static Vector2 Lerp(const Vector2& _from, const Vector2& _to, float _t) noexcept {
-		return _from + ((_to - _from) * LMK_Clamp(_t, 0.0f, 1.0f));
+		return LMK_Lerp(_from, _to, LMK_Clamp(_t, 0.0f, 1.0f));
 	}
 
 	// 
@@ -386,7 +611,7 @@ public: // Static Functions
 	// When _t = 0.5 returns the midpoint of _a and _b.
 	// 
 	_NODISCARD inline static Vector2 LerpUnclamped(const Vector2& _from, const Vector2& _to, float _t) noexcept {
-		return _from + ((_to - _from) * _t);
+		return LMK_Lerp(_from, _to, _t);
 	}
 
 	// 
@@ -477,6 +702,49 @@ public: // Static Functions
 		float deltaTime = 0;
 		//========================= PENDING =========================//
 	}
+
+public: // Static Properties
+	// 
+	// Shorthand for writing Vector2(0, 1).
+	// 
+	_NODISCARD inline static Vector2 up() noexcept {
+		return Vector2(0, 1);
+	}
+
+	// 
+	// Shorthand for writing Vector2(0, -1).
+	// 
+	_NODISCARD inline static Vector2 down() noexcept {
+		return Vector2(0, -1);
+	}
+
+	// 
+	// Shorthand for writing Vector2(1, 0).
+	// 
+	_NODISCARD inline static Vector2 right() noexcept {
+		return Vector2(1, 0);
+	}
+
+	// 
+	// Shorthand for writing Vector2(-1, 0).
+	// 
+	_NODISCARD inline static Vector2 left() noexcept {
+		return Vector2(-1, 0);
+	}
+
+	// 
+	// Shorthand for writing Vector2(1, 1).
+	// 
+	_NODISCARD inline static Vector2 one() noexcept {
+		return Vector2(1, 1);
+	}
+
+	// 
+	// Shorthand for writing Vector2(0, 0).
+	// 
+	_NODISCARD inline static Vector2 zero() noexcept {
+		return Vector2(0, 0);
+	}
 };
 
 // 
@@ -499,13 +767,22 @@ public: // Constructors & Destructors
 	//
 	explicit inline Vector2Int() : BaseVector2() {}
 
-public: // Operator overloads
+public: // Operators Overloads
 	// 
 	// Converts a Vector2Int to Vector2.
 	// 
-	inline operator Vector2() noexcept {
+	_NODISCARD inline operator Vector2() noexcept {
 		return Vector2(x, y);
 	}
+
+#if LMK_HAVE_SDL
+	//
+	// Converts a lmk::Vector2Int to SDL_Point.
+	//
+	_NODISCARD inline operator SDL_Point() {
+		return SDL_Point{ x, y };
+	}
+#endif
 
 	inline Vector2Int& operator+=(const Vector2Int& _right) noexcept {
 		x += _right.x;
@@ -587,41 +864,6 @@ public: // Functions
 
 public: // Static Functions
 	// 
-	// Shorthand for writing Vector2Int(0, 1).
-	// 
-	_NODISCARD inline static Vector2Int up() noexcept {
-		return Vector2Int(0, 1);
-	}
-
-	// 
-	// Shorthand for writing Vector2Int(0, -1).
-	// 
-	_NODISCARD inline static Vector2Int down() noexcept {
-		return Vector2Int(0, -1);
-	}
-
-	// 
-	// Shorthand for writing Vector2Int(1, 0).
-	// 
-	_NODISCARD inline static Vector2Int right() noexcept {
-		return Vector2Int(1, 0);
-	}
-
-	// 
-	// Shorthand for writing Vector2Int(-1, 0).
-	// 
-	_NODISCARD inline static Vector2Int left() noexcept {
-		return Vector2Int(-1, 0);
-	}
-
-	// 
-	// Shorthand for writing Vector2Int(1, 1).
-	// 
-	_NODISCARD inline static Vector2Int one() noexcept {
-		return Vector2Int(1, 1);
-	}
-
-	// 
 	// Shorthand for writing Vector2Int(0, 0).
 	// 
 	_NODISCARD inline static Vector2Int zero() noexcept {
@@ -695,6 +937,42 @@ public: // Static Functions
 		coord_t y = _a.y * _b.y;
 		return Vector2Int(x, y);
 	}
+
+public: // Static Properties
+	// 
+	// Shorthand for writing Vector2Int(0, 1).
+	// 
+	_NODISCARD inline static Vector2Int up() noexcept {
+		return Vector2Int(0, 1);
+	}
+
+	// 
+	// Shorthand for writing Vector2Int(0, -1).
+	// 
+	_NODISCARD inline static Vector2Int down() noexcept {
+		return Vector2Int(0, -1);
+	}
+
+	// 
+	// Shorthand for writing Vector2Int(1, 0).
+	// 
+	_NODISCARD inline static Vector2Int right() noexcept {
+		return Vector2Int(1, 0);
+	}
+
+	// 
+	// Shorthand for writing Vector2Int(-1, 0).
+	// 
+	_NODISCARD inline static Vector2Int left() noexcept {
+		return Vector2Int(-1, 0);
+	}
+
+	// 
+	// Shorthand for writing Vector2Int(1, 1).
+	// 
+	_NODISCARD inline static Vector2Int one() noexcept {
+		return Vector2Int(1, 1);
+	}
 };
 
 // +--------------------------------------------------------------------------------+
@@ -743,11 +1021,11 @@ IMPL_BEGIN
 // @tparam My_Vector2_type:
 //		Vector2 type (e.g. Vector2Int, Vector2, ...).
 //
-template<typename coord_type, class My_Vector2_type = BaseVector2<coord_type>>
+template<typename coord_type, class My_Vector2_type = BaseVector2<int>>
 class BaseRect {
 protected: // Typedef
-	using coord_t		= coord_type;
 	using My_Vector2_t	= My_Vector2_type;
+	using coord_t		= coord_type;
 
 public: // Constructors & Destructors
 	//
@@ -775,7 +1053,7 @@ public: // Constructors & Destructors
 	//
 	inline BaseRect(My_Vector2_t _pos, My_Vector2_t _size) : BaseRect(_pos.x, _pos.y, _size.x, _size.y) {}
 
-public: // Operators
+public: // Operators Overloads
 	//
 	// Returns a formatted string for this rectangle.
 	//
@@ -804,6 +1082,28 @@ public: // Functions
 	//
 	inline void Offset(coord_t _x, coord_t _y) noexcept {
 		Offset(My_Vector2_t(_x, _y));
+	}
+
+	//
+	// Scale width and height of the rectangle.
+	//
+	inline void Scale(const My_Vector2_t& _scale) noexcept {
+		setWidth(width * _scale.x);
+		setHeight(height * _scale.y);
+	}
+
+	//
+	// Scale width and height of the rectangle.
+	//
+	inline void Scale(coord_t _scaleX, coord_t _scaleY) noexcept {
+		Scale(My_Vector2_t(_scaleX, _scaleY));
+	}
+
+	//
+	// Scale width and height of the rectangle.
+	//
+	inline void Scale(coord_t _scale) noexcept {
+		Scale(_scale, _scale);
 	}
 
 	// 
@@ -863,7 +1163,7 @@ protected:
 		return width * height;
 	}
 
-public: // Property Modifiers
+public: // Accesors & Mutators
 	// Returns the width of the rectangle, measured from the X position.
 	_NODISCARD inline coord_t getWidth() const noexcept {
 		return width;
@@ -888,6 +1188,30 @@ public: // Property Modifiers
 		yMax = yMin + height;
 	}
 
+	// Get the minimum X coordinate of the rectangle. 
+	_NODISCARD inline coord_t getXMin() const noexcept {
+		return xMin;
+	}
+
+	// Set the minimum X coordinate of the rectangle. 
+	// Setting this property will resize the width of the rectangle.
+	inline void setXMin(coord_t _xMin) noexcept {
+		xMin = _xMin;
+		width = xMax - xMin;
+	}
+
+	// Get the minimum Y coordinate of the rectangle. 
+	_NODISCARD inline coord_t getYMin() const noexcept {
+		return yMin;
+	}
+
+	// Set the minimum X coordinate of the rectangle. 
+	// Setting this property will resize the height of the rectangle.
+	inline void setYMin(coord_t _yMin) noexcept {
+		yMin = _yMin;
+		height = yMax - yMin;
+	}
+
 	// Get the position of the minimum corner of the rectangle.
 	_NODISCARD inline My_Vector2_t getMin() const noexcept {
 		return My_Vector2_t(xMin, yMin);
@@ -906,6 +1230,30 @@ public: // Property Modifiers
 	// Setting this property will resize the rectangle and preserve the position of the Max coordinate.
 	inline void setMin(const My_Vector2_t& _minPos) noexcept {
 		setMin(_minPos.x, _minPos.y);
+	}
+
+	// Get the maximum X coordinate of the rectangle. 
+	_NODISCARD inline coord_t getXMax() const noexcept {
+		return xMax;
+	}
+
+	// Set the maximum X coordinate of the rectangle. 
+	// Setting this property will resize the width of the rectangle.
+	inline void setXMax(coord_t _xMax) noexcept {
+		xMax = _xMax;
+		width = xMax - xMin;
+	}
+
+	// Get the maximum Y coordinate of the rectangle. 
+	_NODISCARD inline coord_t getYMax() const noexcept {
+		return yMax;
+	}
+
+	// Set the maximum Y coordinate of the rectangle. 
+	// Setting this property will resize the height of the rectangle.
+	inline void setYMax(coord_t _yMax) noexcept {
+		yMax = _yMax;
+		height = yMax - yMin;
 	}
 
 	// Get the position of the maximum corner of the rectangle.
@@ -1019,17 +1367,17 @@ public:	// Constructors & Destructors
 	//
 	_NODISCARD inline Rect() : Rect(0, 0, 0, 0) {}
 
-public: // Operator overloads
-
+public: // Operators Overloads
+#if LMK_HAVE_SDL
+	//
+	// Convert a lmk::RectInt to SDL_Rect.
+	//
+	_NODISCARD inline operator SDL_FRect() {
+		return SDL_FRect{ xMin, yMin, width, height };
+	}
+#endif // LMK_HAVE_SDL
 
 public: // Static Functions
-	// 
-	// Shorthand for writing Rect(0, 0, 0, 0).
-	// 
-	_NODISCARD inline static Rect zero() {
-		return Rect(0, 0, 0, 0);
-	}
-
 	//
 	// Get a point inside a rectangle, given normalized coordinates.
 	// 
@@ -1037,9 +1385,6 @@ public: // Static Functions
 	//		The rectangle to get a point inside.
 	// @param _normRectCoord:
 	//		Normalized coordinates to get a point for.
-	// 
-	// @return:
-	//		A Vector2 represent the 
 	//
 	_NODISCARD inline static My_Vector2_t NormalizedToPoint(const Rect& _rect, const My_Vector2_t& _normRectCoord) {
 		return My_Vector2_t::Scale(_normRectCoord, _rect.getSize());
@@ -1053,6 +1398,14 @@ public: // Static Functions
 	//
 	_NODISCARD inline static My_Vector2_t PointToNormalized(const Rect& _rect, const My_Vector2_t& _point) {
 
+	}
+
+public: // Static Properties
+	// 
+	// Shorthand for writing Rect(0, 0, 0, 0).
+	// 
+	_NODISCARD inline static Rect zero() {
+		return Rect(0, 0, 0, 0);
 	}
 };
 
@@ -1090,6 +1443,16 @@ public:	// Constructors & Destructors
 	//
 	inline RectInt() : RectInt(0, 0, 0, 0) {}
 
+public: // Operators Overloads
+#if LMK_HAVE_SDL
+	//
+	// Convert a lmk::RectInt to SDL_Rect.
+	//
+	_NODISCARD inline operator SDL_Rect() {
+		return SDL_Rect{ xMin, yMin, width, height };
+	}
+#endif // LMK_HAVE_SDL
+
 public: // Functions
 	//
 	// Clamps the position and size of the RectInt to the given _bounds.
@@ -1102,7 +1465,7 @@ public: // Functions
 		setMax(getMax().Clamp(_bounds.getMin(), _bounds.getMax()));
 	}
 
-public: // Static Functions
+public: // Static Properties
 	// 
 	// Shorthand for writing RectInt(0, 0, 0, 0).
 	// 
@@ -1133,31 +1496,31 @@ public:	// Functions
 
 	inline void DetachChildren() {}
 
-	_NODISCARD inline bool IsChildOf() const {}
+	_NODISCARD inline bool IsChildOf(const Transform& _parent) const {}
 
 	_NODISCARD inline Transform* Find(std::string _name) const {}
 
 	_NODISCARD inline Transform* GetChild(int _index) const {}
 
-	_NODISCARD inline Vector2 TransformDirection(Vector2 _direction) const {}
+	_NODISCARD inline Vector2 TransformDirection(const Vector2& _direction) const {}
 	_NODISCARD inline std::vector<Vector2> TransformDirections(std::vector<Vector2> _directions) const {}
 
-	_NODISCARD inline Vector2 TransformPoint(Vector2 _point) const {}
+	_NODISCARD inline Vector2 TransformPoint(const Vector2& _point) const {}
 	_NODISCARD inline std::vector<Vector2> TransformPoints(std::vector<Vector2> _points) const {}
 
-	_NODISCARD inline Vector2 InverseTransformDirection(Vector2 _direction) const {}
+	_NODISCARD inline Vector2 InverseTransformDirection(const Vector2& _direction) const {}
 	_NODISCARD inline std::vector<Vector2> InverseTransformDirections(std::vector<Vector2> _directions) const {}
 
-	_NODISCARD inline Vector2 InverseTransformPoint(Vector2 _point) const {}
+	_NODISCARD inline Vector2 InverseTransformPoint(const Vector2& _point) const {}
 	_NODISCARD inline std::vector<Vector2> InverseTransformPoints(std::vector<Vector2> _points) const {}
 
 	_NODISCARD inline void Rotate(float _angle, bool _worldSpace = false) {}
 
-	_NODISCARD inline void RotateAround(Vector2 _point, float _angle) {}
+	_NODISCARD inline void RotateAround(const Vector2& _point, float _angle) {}
 
-	_NODISCARD inline void Translate(Vector2 _translation) {}
-	_NODISCARD inline void Translate(Vector2 _translation, bool _worldSpace = false) {}
-	_NODISCARD inline void Translate(Vector2 _translation, const Transform& _relativeTo) {}
+	_NODISCARD inline void Translate(const Vector2& _translation) {}
+	_NODISCARD inline void Translate(const Vector2& _translation, bool _worldSpace = false) {}
+	_NODISCARD inline void Translate(const Vector2& _translation, const Transform& _relativeTo) {}
 
 public: // Accesors & Mutators
 	_NODISCARD inline uint8_t childCount() const {}
@@ -1192,23 +1555,21 @@ public: // Accesors & Mutators
 	inline void setParent(Transform* _p) {}
 	inline void setParent(Transform* _parent, bool _worldPositionStays) {}
 
-protected:	// Properties
-	Vector2 lossyScale;
-	Vector2 localscale	= Vector2::one();
-
-	Vector2 position;
+protected: // Properties
+	Vector2 localscale		= Vector2::one();
 	Vector2 localPosition	= Vector2::zero();
-
-	float rotation;
-	float localrotation	= 0;
+	float localrotation		= 0;
 
 	bool isRoot;
 	int siblingIndex;
 	Transform* parent		= nullptr;
+	std::vector<Transform*> childs;
 };
 
 // +--------------------------------------------------------------------------------+
+// |																				|
 // | RECT TRANSFORM																	|
+// |																				|
 // +--------------------------------------------------------------------------------+
 
 class RectTransform : public Transform {
@@ -1217,7 +1578,9 @@ public:
 };
 
 // +--------------------------------------------------------------------------------+
+// |																				|
 // | GAME OBJECT																	|
+// |																				|
 // +--------------------------------------------------------------------------------+
 
 class GameObject {

@@ -5,6 +5,7 @@
 
 #if (LMK_HAVE_SDL) && (LMK_HAVE_SDL_IMAGE)
 #include "LMK_coremdl.h"
+#include "LMK_gizmo.h"
 
 LMK_BEGIN
 class lmkEngine {
@@ -14,21 +15,104 @@ public: // Constructors & Destructors
 			std::cout << "Error: failed to initialize application, the program will now exit." << std::endl;
 			exit(1);
 		}
+
+		OnStart();
+
+		while (m_running) {
+			HandleEvents();
+			Update();
+			Render();
+		}
+
+		OnExit();
 	}
+
 	inline lmkEngine(std::string _title, Vector2Int _pos, Vector2Int _size, bool _fullscr = true)
 		: lmkEngine(_title, _pos.x, _pos.y, _size.x, _size.y, _fullscr) {}
+
 	inline lmkEngine(std::string _title, RectInt _wndRect, bool _fullscr = true)
 		: lmkEngine(_title, _wndRect.getPosition(), _wndRect.getSize(), _fullscr) {}
 
 	inline ~lmkEngine() {
+		SDL_DestroyWindow(window);
+		SDL_DestroyRenderer(renderer);
+
+		IMG_Quit();
+		SDL_Quit();
+	}
+
+protected: // Functions
+	inline void UserOnStart() {
+		m_rotation = 0;
+		m_moveRect = Rect(Vector2::zero(), Vector2::one() * 100);
+		m_staticRect = Rect(screenSize / 2, Vector2::one() * 200);
+
+		m_overlapping = false;
+	}
+
+	virtual void UserHandleEvents(const SDL_Event& _event) {
+		switch (_event.type) {
+		case SDL_MOUSEMOTION:
+			mousePos.x = _event.motion.x;
+			mousePos.y = _event.motion.y;
+			break;
+
+		case SDL_KEYDOWN:
+			switch (_event.key.keysym.sym)
+			{
+			case SDLK_e:
+				m_rotation -= 5;
+				break;
+
+			case SDLK_q:
+				m_rotation += 5;
+				break;
+
+			case SDLK_w:
+				m_moveRect.Scale(1.1f);
+				break;
+
+			case SDLK_s:
+				m_moveRect.Scale(0.9f);
+				break;
+
+			case SDLK_a:
+				m_staticRect.Offset(-10, 0);
+				break;
+
+			case SDLK_d:
+				m_staticRect.Offset(10, 0);
+				break;
+			}
+			break;
+		}
+	}
+
+	virtual void UserUpdate() {
+		m_overlapping = m_staticRect.Overlaps(m_moveRect);
+		m_moveRect.setPosition(mousePos);
+	}
+
+	virtual void UserRender() {
+		gizmo->setColor(Color::yellow());
+		gizmo->DrawRect(m_staticRect);
+
+		if (m_overlapping) {
+			gizmo->setColor(Color::red());
+		}
+		else {
+			gizmo->setColor(Color::white());
+		}
+
+		gizmo->DrawRect(m_moveRect, m_rotation);
 
 	}
 
-public: // Functions
-	virtual void UserUpdate();
-	virtual void UserHandleEvents(const SDL_Event& _event);
+private:
+	inline void OnStart() {
+		UserOnStart();
+	}
 
-private: 
 	inline void HandleEvents() {
 		SDL_Event curEvent;
 		SDL_PollEvent(&curEvent);
@@ -40,23 +124,25 @@ private:
 		case SDL_QUIT:
 			m_running = false;
 			break;
-
-		default:
-			break;
 		}
 	}
 
-	inline void Update() {}
+	inline void Update() {
+		UserUpdate();
+	}
 
 	inline void Render() {
+		SDL_SetRenderDrawColor(renderer, 0, 0, 0, 255);
 		SDL_RenderClear(renderer);
 
-
+		UserRender();
 
 		SDL_RenderPresent(renderer);
 	}
 
 	inline void OnExit() {
+		delete gizmo;
+
 		SDL_DestroyWindow(window);
 		SDL_DestroyRenderer(renderer);
 
@@ -88,7 +174,7 @@ private:
 			return false;
 		}
 
-		// Initialize renderer from window
+		// Initialize m_renderer from window
 		renderer = SDL_CreateRenderer(window, -1, SDL_RENDERER_ACCELERATED);
 		if (!renderer) {
 			printf("Error: failed to initialize SDL_Renderer.");
@@ -96,6 +182,11 @@ private:
 			return false;
 		}
 
+		// Initialize lmk::Gizmo subsystem
+		gizmo = new Gizmo(renderer);
+
+		// Initialize protected properties
+		screenSize = Vector2Int(_w, _h);
 		m_running = true;
 
 		return true;
@@ -113,9 +204,18 @@ protected:
 	SDL_Window* window;
 	SDL_Renderer* renderer;
 
+	Gizmo* gizmo;
+
+	lmk::Vector2Int mousePos;
+	lmk::Vector2Int screenSize;
+
 private:
 	bool m_running;
 
+	bool m_overlapping;
+	float m_rotation;
+	Rect m_moveRect;
+	Rect m_staticRect;
 };
 LMK_END
 

@@ -10,7 +10,9 @@
 #include "LMK_root.h"
 
 // +--------------------------------------------------------------------------------+
+// |																				|
 // | STANDARD LIBRARIES INCLUSION													|
+// |																				|
 // +--------------------------------------------------------------------------------+
 
 #include <cstdint>
@@ -69,7 +71,9 @@
 #endif
 
 // +--------------------------------------------------------------------------------+
+// |																				|
 // | VENDOR LIBRARIES INCLUSION														|
+// |																				|
 // +--------------------------------------------------------------------------------+
 
 //
@@ -86,44 +90,69 @@
 #endif
 
 // +--------------------------------------------------------------------------------+
-// | STANDARD VERSION INDEPENDENT MACROS											|
+// |																				|
+// | COMPILER INDEPENDENT MACROS													|
+// |																				|
 // +--------------------------------------------------------------------------------+
 
 #ifndef M_PI
-#define M_PI	3.14159265358979323846
+	#define M_PI	3.14159265358979323846
 #endif
 
 #ifndef min
-#define min(_a, _b)		(((_a) < (_b)) ? (_a) : (_b))
+	//
+	// Get the minimum value between _a and _b.
+	//
+	#define min(_a, _b)		((_a < _b) ? (_a) : (_b))
 #endif
 
 #ifndef max
-#define max(_a, _b)		(((_a) > (_b)) ? (_a) : (_b))
+	//
+	// Get the maximum value between _a and _b.
+	//
+	#define max(_a, _b)		((_a > _b) ? (_a) : (_b))
 #endif
 
 #ifndef LMK_Clamp
-// Clamp value to range.
-#define LMK_Clamp(_val, _min, _max)		min(max((_val), (_min)), (_max))
+	//
+	// Clamp value to range.
+	//
+	#define LMK_Clamp(_val, _min, _max)		min(max(_val, _min), _max)
 #endif
 
 #ifndef LMK_DtoR
-// Convert degree to radian.
-#define LMK_DtoR(_degree)	_degree / 180 * M_PI
+	//
+	// Convert degree to radian.
+	//
+	#define LMK_DtoR(_degree)	(_degree / 180 * M_PI)
 #endif
 
 #ifndef LMK_RtoD
-// Convert radian to degree.
-#define LMK_RtoD(_radian)	_radian / M_PI * 180
+	//
+	// Convert radian to degree.
+	//
+	#define LMK_RtoD(_radian)	(_radian / M_PI * 180)
 #endif
 
 #ifndef LMK_InRange
-// Check if value is in range.
-#define LMK_InRange(_val, _min, _max)	(((_val) > (_min)) && ((_val) < (_max)))
+	//
+	// Check if value is in range.
+	//
+	#define LMK_InRange(_val, _min, _max)	((_val > _min) && (_val < _max))
+#endif
+
+#ifndef LMK_Lerp
+	//
+	// Linearly interpolates between _a and _b by _t.
+	// 
+	#define LMK_Lerp(_a, _b, _t)	(_a + ((_b - _a) * _t))
 #endif
 
 #ifndef LMK_ArraySize
-// The number of elements in an array.
-#define LMK_ArraySize(_array)	(sizeof(_array) / sizeof(_array[0]))
+	//
+	// The number of elements in an array.
+	//
+	#define LMK_ArraySize(_array)	(sizeof(_array) / sizeof(_array[0]))
 #endif
 
 #endif // !LMK_STDINC_H_
