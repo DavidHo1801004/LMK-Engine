@@ -15,9 +15,10 @@ IMPL_BEGIN
 // The base class for Vector2 and Vector2Int.
 // 
 // @tparam coord_type:
-//		Single coordinate type (e.g. int, float, ...).
+//		Single coordinate as an arithmetic type (e.g. int, float, ...).
 //
-template<typename coord_type>
+template<typename coord_type,
+	std::enable_if_t<std::is_arithmetic_v<coord_type>, bool> = true>
 class BaseVector2 {
 public:	// Typedef
 	using coord_t = coord_type;
@@ -756,18 +757,27 @@ public: // Static Properties
 
 IMPL_BEGIN
 //
+// Returns true when T is is any of the following:
+//	> Vector2
+//	> Vector2Int
+//
+template<typename T>
+constexpr bool is_lmkvector_t = std::_Is_any_of_v<std::remove_cv_t<T>, 
+	Vector2, Vector2Int>;
+//
 // The base class for Rect and RectInt.
 // 
 // @tparam coord_type:
 //		Single coordinate type (e.g. int, float, ...).
 // @tparam My_Vector2_type:
-//		Vector2 type (e.g. Vector2Int, Vector2, ...).
+//		lmk::BaseVector2 type (e.g. Vector2Int, Vector2, ...).
 //
-template<typename coord_type, class My_Vector2_type = BaseVector2<int>>
+template<typename coord_type, class My_Vector2_type,
+	std::enable_if_t<is_lmkvector_t<My_Vector2_type>, bool> = true>
 class BaseRect {
 protected: // Typedef
-	using My_Vector2_t = My_Vector2_type;
-	using coord_t = coord_type;
+	using My_Vector2_t	= My_Vector2_type;
+	using coord_t		= coord_type;
 
 public: // Constructors & Destructors
 	//
@@ -782,7 +792,7 @@ public: // Constructors & Destructors
 	// @param _h:
 	//		Height of the rectangle.
 	//
-	inline BaseRect(coord_t _x, coord_t _y, coord_t _w, coord_t _h)
+	inline BaseRect(coord_t _x, coord_t _y, coord_t _w, coord_t _h) 
 		: xMin(_x), yMin(_y), xMax(_x + _w), yMax(_y + _h), width(_w), height(_h) {}
 
 	//
