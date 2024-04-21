@@ -7,17 +7,28 @@ LMK_BEGIN
 class Time {
 public:
 	inline Time() {
-		lastFrame = currFrame;
+		m_lastFrame = std::chrono::system_clock::now();
+		m_currFrame = std::chrono::system_clock::now();
+
+		m_deltaTime = m_currFrame - m_lastFrame;
 	}
 
-public:
-	_NODISCARD inline float DeltaTime()  {
-
+public: // Static Functions
+	_NODISCARD inline float DeltaTime() noexcept {
+		return m_deltaTime.count();
 	}
 
-private:
-	std::chrono::time_point<std::chrono::system_clock> lastFrame;
-	std::chrono::time_point<std::chrono::system_clock> currFrame;
+	inline void UpdateDeltaTime() noexcept {
+		m_currFrame = std::chrono::system_clock::now();
+		m_deltaTime = m_currFrame - m_lastFrame;
+		m_lastFrame = m_currFrame;
+	}
+
+private: // Properties
+	std::chrono::time_point<std::chrono::system_clock> m_lastFrame;
+	std::chrono::time_point<std::chrono::system_clock> m_currFrame;
+
+	std::chrono::duration<float> m_deltaTime;
 };
 LMK_END
 

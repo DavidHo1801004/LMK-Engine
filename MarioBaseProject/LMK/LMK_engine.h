@@ -6,6 +6,7 @@
 #if (LMK_HAVE_SDL) && (LMK_HAVE_SDL_IMAGE)
 #include "LMK_coremdl.h"
 #include "LMK_gizmo.h"
+#include "LMK_time.h"
 
 LMK_BEGIN
 class lmkEngine {
@@ -33,14 +34,6 @@ public: // Constructors & Destructors
 	inline lmkEngine(std::string _title, RectInt _wndRect, bool _fullscr = true)
 		: lmkEngine(_title, _wndRect.getPosition(), _wndRect.getSize(), _fullscr) {}
 
-	inline ~lmkEngine() {
-		SDL_DestroyWindow(window);
-		SDL_DestroyRenderer(renderer);
-
-		IMG_Quit();
-		SDL_Quit();
-	}
-
 protected: // Functions
 	inline void UserOnStart() {
 		m_rotation = 0;
@@ -61,19 +54,19 @@ protected: // Functions
 			switch (_event.key.keysym.sym)
 			{
 			case SDLK_e:
-				m_rotation -= 5;
+				m_rotation -= 45 * time->DeltaTime();
 				break;
 
 			case SDLK_q:
-				m_rotation += 5;
+				m_rotation += 45 * time->DeltaTime();
 				break;
 
 			case SDLK_w:
-				m_moveRect.Scale(1.1f);
+				m_moveRect.Scale(1 + 10 * time->DeltaTime());
 				break;
 
 			case SDLK_s:
-				m_moveRect.Scale(0.9f);
+				m_moveRect.Scale(1 - 10 * time->DeltaTime());
 				break;
 
 			case SDLK_a:
@@ -128,6 +121,8 @@ private:
 	}
 
 	inline void Update() {
+		time->UpdateDeltaTime();
+
 		UserUpdate();
 	}
 
@@ -141,6 +136,7 @@ private:
 	}
 
 	inline void OnExit() {
+		delete time;
 		delete gizmo;
 
 		SDL_DestroyWindow(window);
@@ -185,6 +181,9 @@ private:
 		// Initialize lmk::Gizmo subsystem
 		gizmo = new Gizmo(renderer);
 
+		// Initialize lmk::Time subsystem
+		time = new Time();
+
 		// Initialize protected properties
 		screenSize = Vector2Int(_w, _h);
 		m_running = true;
@@ -205,6 +204,7 @@ protected:
 	SDL_Renderer* renderer;
 
 	Gizmo* gizmo;
+	Time* time;
 
 	lmk::Vector2Int mousePos;
 	lmk::Vector2Int screenSize;

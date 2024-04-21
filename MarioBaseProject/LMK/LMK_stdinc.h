@@ -44,6 +44,7 @@
 #include <cmath>
 
 #if HAVE_CPP14	// C++14
+	// For experimental libraries that got implemented in C++17
 	#if !HAVE_CPP17
 		#define _SILENCE_EXPERIMENTAL_FILESYSTEM_DEPRECATION_WARNING
 		#include <experimental/filesystem>

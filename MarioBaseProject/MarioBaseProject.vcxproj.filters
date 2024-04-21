@@ -47,5 +47,11 @@
     <ClInclude Include="LMK\LMK_render.h">
       <Filter>Header Files\LMK</Filter>
     </ClInclude>
+    <ClInclude Include="LMK\LMK_gameobj.h">
+      <Filter>Header Files\LMK</Filter>
+    </ClInclude>
+    <ClInclude Include="LMK\LMK_time.h">
+      <Filter>Header Files\LMK</Filter>
+    </ClInclude>
   </ItemGroup>
 </Project>
