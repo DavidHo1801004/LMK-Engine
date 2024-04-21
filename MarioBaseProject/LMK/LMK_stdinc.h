@@ -155,4 +155,12 @@
 	#define LMK_ArraySize(_array)	(sizeof(_array) / sizeof(_array[0]))
 #endif
 
+#ifndef LMK_RoundToInt
+	//
+	// Round a floating point value to integer value.
+	//
+	#define LMK_RoundToInt(f)	((int)(f >= 0.0 ? (f + 0.5) : (f - 0.5)))
+#endif
+
+
 #endif // !LMK_STDINC_H_

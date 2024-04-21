@@ -7,7 +7,7 @@ LMK_BEGIN
 class Time {
 public:
 	inline Time() {
-		lastFrame = currFrame = 
+		lastFrame = currFrame;
 	}
 
 public:

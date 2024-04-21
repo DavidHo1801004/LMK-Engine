@@ -6,264 +6,6 @@
 LMK_BEGIN
 // +--------------------------------------------------------------------------------+
 // |																				|
-// | COLOR																			|
-// |																				|
-// +--------------------------------------------------------------------------------+
-
-class Color {
-public: // Constructors & Destructors
-	//
-	// 
-	//
-	inline Color(uint8_t _r, uint8_t _g, uint8_t _b, uint8_t _a) : r(_r), g(_g), b(_b), a(_a) {}
-
-public: // Operators Overloads
-#if LMK_HAVE_SDL
-	//
-	// Converts a lmk::Color to SDL_Color
-	//
-	_NODISCARD inline operator SDL_Color() noexcept {
-		return SDL_Color{ r, g, b, a };
-	}
-#endif
-
-	//
-	// Access the r, g, b, a components using [0], [1], [2], [3] respectively.
-	//
-	_NODISCARD inline uint8_t& operator[](uint8_t _index) {
-		switch (_index)
-		{
-		case 0:
-			return r;
-		case 1:
-			return g;
-		case 2:
-			return b;
-		case 3:
-			return a;
-		default:
-			throw std::out_of_range("lmk::Color: index out of range for operator[] (index should be 0, 1, 2 or 3).");
-			break;
-		}
-	}
-
-	inline Color& operator+=(const Color& _right) {
-		r += _right.r;
-		g += _right.g;
-		b += _right.b;
-		a += _right.a;
-		return *this;
-	}
-
-	inline Color& operator-=(const Color& _right) {
-		r -= _right.r;
-		g -= _right.g;
-		b -= _right.b;
-		a -= _right.a;
-		return *this;
-	}
-
-#pragma warning (disable : 4244)
-	inline Color& operator*=(float _right) {
-		for (uint8_t i = 0; i < 4; i++) {
-			(*this)[i] *= _right;
-		}
-		return *this;
-	}
-
-	inline Color& operator/=(float _right) {
-		for (uint8_t i = 0; i < 4; i++) {
-			(*this)[i] /= _right;
-		}
-		return *this;
-	}
-
-	_NODISCARD inline Color operator+(const Color& _right) const {
-		Color temp = *this;
-		temp += _right;
-		return temp;
-	}
-
-	_NODISCARD inline Color operator-(const Color& _right) const {
-		Color temp = *this;
-		temp -= _right;
-		return temp;
-	}
-
-	_NODISCARD inline Color operator*(float _right) const {
-		Color temp = *this;
-		temp *= _right;
-		return temp;
-	}
-
-	_NODISCARD inline Color operator/(float _right) const {
-		Color temp = *this;
-		temp /= _right;
-		return temp;
-	}
-
-public: // Static Functions
-	//
-	// Creates an RGB colour from HSV input.
-	// 
-	// @param _h:
-	//		Hue [0...1].
-	// @param _s:
-	//		Saturation [0...1].
-	// @param _v:
-	//		Brightness value [0...1].
-	// 
-	// @returns:
-	//		Color An opaque colour with HSV matching the input.
-	//
-	_NODISCARD inline static Color HSVToRGB(float _h, float _s, float _v) {
-		uint8_t r, g, b;
-
-		if (_s == 0) {		// no saturation ->
-			r = g = b = _v; // achromatic
-		}
-		else {
-			float q = _v < 0.5 ? _v * (1 + _s) : _v + _s - _v * _s;
-			float p = 2 * _v - q;
-			r = HueToRGB(p, q, _h + 1.0f / 3.0f);
-			g = HueToRGB(p, q, _h);
-			b = HueToRGB(p, q, _h - 1.0f / 3.0f);
-		}
-
-		return Color(std::round(r * 255), std::round(g * 255), std::round(b * 255), 1);
-	}
-
-	//
-	// Calculates the hue, saturation and value of an RGB input color.
-	// 
-	// @param _rgb:
-	//		An input RGB color.
-	// @param _h:
-	//		Output variable for hue.
-	// @param _s:
-	//		Output variable for saturation.
-	// @param _v:
-	//		Output variable for value.
-	// 
-	// @returns:
-	//		The H, S, and V are output in the range 0 to 1.
-	//
-	_NODISCARD inline static Color RGBToHSV(const Color& _rgb, float& _h, float& _s, float& _v) {
-		return Color::clear();
-	}
-
-	//
-	// Linearly interpolates between colors _a and _b by _t.
-	// 
-	// _t is clamped between 0 and 1. 
-	// When t is 0 returns a. 
-	// When t is 1 returns b.
-	//
-	_NODISCARD inline static Color Lerp(const Color& _a, const Color& _b, float _t) {
-		return LMK_Lerp(_a, _b, LMK_Clamp(_t, 0.0f, 1.0f));
-	}
-
-	//
-	// Linearly interpolates between colors _a and _b by _t.
-	// 
-	// When t is 0 returns a. 
-	// When t is 1 returns b.
-	//
-	_NODISCARD inline static Color LerpUnclamped(const Color& _a, const Color& _b, float _t) {
-		return LMK_Lerp(_a, _b, _t);
-	}
-
-private:
-	//
-	// 
-	//
-	_NODISCARD inline static uint8_t HueToRGB(float _p, float _q, float _t) {
-		if (_t < 0)				_t += 1;
-		if (_t > 1)				_t -= 1;
-		if (_t < 1.0f / 6.0f)	return _p + (_q - _p) * 6 * _t;
-		if (_t < 1.0f / 2.0f)	return _q;
-		if (_t < 2.0f / 3.0f)	return _p + (_q - _p) * (2.0f / 3.0f - _t) * 6;
-		return _p;
-	}
-#pragma warning (default : 4244)
-
-public: // Static Properties
-	//
-	// Completely transparent. RGBA is (0, 0, 0, 0).
-	//
-	_NODISCARD inline static Color clear() {
-		return Color(0, 0, 0, 0);
-	}
-
-	//
-	// Solid black. RGBA is (0, 0, 0, 255).
-	//
-	_NODISCARD inline static Color black() {
-		return Color(0, 0, 0, 255);
-	}
-
-	//
-	// Solid white. RGBA is (255, 255, 255, 255).
-	//
-	_NODISCARD inline static Color white() {
-		return Color(255, 255, 255, 255);
-	}
-
-	//
-	// Grey. RGBA is (128, 128, 128, 255).
-	//
-	_NODISCARD inline static Color grey() {
-		return Color(128, 128, 128, 255);
-	}
-
-	//
-	// Solid red. RGBA is (255, 0, 0, 255).
-	//
-	_NODISCARD inline static Color red() {
-		return Color(255, 0, 0, 255);
-	}
-
-	//
-	// Solid green. RGBA is (0, 255, 0, 255).
-	//
-	_NODISCARD inline static Color green() {
-		return Color(0, 255, 0, 255);
-	}
-
-	//
-	// Solid blue. RGBA is (0, 0, 255, 255).
-	//
-	_NODISCARD inline static Color blue() {
-		return Color(0, 0, 255, 255);
-	}
-
-	//
-	// Cyan. RGBA is (0, 255, 255, 255).
-	//
-	_NODISCARD inline static Color cyan() {
-		return Color(0, 255, 255, 255);
-	}
-
-	//
-	// Magenta. RGBA is (255, 0, 255, 255).
-	//
-	_NODISCARD inline static Color magenta() {
-		return Color(255, 0, 255, 255);
-	}
-
-	//
-	// Yellow. RGBA is (255, 235, 4, 255).
-	//
-	_NODISCARD inline static Color yellow() {
-		return Color(255, 235, 4, 255);
-	}
-
-public: // Properties
-	uint8_t r, g, b, a;
-};
-
-// +--------------------------------------------------------------------------------+
-// |																				|
 // | 2D VECTOR																		|
 // |																				|
 // +--------------------------------------------------------------------------------+
@@ -369,7 +111,7 @@ public:	// Constructors & Destructors
 	// @param _y:
 	//		The Y coordinate of the vector.
 	//
-	explicit inline Vector2(coord_t _x, coord_t _y)	: BaseVector2(_x, _y) {}
+	explicit inline Vector2(coord_t _x, coord_t _y) : BaseVector2(_x, _y) {}
 
 	//
 	// Creates a new Vector2 with coordinate of (0, 0).
@@ -390,7 +132,7 @@ public: // Operators Overloads
 		x += _right.x;
 		y += _right.y;
 		return *this;
-	}	
+	}
 
 	inline Vector2& operator-=(const Vector2& _right) noexcept {
 		x -= _right.x;
@@ -1024,8 +766,8 @@ IMPL_BEGIN
 template<typename coord_type, class My_Vector2_type = BaseVector2<int>>
 class BaseRect {
 protected: // Typedef
-	using My_Vector2_t	= My_Vector2_type;
-	using coord_t		= coord_type;
+	using My_Vector2_t = My_Vector2_type;
+	using coord_t = coord_type;
 
 public: // Constructors & Destructors
 	//
@@ -1040,8 +782,8 @@ public: // Constructors & Destructors
 	// @param _h:
 	//		Height of the rectangle.
 	//
-	inline BaseRect(coord_t _x, coord_t _y, coord_t _w, coord_t _h) 
-		:  xMin(_x), yMin(_y), xMax(_x + _w), yMax(_y + _h), width(_w), height(_h) {}
+	inline BaseRect(coord_t _x, coord_t _y, coord_t _w, coord_t _h)
+		: xMin(_x), yMin(_y), xMax(_x + _w), yMax(_y + _h), width(_w), height(_h) {}
 
 	//
 	// Creates a BaseRect<coord_type>.
@@ -1163,29 +905,24 @@ protected:
 		return width * height;
 	}
 
-public: // Accesors & Mutators
+public: // Accessors & Mutators
+	// +------------+
+	// | ACCESSORS	|
+	// +------------+
+
 	// Returns the width of the rectangle, measured from the X position.
 	_NODISCARD inline coord_t getWidth() const noexcept {
 		return width;
 	}
 
-	// Set the width of the rectangle, measured from the X position.
-	// Setting this property will preserve the Min coordinate but changes and Max coordinate.
-	inline void setWidth(coord_t _width) noexcept {
-		width = _width;
-		xMax = xMin + width;
-	}
- 
 	// Returns the height of the rectangle, measured from the Y position.
 	_NODISCARD inline coord_t getHeight() const noexcept {
 		return height;
 	}
 
-	// Set the height of the rectangle, measured from the Y position.
-	// Setting this property will preserve the Min coordinate but changes and Max coordinate.
-	inline void setHeight(coord_t _height) noexcept {
-		height = _height;
-		yMax = yMin + height;
+	// Get the width and height of the rectangle.
+	_NODISCARD inline My_Vector2_t getSize() const noexcept {
+		return My_Vector2_t(width, height);
 	}
 
 	// Get the minimum X coordinate of the rectangle. 
@@ -1193,23 +930,9 @@ public: // Accesors & Mutators
 		return xMin;
 	}
 
-	// Set the minimum X coordinate of the rectangle. 
-	// Setting this property will resize the width of the rectangle.
-	inline void setXMin(coord_t _xMin) noexcept {
-		xMin = _xMin;
-		width = xMax - xMin;
-	}
-
 	// Get the minimum Y coordinate of the rectangle. 
 	_NODISCARD inline coord_t getYMin() const noexcept {
 		return yMin;
-	}
-
-	// Set the minimum X coordinate of the rectangle. 
-	// Setting this property will resize the height of the rectangle.
-	inline void setYMin(coord_t _yMin) noexcept {
-		yMin = _yMin;
-		height = yMax - yMin;
 	}
 
 	// Get the position of the minimum corner of the rectangle.
@@ -1217,31 +940,9 @@ public: // Accesors & Mutators
 		return My_Vector2_t(xMin, yMin);
 	}
 
-	// Set the position of the minimum corner of the rectangle.
-	// Setting this property will resize the rectangle and preserve the position of the Max coordinate.
-	inline void setMin(coord_t _x, coord_t _y) noexcept {
-		xMin = _x;
-		yMin = _y;
-		width = xMax - xMin;
-		height = yMax - yMin;
-	}
-
-	// Set the position of the minimum corner of the rectangle.
-	// Setting this property will resize the rectangle and preserve the position of the Max coordinate.
-	inline void setMin(const My_Vector2_t& _minPos) noexcept {
-		setMin(_minPos.x, _minPos.y);
-	}
-
 	// Get the maximum X coordinate of the rectangle. 
 	_NODISCARD inline coord_t getXMax() const noexcept {
 		return xMax;
-	}
-
-	// Set the maximum X coordinate of the rectangle. 
-	// Setting this property will resize the width of the rectangle.
-	inline void setXMax(coord_t _xMax) noexcept {
-		xMax = _xMax;
-		width = xMax - xMin;
 	}
 
 	// Get the maximum Y coordinate of the rectangle. 
@@ -1249,31 +950,9 @@ public: // Accesors & Mutators
 		return yMax;
 	}
 
-	// Set the maximum Y coordinate of the rectangle. 
-	// Setting this property will resize the height of the rectangle.
-	inline void setYMax(coord_t _yMax) noexcept {
-		yMax = _yMax;
-		height = yMax - yMin;
-	}
-
 	// Get the position of the maximum corner of the rectangle.
 	_NODISCARD inline My_Vector2_t getMax() const noexcept {
 		return My_Vector2_t(xMax, yMax);
-	}
-
-	// Set the position of the maximum corner of the rectangle.
-	// Setting this property will resize the rectangle and preserve the position of the Min coordinate.
-	inline void setMax(coord_t _x, coord_t _y) noexcept {
-		xMax = _x;
-		yMax = _y;
-		width = xMax - xMin;
-		height = yMax - yMin;
-	}
-
-	// Set the position of the maximum corner of the rectangle.
-	// Setting this property will resize the rectangle and preserve the position of the Min coordinate.
-	inline void setMax(const My_Vector2_t& _maxPos) noexcept {
-		setMax(_maxPos.x, _maxPos.y);
 	}
 
 	// Get the X and Y position of the rectangle.
@@ -1281,24 +960,22 @@ public: // Accesors & Mutators
 		return My_Vector2_t(xMin, yMin);
 	}
 
-	// Set the X and Y position of the rectangle. 
-	// Setting this property will preserve the size of the rectangle but changes the Min and Max coordinate.
-	inline void setPosition(coord_t _x, coord_t _y) noexcept {
-		xMin = _x;
-		yMin = _y;
-		xMax = _x + width;
-		yMax = _y + height;
+	// +------------+
+	// | MUTATORS	|
+	// +------------+
+
+	// Set the width of the rectangle, measured from the X position.
+	// Setting this property will preserve the Min coordinate but changes and Max coordinate.
+	inline void setWidth(coord_t _width) noexcept {
+		width = _width;
+		xMax = xMin + width;
 	}
 
-	// Set the X and Y position of the rectangle.
-	// Setting this property will preserve the size of the rectangle but changes the Min and Max coordinate.
-	inline void setPosition(const My_Vector2_t& _pos) noexcept {
-		setPosition(_pos.x, _pos.y);
-	}
-
-	// Get the width and height of the rectangle.
-	_NODISCARD inline My_Vector2_t getSize() const noexcept {
-		return My_Vector2_t(width, height);
+	// Set the height of the rectangle, measured from the Y position.
+	// Setting this property will preserve the Min coordinate but changes and Max coordinate.
+	inline void setHeight(coord_t _height) noexcept {
+		height = _height;
+		yMax = yMin + height;
 	}
 
 	// Set the width and height of the rectangle.
@@ -1316,12 +993,85 @@ public: // Accesors & Mutators
 		setSize(_size.x, _size.y);
 	}
 
+	// Set the minimum X coordinate of the rectangle. 
+	// Setting this property will resize the width of the rectangle.
+	inline void setXMin(coord_t _xMin) noexcept {
+		xMin = _xMin;
+		width = xMax - xMin;
+	}
+
+	// Set the minimum X coordinate of the rectangle. 
+	// Setting this property will resize the height of the rectangle.
+	inline void setYMin(coord_t _yMin) noexcept {
+		yMin = _yMin;
+		height = yMax - yMin;
+	}
+
+	// Set the position of the minimum corner of the rectangle.
+	// Setting this property will resize the rectangle and preserve the position of the Max coordinate.
+	inline void setMin(coord_t _x, coord_t _y) noexcept {
+		xMin = _x;
+		yMin = _y;
+		width = xMax - xMin;
+		height = yMax - yMin;
+	}
+
+	// Set the position of the minimum corner of the rectangle.
+	// Setting this property will resize the rectangle and preserve the position of the Max coordinate.
+	inline void setMin(const My_Vector2_t& _minPos) noexcept {
+		setMin(_minPos.x, _minPos.y);
+	}
+
+	// Set the maximum X coordinate of the rectangle. 
+	// Setting this property will resize the width of the rectangle.
+	inline void setXMax(coord_t _xMax) noexcept {
+		xMax = _xMax;
+		width = xMax - xMin;
+	}
+
+	// Set the maximum Y coordinate of the rectangle. 
+	// Setting this property will resize the height of the rectangle.
+	inline void setYMax(coord_t _yMax) noexcept {
+		yMax = _yMax;
+		height = yMax - yMin;
+	}
+
+	// Set the position of the maximum corner of the rectangle.
+	// Setting this property will resize the rectangle and preserve the position of the Min coordinate.
+	inline void setMax(coord_t _x, coord_t _y) noexcept {
+		xMax = _x;
+		yMax = _y;
+		width = xMax - xMin;
+		height = yMax - yMin;
+	}
+
+	// Set the position of the maximum corner of the rectangle.
+	// Setting this property will resize the rectangle and preserve the position of the Min coordinate.
+	inline void setMax(const My_Vector2_t& _maxPos) noexcept {
+		setMax(_maxPos.x, _maxPos.y);
+	}
+
+	// Set the X and Y position of the rectangle. 
+	// Setting this property will preserve the size of the rectangle but changes the Min and Max coordinate.
+	inline void setPosition(coord_t _x, coord_t _y) noexcept {
+		xMin = _x;
+		yMin = _y;
+		xMax = _x + width;
+		yMax = _y + height;
+	}
+
+	// Set the X and Y position of the rectangle.
+	// Setting this property will preserve the size of the rectangle but changes the Min and Max coordinate.
+	inline void setPosition(const My_Vector2_t& _pos) noexcept {
+		setPosition(_pos.x, _pos.y);
+	}
+
 public: // Properties
 	//
 	// The vertial center of the rectangle.
 	// This property acts as a pivot for Rect-based components to perform scale and rotation functions.
 	//
-	Vector2 center	= Vector2(0.5f, 0.5f);
+	Vector2 center = Vector2(0.5f, 0.5f);
 
 protected:
 	// The position of the minimum corner of the rectangle.
@@ -1436,7 +1186,7 @@ public:	// Constructors & Destructors
 	// @param _size:
 	//		The width (x) and height (y) of the RectInt.
 	//
-	inline RectInt(My_Vector2_t _position, My_Vector2_t _size) : RectInt(_position.x ,_position.y, _size.x, _size.y) {}
+	inline RectInt(My_Vector2_t _position, My_Vector2_t _size) : RectInt(_position.x, _position.y, _size.x, _size.y) {}
 
 	//
 	// Creates a new RectInt with position and size of (0, 0).
@@ -1476,119 +1226,294 @@ public: // Static Properties
 #pragma warning(default : 4244)
 
 // +--------------------------------------------------------------------------------+
-// |					 															|
-// | TRANSFORM			 															|
-// |					 															|
+// |																				|
+// | COLOR																			|
+// |																				|
 // +--------------------------------------------------------------------------------+
 
 //
-// Position, rotation and scale of an object.
+// Representation of RGBA colors.
+// 
+// Each color component is an integer value with a range from 0 to 255 (uint8_t):
+// 
+// - Components (r,g,b) define a color in RGB color space. 
+// - Alpha component (a) defines transparency with: 0 = completely transparent; 255 = completely opaque.
 //
-class Transform {
+class Color {
 public: // Constructors & Destructors
-	inline Transform() {
-		
+	//
+	// 
+	//
+	inline Color(uint8_t _r, uint8_t _g, uint8_t _b, uint8_t _a) : r(_r), g(_g), b(_b), a(_a) {}
+
+public: // Operators Overloads
+#if LMK_HAVE_SDL
+	//
+	// Converts a lmk::Color to SDL_Color
+	//
+	_NODISCARD inline operator SDL_Color() noexcept {
+		return SDL_Color{ r, g, b, a };
+	}
+#endif
+
+	//
+	// Access the r, g, b, a components using [0], [1], [2], [3] respectively.
+	//
+	_NODISCARD inline uint8_t& operator[](uint8_t _index) {
+		switch (_index)
+		{
+		case 0:
+			return r;
+		case 1:
+			return g;
+		case 2:
+			return b;
+		case 3:
+			return a;
+		default:
+			throw std::out_of_range("lmk::Color: index out of range for operator[] (index should be 0, 1, 2 or 3).");
+			break;
+		}
 	}
 
-public:	// Functions
-	inline void SetAsFirstSibling() {}
-	inline void SetAsLastSibling() {}
+	inline Color& operator+=(const Color& _right) {
+		r += _right.r;
+		g += _right.g;
+		b += _right.b;
+		a += _right.a;
+		return *this;
+	}
 
-	inline void DetachChildren() {}
+	inline Color& operator-=(const Color& _right) {
+		r -= _right.r;
+		g -= _right.g;
+		b -= _right.b;
+		a -= _right.a;
+		return *this;
+	}
 
-	_NODISCARD inline bool IsChildOf(const Transform& _parent) const {}
+#pragma warning (disable : 4244)
+	inline Color& operator*=(float _right) {
+		for (uint8_t i = 0; i < 4; i++) {
+			(*this)[i] *= _right;
+		}
+		return *this;
+	}
 
-	_NODISCARD inline Transform* Find(std::string _name) const {}
+	inline Color& operator/=(float _right) {
+		for (uint8_t i = 0; i < 4; i++) {
+			(*this)[i] /= _right;
+		}
+		return *this;
+	}
 
-	_NODISCARD inline Transform* GetChild(int _index) const {}
+	_NODISCARD inline Color operator+(const Color& _right) const {
+		Color temp = *this;
+		temp += _right;
+		return temp;
+	}
 
-	_NODISCARD inline Vector2 TransformDirection(const Vector2& _direction) const {}
-	_NODISCARD inline std::vector<Vector2> TransformDirections(std::vector<Vector2> _directions) const {}
+	_NODISCARD inline Color operator-(const Color& _right) const {
+		Color temp = *this;
+		temp -= _right;
+		return temp;
+	}
 
-	_NODISCARD inline Vector2 TransformPoint(const Vector2& _point) const {}
-	_NODISCARD inline std::vector<Vector2> TransformPoints(std::vector<Vector2> _points) const {}
+	_NODISCARD inline Color operator*(float _right) const {
+		Color temp = *this;
+		temp *= _right;
+		return temp;
+	}
 
-	_NODISCARD inline Vector2 InverseTransformDirection(const Vector2& _direction) const {}
-	_NODISCARD inline std::vector<Vector2> InverseTransformDirections(std::vector<Vector2> _directions) const {}
+	_NODISCARD inline Color operator/(float _right) const {
+		Color temp = *this;
+		temp /= _right;
+		return temp;
+	}
 
-	_NODISCARD inline Vector2 InverseTransformPoint(const Vector2& _point) const {}
-	_NODISCARD inline std::vector<Vector2> InverseTransformPoints(std::vector<Vector2> _points) const {}
+public: // Static Functions
+	//
+	// Creates an RGB colour from HSV input.
+	// 
+	// @param _h:
+	//		Hue [0...1).
+	// @param _s:
+	//		Saturation [0...1].
+	// @param _v:
+	//		Brightness value [0...1].
+	// 
+	// @returns:
+	//		Color An opaque colour with HSV matching the input.
+	//
+	_NODISCARD inline static Color HSVToRGB(float _h, float _s, float _v) {
+		// For a reference to the original formula of this conversion, see: 
+		// https://web.archive.org/web/20090102212804/http://en.wikipedia.org/wiki/HSL_color_space
 
-	_NODISCARD inline void Rotate(float _angle, bool _worldSpace = false) {}
+		uint8_t hi = LMK_RoundToInt(_h * 6) % 6;
+		float f = _h * 6 - LMK_RoundToInt(_h * 6);
+		float p = _v * (1 - f);
+		float q = _v * (1 - f * _s);
+		float t = _v * (1 - (1 - f) * _s);
 
-	_NODISCARD inline void RotateAround(const Vector2& _point, float _angle) {}
+		switch (hi)
+		{
+		case 0:
+			return Color(std::round(_v * 255), std::round(t * 255), std::round(p * 255), 1);
+		case 1:
+			return Color(std::round(q * 255), std::round(_v * 255), std::round(p * 255), 1);
+		case 2:
+			return Color(std::round(p * 255), std::round(_v * 255), std::round(t * 255), 1);
+		case 3:
+			return Color(std::round(p * 255), std::round(q * 255), std::round(_v * 255), 1);
+		case 4:
+			return Color(std::round(t * 255), std::round(p * 255), std::round(_v * 255), 1);
+		case 5:
+			return Color(std::round(_v * 255), std::round(p * 255), std::round(q * 255), 1);
+		}
+	}
 
-	_NODISCARD inline void Translate(const Vector2& _translation) {}
-	_NODISCARD inline void Translate(const Vector2& _translation, bool _worldSpace = false) {}
-	_NODISCARD inline void Translate(const Vector2& _translation, const Transform& _relativeTo) {}
+	//
+	// Calculates the hue, saturation and value of an RGB input color.
+	// 
+	// @param _rgb:
+	//		An input RGB color.
+	// @param _h:
+	//		Output variable for hue.
+	// @param _s:
+	//		Output variable for saturation.
+	// @param _v:
+	//		Output variable for brightness value.
+	// 
+	// @returns:
+	//		The H, S, and V are output in the range 0 to 1.
+	//
+	_NODISCARD inline static void RGBToHSV(const Color& _rgb, float& _h, float& _s, float& _v) {
+		// For a reference to the original formula of this conversion, see: 
+		// https://web.archive.org/web/20090102212804/http://en.wikipedia.org/wiki/HSL_color_space
+		
+		// normalize rgb value to [0...1].
+		float fr	= _rgb.r / UINT8_MAX;
+		float fg	= _rgb.g / UINT8_MAX;
+		float fb	= _rgb.b / UINT8_MAX;
+		// get the min and max value between r, g, and b.
+		float min = (fr < fg && fr < fb) ? fr : (fg < fb) ? fg : fb;
+		float max	= (fr > fg && fr > fb) ? fr : (fg > fb) ? fg : fb;
 
-public: // Accesors & Mutators
-	_NODISCARD inline uint8_t childCount() const {}
+		// reset hsv value.
+		_h = _s = _v = 0.0f;
+		_v = (max + min) / 2.0f;
+								
+		if (max == min) {	// all values are the same -> 
+			_h = _s = 0.0f;	// achromatic color (gray).
+		}
+		else {
+			float d = max - min;
+			_s = (_v > 0.5f) ? d / (2.0f - max - min) : d / (max + min);
+			if (fr > fg && fr > fb)
+				_h = (fg - fb) / d + (fg < fb ? 6.0f : 0.0f);
+			else if (fg > fb)
+				_h = (fb - fr) / d + 2.0f;
+			else
+				_h = (fr - fg) / d + 4.0f;
+			_h /= 6.0f;
+		}
+	}
 
-	_NODISCARD inline Vector2 up() const {}
+	//
+	// Linearly interpolates between colors _a and _b by _t.
+	// 
+	// _t is clamped between 0 and 1. 
+	// When t is 0 returns a. 
+	// When t is 1 returns b.
+	//
+	_NODISCARD inline static Color Lerp(const Color& _a, const Color& _b, float _t) {
+		return LMK_Lerp(_a, _b, LMK_Clamp(_t, 0.0f, 1.0f));
+	}
 
-	_NODISCARD inline Vector2 right() const {}
+	//
+	// Linearly interpolates between colors _a and _b by _t.
+	// 
+	// When t is 0 returns a. 
+	// When t is 1 returns b.
+	//
+	_NODISCARD inline static Color LerpUnclamped(const Color& _a, const Color& _b, float _t) {
+		return LMK_Lerp(_a, _b, _t);
+	}
+#pragma warning (default : 4244)
 
-	_NODISCARD inline Transform* root() {}
+public: // Static Properties
+	//
+	// Completely transparent. RGBA is (0, 0, 0, 0).
+	//
+	_NODISCARD inline static Color clear() {
+		return Color(0, 0, 0, 0);
+	}
 
-	_NODISCARD inline Vector2 getPosition() const {}
-	inline void setPosition(Vector2 _newVal) {}
+	//
+	// Solid black. RGBA is (0, 0, 0, 255).
+	//
+	_NODISCARD inline static Color black() {
+		return Color(0, 0, 0, 255);
+	}
 
-	_NODISCARD inline Vector2 getLocalPosition() const {}
-	inline void setLocalPosition(Vector2 _newVal) {}
+	//
+	// Solid white. RGBA is (255, 255, 255, 255).
+	//
+	_NODISCARD inline static Color white() {
+		return Color(255, 255, 255, 255);
+	}
 
-	_NODISCARD inline float getRotation() const {}
-	inline void setRotation(float _newVal) {}
+	//
+	// Grey. RGBA is (128, 128, 128, 255).
+	//
+	_NODISCARD inline static Color grey() {
+		return Color(128, 128, 128, 255);
+	}
 
-	_NODISCARD inline float getLocalRotation() const {}
-	inline void setLocalRotation(float _newVal) {}
+	//
+	// Solid red. RGBA is (255, 0, 0, 255).
+	//
+	_NODISCARD inline static Color red() {
+		return Color(255, 0, 0, 255);
+	}
 
-	_NODISCARD inline Vector2 getLossyScale() {}
+	//
+	// Solid green. RGBA is (0, 255, 0, 255).
+	//
+	_NODISCARD inline static Color green() {
+		return Color(0, 255, 0, 255);
+	}
 
-	_NODISCARD inline Vector2 getLocalScale() const {}
-	inline void setLocalScale(Vector2 _newVal) {}
+	//
+	// Solid blue. RGBA is (0, 0, 255, 255).
+	//
+	_NODISCARD inline static Color blue() {
+		return Color(0, 0, 255, 255);
+	}
 
-	_NODISCARD inline int getSiblingIndex() const {}
-	inline void setSiblingIndex(int _index) {}
+	//
+	// Cyan. RGBA is (0, 255, 255, 255).
+	//
+	_NODISCARD inline static Color cyan() {
+		return Color(0, 255, 255, 255);
+	}
 
-	_NODISCARD inline Transform* getParent() const {}
-	inline void setParent(Transform* _p) {}
-	inline void setParent(Transform* _parent, bool _worldPositionStays) {}
+	//
+	// Magenta. RGBA is (255, 0, 255, 255).
+	//
+	_NODISCARD inline static Color magenta() {
+		return Color(255, 0, 255, 255);
+	}
 
-protected: // Properties
-	Vector2 localscale		= Vector2::one();
-	Vector2 localPosition	= Vector2::zero();
-	float localrotation		= 0;
+	//
+	// Yellow. RGBA is (255, 235, 4, 255).
+	//
+	_NODISCARD inline static Color yellow() {
+		return Color(255, 235, 4, 255);
+	}
 
-	bool isRoot;
-	int siblingIndex;
-	Transform* parent		= nullptr;
-	std::vector<Transform*> childs;
-};
-
-// +--------------------------------------------------------------------------------+
-// |																				|
-// | RECT TRANSFORM																	|
-// |																				|
-// +--------------------------------------------------------------------------------+
-
-class RectTransform : public Transform {
-public:
-
-};
-
-// +--------------------------------------------------------------------------------+
-// |																				|
-// | GAME OBJECT																	|
-// |																				|
-// +--------------------------------------------------------------------------------+
-
-class GameObject {
-public:
-	GameObject() {}
-
-public:
-	RectTransform* transform	= nullptr;
+public: // Properties
+	uint8_t r, g, b, a;
 };
 LMK_END
 
