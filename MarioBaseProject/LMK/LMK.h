@@ -66,8 +66,9 @@
 #if defined(LMK_INCLUDE_ALL)
 	#define LMK_INCLUDE_SOUND	
 	#define LMK_INCLUDE_GIZMOS
+	#define LMK_INCLUDE_PHYSICS
 	//
-	// This is reserved for future defines
+	// Future defines are added here.
 	//
 #endif
 

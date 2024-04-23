@@ -26,10 +26,9 @@ public:
 	//
 	inline void DrawRect(const Rect& _rect, float _angle = 0) {
 		Vector2 points[4];
-
 		Vector2 rotaPivot = _rect.position() + Vector2::Scale(_rect.center, _rect.size());
 
-		// We need to transform the point before render it to screen.
+		// We need to transform the points before render it to screen.
 		points[0] = RenderUtil::RotatePointAround(_rect.minPos(), rotaPivot, _angle);
 		points[1] = RenderUtil::RotatePointAround(Vector2(_rect.xMax(), _rect.yMin()), rotaPivot, _angle);
 		points[2] = RenderUtil::RotatePointAround(_rect.maxPos(), rotaPivot, _angle);
@@ -42,7 +41,7 @@ public:
 	}
 
 	//
-	//
+	// 
 	//
 	inline void DrawFillRect() {
 
