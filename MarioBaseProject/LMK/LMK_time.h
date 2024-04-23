@@ -1,3 +1,4 @@
+#pragma once
 #ifndef LMK_TIME_H_
 #define LMK_TIME_H_
 

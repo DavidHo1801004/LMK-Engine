@@ -1,3 +1,4 @@
+#pragma once
 #ifndef LMK_COREMDL_H_
 #define LMK_COREMDL_H_
 
@@ -82,7 +83,7 @@ public: // Static Functions
 		return 0;
 	}
 
-public: // Accessors & Mutators
+public: // Accessors
 	//
 	// Converts a layer mask value to an integer value.
 	//
@@ -107,7 +108,7 @@ IMPL_BEGIN
 // @tparam coord_type:
 //		Single coordinate as an arithmetic type (e.g. int, float, ...).
 //
-template<typename coord_type,
+template <typename coord_type,
 	std::enable_if_t<std::is_arithmetic_v<coord_type>, bool> = true>
 class BaseVector2 {
 public:	// Typedef
@@ -155,7 +156,7 @@ public:	// Operators Overloads
 		}
 	}
 
-	template<typename right_coord_t>
+	template <typename right_coord_t>
 	_NODISCARD constexpr bool operator==(const BaseVector2<right_coord_t>& _right) const noexcept {
 		return (x == _right.x) && (y == _right.y);
 	}
@@ -851,7 +852,7 @@ IMPL_BEGIN
 //	> Vector2
 //	> Vector2Int
 //
-template<typename T>
+template <typename T>
 constexpr bool is_lmkvector_t = std::_Is_any_of_v<std::remove_cv_t<T>, 
 	Vector2, Vector2Int>;
 //
@@ -862,7 +863,7 @@ constexpr bool is_lmkvector_t = std::_Is_any_of_v<std::remove_cv_t<T>,
 // @tparam My_Vector2_type:
 //		lmk::BaseVector2 type (e.g. Vector2Int, Vector2, ...).
 //
-template<typename coord_type, class My_Vector2_type,
+template <typename coord_type, class My_Vector2_type,
 	std::enable_if_t<is_lmkvector_t<My_Vector2_type>, bool> = true>
 class BaseRect {
 protected: // Typedef
@@ -883,7 +884,7 @@ public: // Constructors & Destructors
 	//		Height of the rectangle.
 	//
 	inline BaseRect(coord_t _x, coord_t _y, coord_t _w, coord_t _h) 
-		: xMin(_x), yMin(_y), xMax(_x + _w), yMax(_y + _h), width(_w), height(_h) {}
+		: m_xMin(_x), m_yMin(_y), m_xMax(_x + _w), m_yMax(_y + _h), m_width(_w), m_height(_h) {}
 
 	//
 	// Creates a BaseRect<coord_type>.
@@ -903,12 +904,12 @@ public: // Operators Overloads
 	//		A formatted string: (xMin; yMin) : (xMax; yMax)
 	// 
 	_NODISCARD inline operator std::string() const {
-		return (std::string)My_Vector2_t(xMin, yMin) + " : " + (std::string)My_Vector2_t(xMax, yMax);
+		return (std::string)My_Vector2_t(m_xMin, m_yMin) + " : " + (std::string)My_Vector2_t(m_xMax, m_yMax);
 	}
 
-	template<typename right_coord_t, class My_Vector2_t>
+	template <typename right_coord_t, class My_Vector2_t>
 	_NODISCARD inline bool operator==(const BaseRect<right_coord_t, My_Vector2_t>& _right) const noexcept {
-		return (xMin == _right.xMin) && (yMin == _right.yMin) && (width == _right.width) && (height == _right.height);
+		return (m_xMin == _right.m_xMin) && (m_yMin == _right.m_yMin) && (m_width == _right.m_width) && (m_height == _right.m_height);
 	}
 
 public: // Functions
@@ -916,7 +917,7 @@ public: // Functions
 	// Offset the position of the rectangle.
 	//
 	inline void Offset(const My_Vector2_t& _offset) noexcept {
-		setPosition(getPosition() + _offset);
+		setPosition(position() + _offset);
 	}
 
 	//
@@ -930,8 +931,8 @@ public: // Functions
 	// Scale width and height of the rectangle.
 	//
 	inline void Scale(const My_Vector2_t& _scale) noexcept {
-		setWidth(width * _scale.x);
-		setHeight(height * _scale.y);
+		setWidth(m_width * _scale.x);
+		setHeight(m_height * _scale.y);
 	}
 
 	//
@@ -982,18 +983,18 @@ public: // Functions
 	// @tparam right_coord_t: 
 	//		The <coord_type> of the other rectangle.
 	// 
-	template<typename right_coord_t, class Right_Vector2_t>
+	template <typename right_coord_t, class Right_Vector2_t>
 	_NODISCARD inline bool Overlaps(const BaseRect<right_coord_t, Right_Vector2_t>& _other) const noexcept {
 		// If either rectangle has area of 0 -> no overlap possible.
 		if (area() == 0 || _other.area() == 0)
 			return false;
 
 		// If one rectangle is on left side of the other.
-		if (xMin > _other.xMax || _other.xMin > xMax)
+		if (m_xMin > _other.m_xMax || _other.m_xMin > m_xMax)
 			return false;
 
 		// If one rectangle is above the other.
-		if (yMin > _other.yMax || _other.yMin > yMax)
+		if (m_yMin > _other.m_yMax || _other.m_yMin > m_yMax)
 			return false;
 
 		return true;
@@ -1002,89 +1003,83 @@ public: // Functions
 protected:
 	// Get the area of this Rect.
 	_NODISCARD inline coord_t area() const noexcept {
-		return width * height;
+		return m_width * m_height;
+		return m_width * m_height;
 	}
 
-public: // Accessors & Mutators
-	// +------------+
-	// | ACCESSORS	|
-	// +------------+
-
+public: // Accessors
 	// Returns the width of the rectangle, measured from the X position.
-	_NODISCARD inline coord_t getWidth() const noexcept {
-		return width;
+	_NODISCARD inline coord_t width() const noexcept {
+		return m_width;
 	}
 
 	// Returns the height of the rectangle, measured from the Y position.
-	_NODISCARD inline coord_t getHeight() const noexcept {
-		return height;
+	_NODISCARD inline coord_t height() const noexcept {
+		return m_height;
 	}
 
 	// Get the width and height of the rectangle.
-	_NODISCARD inline My_Vector2_t getSize() const noexcept {
-		return My_Vector2_t(width, height);
+	_NODISCARD inline My_Vector2_t size() const noexcept {
+		return My_Vector2_t(m_width, m_height);
 	}
 
 	// Get the minimum X coordinate of the rectangle. 
-	_NODISCARD inline coord_t getXMin() const noexcept {
-		return xMin;
+	_NODISCARD inline coord_t xMin() const noexcept {
+		return m_xMin;
 	}
 
 	// Get the minimum Y coordinate of the rectangle. 
-	_NODISCARD inline coord_t getYMin() const noexcept {
-		return yMin;
+	_NODISCARD inline coord_t yMin() const noexcept {
+		return m_yMin;
 	}
 
 	// Get the position of the minimum corner of the rectangle.
-	_NODISCARD inline My_Vector2_t getMin() const noexcept {
-		return My_Vector2_t(xMin, yMin);
+	_NODISCARD inline My_Vector2_t minPos() const noexcept {
+		return My_Vector2_t(m_xMin, m_yMin);
 	}
 
 	// Get the maximum X coordinate of the rectangle. 
-	_NODISCARD inline coord_t getXMax() const noexcept {
-		return xMax;
+	_NODISCARD inline coord_t xMax() const noexcept {
+		return m_xMax;
 	}
 
 	// Get the maximum Y coordinate of the rectangle. 
-	_NODISCARD inline coord_t getYMax() const noexcept {
-		return yMax;
+	_NODISCARD inline coord_t yMax() const noexcept {
+		return m_yMax;
 	}
 
 	// Get the position of the maximum corner of the rectangle.
-	_NODISCARD inline My_Vector2_t getMax() const noexcept {
-		return My_Vector2_t(xMax, yMax);
+	_NODISCARD inline My_Vector2_t maxPos() const noexcept {
+		return My_Vector2_t(m_xMax, m_yMax);
 	}
 
 	// Get the X and Y position of the rectangle.
-	_NODISCARD inline My_Vector2_t getPosition() const noexcept {
-		return My_Vector2_t(xMin, yMin);
+	_NODISCARD inline My_Vector2_t position() const noexcept {
+		return My_Vector2_t(m_xMin, m_yMin);
 	}
 
-	// +------------+
-	// | MUTATORS	|
-	// +------------+
-
+public: // Mutators
 	// Set the width of the rectangle, measured from the X position.
 	// Setting this property will preserve the Min coordinate but changes and Max coordinate.
 	inline void setWidth(coord_t _width) noexcept {
-		width = _width;
-		xMax = xMin + width;
+		m_width = _width;
+		m_xMax = m_xMin + m_width;
 	}
 
 	// Set the height of the rectangle, measured from the Y position.
 	// Setting this property will preserve the Min coordinate but changes and Max coordinate.
 	inline void setHeight(coord_t _height) noexcept {
-		height = _height;
-		yMax = yMin + height;
+		m_height = _height;
+		m_yMax = m_yMin + m_height;
 	}
 
 	// Set the width and height of the rectangle.
 	// Setting this property will preserve the Min coordinate but changes and Max coordinate.
 	inline void setSize(coord_t _width, coord_t _height) noexcept {
-		width = _width;
-		height = _height;
-		xMax = xMin + width;
-		yMax = yMin + height;
+		m_width = _width;
+		m_height = _height;
+		m_xMax = m_xMin + m_width;
+		m_yMax = m_yMin + m_height;
 	}
 
 	// Set the width and height of the rectangle.
@@ -1096,24 +1091,24 @@ public: // Accessors & Mutators
 	// Set the minimum X coordinate of the rectangle. 
 	// Setting this property will resize the width of the rectangle.
 	inline void setXMin(coord_t _xMin) noexcept {
-		xMin = _xMin;
-		width = xMax - xMin;
+		m_xMin = _xMin;
+		m_width = m_xMax - m_xMin;
 	}
 
 	// Set the minimum X coordinate of the rectangle. 
 	// Setting this property will resize the height of the rectangle.
 	inline void setYMin(coord_t _yMin) noexcept {
-		yMin = _yMin;
-		height = yMax - yMin;
+		m_yMin = _yMin;
+		m_height = m_yMax - m_yMin;
 	}
 
 	// Set the position of the minimum corner of the rectangle.
 	// Setting this property will resize the rectangle and preserve the position of the Max coordinate.
 	inline void setMin(coord_t _x, coord_t _y) noexcept {
-		xMin = _x;
-		yMin = _y;
-		width = xMax - xMin;
-		height = yMax - yMin;
+		m_xMin = _x;
+		m_yMin = _y;
+		m_width = m_xMax - m_xMin;
+		m_height = m_yMax - m_yMin;
 	}
 
 	// Set the position of the minimum corner of the rectangle.
@@ -1125,24 +1120,24 @@ public: // Accessors & Mutators
 	// Set the maximum X coordinate of the rectangle. 
 	// Setting this property will resize the width of the rectangle.
 	inline void setXMax(coord_t _xMax) noexcept {
-		xMax = _xMax;
-		width = xMax - xMin;
+		m_xMax = _xMax;
+		m_width = m_xMax - m_xMin;
 	}
 
 	// Set the maximum Y coordinate of the rectangle. 
 	// Setting this property will resize the height of the rectangle.
 	inline void setYMax(coord_t _yMax) noexcept {
-		yMax = _yMax;
-		height = yMax - yMin;
+		m_yMax = _yMax;
+		m_height = m_yMax - m_yMin;
 	}
 
 	// Set the position of the maximum corner of the rectangle.
 	// Setting this property will resize the rectangle and preserve the position of the Min coordinate.
 	inline void setMax(coord_t _x, coord_t _y) noexcept {
-		xMax = _x;
-		yMax = _y;
-		width = xMax - xMin;
-		height = yMax - yMin;
+		m_xMax = _x;
+		m_yMax = _y;
+		m_width = m_xMax - m_xMin;
+		m_height = m_yMax - m_yMin;
 	}
 
 	// Set the position of the maximum corner of the rectangle.
@@ -1154,10 +1149,10 @@ public: // Accessors & Mutators
 	// Set the X and Y position of the rectangle. 
 	// Setting this property will preserve the size of the rectangle but changes the Min and Max coordinate.
 	inline void setPosition(coord_t _x, coord_t _y) noexcept {
-		xMin = _x;
-		yMin = _y;
-		xMax = _x + width;
-		yMax = _y + height;
+		m_xMin = _x;
+		m_yMin = _y;
+		m_xMax = _x + m_width;
+		m_yMax = _y + m_height;
 	}
 
 	// Set the X and Y position of the rectangle.
@@ -1175,11 +1170,11 @@ public: // Properties
 
 protected:
 	// The position of the minimum corner of the rectangle.
-	coord_t xMin, yMin;
+	coord_t m_xMin, m_yMin;
 	// The position of the maximum corner of the rectangle.
-	coord_t xMax, yMax;
+	coord_t m_xMax, m_yMax;
 
-	coord_t width, height;
+	coord_t m_width, m_height;
 };
 IMPL_END
 
@@ -1223,7 +1218,7 @@ public: // Operators Overloads
 	// Convert a lmk::RectInt to SDL_Rect.
 	//
 	_NODISCARD inline operator SDL_FRect() {
-		return SDL_FRect{ xMin, yMin, width, height };
+		return SDL_FRect{ m_xMin, m_yMin, m_width, m_height };
 	}
 #endif // LMK_HAVE_SDL
 
@@ -1237,7 +1232,7 @@ public: // Static Functions
 	//		Normalized coordinates to get a point for.
 	//
 	_NODISCARD inline static My_Vector2_t NormalizedToPoint(const Rect& _rect, const My_Vector2_t& _normRectCoord) {
-		return My_Vector2_t::Scale(_normRectCoord, _rect.getSize());
+		return My_Vector2_t::Scale(_normRectCoord, _rect.size());
 	}
 
 	//
@@ -1299,7 +1294,7 @@ public: // Operators Overloads
 	// Convert a lmk::RectInt to SDL_Rect.
 	//
 	_NODISCARD inline operator SDL_Rect() {
-		return SDL_Rect{ xMin, yMin, width, height };
+		return SDL_Rect{ m_xMin, m_yMin, m_width, m_height };
 	}
 #endif // LMK_HAVE_SDL
 
@@ -1311,8 +1306,8 @@ public: // Functions
 	//		Bounds to clamp the RectInt.
 	//
 	inline void ClampToBounds(const RectInt& _bounds) {
-		setMin(getMin().Clamp(_bounds.getMin(), _bounds.getMax()));
-		setMax(getMax().Clamp(_bounds.getMin(), _bounds.getMax()));
+		setMin(minPos().Clamp(_bounds.minPos(), _bounds.maxPos()));
+		setMax(maxPos().Clamp(_bounds.minPos(), _bounds.maxPos()));
 	}
 
 public: // Static Properties

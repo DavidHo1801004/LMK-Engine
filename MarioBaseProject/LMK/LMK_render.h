@@ -1,3 +1,4 @@
+#pragma once
 #ifndef LMK_RENDER_H_
 #define LMK_RENDER_H_
 

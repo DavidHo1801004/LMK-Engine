@@ -6,6 +6,7 @@
 // and defines standard configurations for LMK features.
 //
 
+#pragma once
 #ifndef LMK_ROOT_H_
 #define LMK_ROOT_H_
 

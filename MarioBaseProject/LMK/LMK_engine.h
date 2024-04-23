@@ -1,3 +1,4 @@
+#pragma once
 #ifndef LMK_ENGINE_H_
 #define LMK_ENGINE_H_
 
@@ -32,13 +33,13 @@ public: // Constructors & Destructors
 		: lmkEngine(_title, _pos.x, _pos.y, _size.x, _size.y, _fullscr) {}
 
 	inline lmkEngine(std::string _title, RectInt _wndRect, bool _fullscr = true)
-		: lmkEngine(_title, _wndRect.getPosition(), _wndRect.getSize(), _fullscr) {}
+		: lmkEngine(_title, _wndRect.position(), _wndRect.size(), _fullscr) {}
 
 protected: // Functions
 	inline void UserOnStart() {
 		m_rotation = 0;
 		m_moveRect = Rect(Vector2::zero(), Vector2::one() * 100);
-		m_staticRect = Rect(screenSize / 2, Vector2::one() * 200);
+		m_staticRect = Rect(m_screenSize / 2, Vector2::one() * 200);
 
 		m_overlapping = false;
 	}
@@ -46,27 +47,27 @@ protected: // Functions
 	virtual void UserHandleEvents(const SDL_Event& _event) {
 		switch (_event.type) {
 		case SDL_MOUSEMOTION:
-			mousePos.x = _event.motion.x;
-			mousePos.y = _event.motion.y;
+			m_mousePos.x = _event.motion.x;
+			m_mousePos.y = _event.motion.y;
 			break;
 
 		case SDL_KEYDOWN:
 			switch (_event.key.keysym.sym)
 			{
 			case SDLK_e:
-				m_rotation -= 45 * time->DeltaTime();
+				m_rotation -= 45 * m_time->DeltaTime();
 				break;
 
 			case SDLK_q:
-				m_rotation += 45 * time->DeltaTime();
+				m_rotation += 45 * m_time->DeltaTime();
 				break;
 
 			case SDLK_w:
-				m_moveRect.Scale(1 + 10 * time->DeltaTime());
+				m_moveRect.Scale(1 + 10 * m_time->DeltaTime());
 				break;
 
 			case SDLK_s:
-				m_moveRect.Scale(1 - 10 * time->DeltaTime());
+				m_moveRect.Scale(1 - 10 * m_time->DeltaTime());
 				break;
 
 			case SDLK_a:
@@ -83,21 +84,21 @@ protected: // Functions
 
 	virtual void UserUpdate() {
 		m_overlapping = m_staticRect.Overlaps(m_moveRect);
-		m_moveRect.setPosition(mousePos);
+		m_moveRect.setPosition(m_mousePos);
 	}
 
 	virtual void UserRender() {
-		gizmo->setColor(Color::yellow());
-		gizmo->DrawRect(m_staticRect);
+		m_gizmo->setColor(Color::yellow());
+		m_gizmo->DrawRect(m_staticRect);
 
 		if (m_overlapping) {
-			gizmo->setColor(Color::red());
+			m_gizmo->setColor(Color::red());
 		}
 		else {
-			gizmo->setColor(Color::white());
+			m_gizmo->setColor(Color::white());
 		}
 
-		gizmo->DrawRect(m_moveRect, m_rotation);
+		m_gizmo->DrawRect(m_moveRect, m_rotation);
 
 	}
 
@@ -121,26 +122,26 @@ private:
 	}
 
 	inline void Update() {
-		time->UpdateDeltaTime();
+		m_time->UpdateDeltaTime();
 
 		UserUpdate();
 	}
 
 	inline void Render() {
-		SDL_SetRenderDrawColor(renderer, 0, 0, 0, 255);
-		SDL_RenderClear(renderer);
+		SDL_SetRenderDrawColor(m_renderer, 0, 0, 0, 255);
+		SDL_RenderClear(m_renderer);
 
 		UserRender();
 
-		SDL_RenderPresent(renderer);
+		SDL_RenderPresent(m_renderer);
 	}
 
 	inline void OnExit() {
-		delete time;
-		delete gizmo;
+		delete m_time;
+		delete m_gizmo;
 
-		SDL_DestroyWindow(window);
-		SDL_DestroyRenderer(renderer);
+		SDL_DestroyWindow(m_window);
+		SDL_DestroyRenderer(m_renderer);
 
 		IMG_Quit();
 		SDL_Quit();
@@ -163,29 +164,29 @@ private:
 		}
 
 		// Initialize window
-		window = SDL_CreateWindow(_tilte.c_str(), _x, _y, _w, _h, flags);
-		if (!window) {
+		m_window = SDL_CreateWindow(_tilte.c_str(), _x, _y, _w, _h, flags);
+		if (!m_window) {
 			printf("Error: failed to initialize SDL_Window.");
 
 			return false;
 		}
 
 		// Initialize m_renderer from window
-		renderer = SDL_CreateRenderer(window, -1, SDL_RENDERER_ACCELERATED);
-		if (!renderer) {
+		m_renderer = SDL_CreateRenderer(m_window, -1, SDL_RENDERER_ACCELERATED);
+		if (!m_renderer) {
 			printf("Error: failed to initialize SDL_Renderer.");
 
 			return false;
 		}
 
 		// Initialize lmk::Gizmo subsystem
-		gizmo = new Gizmo(renderer);
+		m_gizmo = new Gizmo(m_renderer);
 
 		// Initialize lmk::Time subsystem
-		time = new Time();
+		m_time = new Time();
 
 		// Initialize protected properties
-		screenSize = Vector2Int(_w, _h);
+		m_screenSize = Vector2Int(_w, _h);
 		m_running = true;
 
 		return true;
@@ -200,14 +201,14 @@ public: // Properties
 	std::string name;
 
 protected:
-	SDL_Window* window;
-	SDL_Renderer* renderer;
+	SDL_Window* m_window;
+	SDL_Renderer* m_renderer;
 
-	Gizmo* gizmo;
-	Time* time;
+	Gizmo* m_gizmo;
+	Time* m_time;
 
-	lmk::Vector2Int mousePos;
-	lmk::Vector2Int screenSize;
+	lmk::Vector2Int m_mousePos;
+	lmk::Vector2Int m_screenSize;
 
 private:
 	bool m_running;

@@ -1,3 +1,4 @@
+#pragma once
 #ifndef LMK_GISMO_H_
 #define LMK_GISMO_H_
 
@@ -26,13 +27,13 @@ public:
 	inline void DrawRect(const Rect& _rect, float _angle = 0) {
 		Vector2 points[4];
 
-		Vector2 rotaPivot = _rect.getPosition() + Vector2::Scale(_rect.center, _rect.getSize());
+		Vector2 rotaPivot = _rect.position() + Vector2::Scale(_rect.center, _rect.size());
 
 		// We need to transform the point before render it to screen.
-		points[0] = RenderUtil::RotatePointAround(_rect.getMin(), rotaPivot, _angle);
-		points[1] = RenderUtil::RotatePointAround(Vector2(_rect.getXMax(), _rect.getYMin()), rotaPivot, _angle);
-		points[2] = RenderUtil::RotatePointAround(_rect.getMax(), rotaPivot, _angle);
-		points[3] = RenderUtil::RotatePointAround(Vector2(_rect.getXMin(), _rect.getYMax()), rotaPivot, _angle);
+		points[0] = RenderUtil::RotatePointAround(_rect.minPos(), rotaPivot, _angle);
+		points[1] = RenderUtil::RotatePointAround(Vector2(_rect.xMax(), _rect.yMin()), rotaPivot, _angle);
+		points[2] = RenderUtil::RotatePointAround(_rect.maxPos(), rotaPivot, _angle);
+		points[3] = RenderUtil::RotatePointAround(Vector2(_rect.xMin(), _rect.yMax()), rotaPivot, _angle);
 
 		DrawLine(points[0], points[1]);
 		DrawLine(points[1], points[2]);

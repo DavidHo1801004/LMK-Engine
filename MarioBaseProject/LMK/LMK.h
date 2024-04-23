@@ -37,6 +37,7 @@
 // Main include header for the LMK Engine library.
 //
 
+#pragma once
 #ifndef LMK_H_
 #define LMK_H_
 

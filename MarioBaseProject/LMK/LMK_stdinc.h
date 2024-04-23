@@ -4,6 +4,7 @@
 // This is the standard include header for LMK Engine.
 // 
 
+#pragma once
 #ifndef LMK_STDINC_H_
 #define LMK_STDINC_H_
 

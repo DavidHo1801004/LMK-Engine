@@ -1,3 +1,4 @@
+#pragma once
 #ifndef LMK_PHYSICS_2D_H_
 #define LMK_PHYSICS_2D_H_
 

@@ -1,3 +1,4 @@
+#pragma once
 #ifndef LMK_GAMEOBJ_H_
 #define LMK_GAMEOBJ_H_
 
@@ -61,7 +62,7 @@ public: // Accessors & Mutators
 
 	_NODISCARD inline Transform* root() {}
 
-	_NODISCARD inline Vector2 getPosition() const {}
+	_NODISCARD inline Vector2 position() const {}
 	inline void setPosition(Vector2 _newVal) {}
 
 	_NODISCARD inline Vector2 getLocalPosition() const {}

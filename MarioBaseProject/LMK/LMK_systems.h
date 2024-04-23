@@ -1,3 +1,4 @@
+#pragma once
 #ifndef LMK_SYSTEMS_H_
 #define LMK_SYSTEMS_H_
 
