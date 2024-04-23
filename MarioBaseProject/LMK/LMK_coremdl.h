@@ -2,8 +2,98 @@
 #define LMK_COREMDL_H_
 
 #include "LMK_stdinc.h"
+#include "LMK_systems.h"
 
 LMK_BEGIN
+// +--------------------------------------------------------------------------------+
+// |																				|
+// | LAYERMASK																		|
+// |																				|
+// +--------------------------------------------------------------------------------+
+
+//
+// Specifies Layers to use in Physics functions.
+//
+class LayerMask {
+public: // Typedef
+	using layer_size_t	= TagsLayersSystem::layer_size_t;
+
+public:
+	//
+	// Create a new LayerMask with the layer id of _layers.
+	// 
+	// The value of _layers should not be passed manually, but instead use predefined
+	// layer flags in TagsLayersSystem.
+	//
+	inline LayerMask(uint32_t _layers) : m_value(_layers) {}
+
+	//
+	// Create a new LayerMask with the default id of LAYER_0.
+	//
+	inline LayerMask() : LayerMask(TagsLayersSystem::LAYER_0) {}
+
+public: // Functions
+	//
+	//
+	//
+	inline bool Contains(uint32_t _layerID) {
+		return true;
+	}
+
+	//
+	//
+	//
+	inline bool Contains(LayerMask _layerMask) {
+		return true;
+	}
+
+public: // Static Functions
+	//
+	// Given a set of layer names as defined in the TagsLayersSystem, 
+	// returns the equivalent layer mask for all of them.
+	// 
+	// @param _layerNames:
+	//		List of layer names to convert to a layer mask.
+	// 
+	// @return:
+	//		The layer mask created from the _layerNames.
+	//
+	inline static int GetMask(std::string _layerNames...) {
+		return 0;
+	}
+
+	//
+	// Given a layer number, returns the name of the layer as defined in the TagsLayersSystem.
+	// 
+	// @return:
+	//		
+	//
+	inline static std::string LayerToName(layer_size_t _layer) {
+		return "";
+	}
+
+	//
+	// Given a layer number, returns the name of the layer as defined in the TagsLayersSystem.
+	// 
+	// @return:
+	//		
+	//
+	inline static layer_size_t NameToLayer(std::string _layer) {
+		return 0;
+	}
+
+public: // Accessors & Mutators
+	//
+	// Converts a layer mask value to an integer value.
+	//
+	_NODISCARD inline layer_size_t value() {
+		return m_value;
+	}
+
+private:
+	layer_size_t m_value;
+};
+
 // +--------------------------------------------------------------------------------+
 // |																				|
 // | 2D VECTOR																		|
