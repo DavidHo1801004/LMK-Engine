@@ -7,7 +7,7 @@
 LMK_BEGIN
 // +--------------------------------------------------------------------------------+
 // |																				|
-// | TAGS & LAYERS MANAGER															|
+// | TAGS & LAYERS SYSTEM															|
 // |																				|
 // +--------------------------------------------------------------------------------+
 
@@ -66,6 +66,52 @@ private:
 	static std::unordered_set<tag_size_t, std::string> m_tagSet;
 	static std::unordered_set<layer_size_t, std::string> m_layerSet;
 };
+
+// +--------------------------------------------------------------------------------+
+// |																				|
+// | TIME SYSTEM																	|
+// |																				|
+// +--------------------------------------------------------------------------------+
+
+//
+// A static class provides time related functions in the LMK Engine.
+//
+class Time {
+public:
+	// Singleton
+	Time(const Time&) = delete;
+
+	inline static Time& Get() {
+		return s_Instance;
+	}
+
+private:
+	Time() {}
+
+public: // Static Functions
+	_NODISCARD inline static float DeltaTime() noexcept {
+		return Get().m_deltaTime.count();
+	}
+
+	inline static void UpdateDeltaTime() noexcept {
+		Get().m_currFrame = std::chrono::system_clock::now();
+		Get().m_deltaTime = Get().m_currFrame - Get().m_lastFrame;
+		Get().m_lastFrame = Get().m_currFrame;
+	}
+
+public: // Properties
+	static Time s_Instance;	// Singleton
+
+	float m_timeScale;
+
+private:
+	std::chrono::time_point<std::chrono::system_clock> m_lastFrame;
+	std::chrono::time_point<std::chrono::system_clock> m_currFrame;
+
+	std::chrono::duration<float> m_deltaTime;
+};
+
+Time Time::s_Instance;
 LMK_END
 
 #endif // !LMK_SYSTEMS_H_

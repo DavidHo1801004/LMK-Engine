@@ -177,7 +177,6 @@
     <ClInclude Include="LMK\LMK_root.h" />
     <ClInclude Include="LMK\LMK_stdinc.h" />
     <ClInclude Include="LMK\LMK_systems.h" />
-    <ClInclude Include="LMK\LMK_time.h" />
     <ClInclude Include="SuperMarioClone.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />

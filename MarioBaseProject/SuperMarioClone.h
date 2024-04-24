@@ -25,19 +25,19 @@ public: // Functions
 			switch (_event.key.keysym.sym)
 			{
 			case SDLK_e:
-				m_rotation -= 45 * m_time->DeltaTime();
+				m_rotation -= 45 * lmk::Time::DeltaTime();
 				break;
 
 			case SDLK_q:
-				m_rotation += 45 * m_time->DeltaTime();
+				m_rotation += 45 * lmk::Time::DeltaTime();
 				break;
 
 			case SDLK_w:
-				m_moveRect.Scale(1 + 10 * m_time->DeltaTime());
+				m_moveRect.Scale(1 + 10 * lmk::Time::DeltaTime());
 				break;
 
 			case SDLK_s:
-				m_moveRect.Scale(1 - 10 * m_time->DeltaTime());
+				m_moveRect.Scale(1 - 10 * lmk::Time::DeltaTime());
 				break;
 
 			case SDLK_a:

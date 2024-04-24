@@ -5,9 +5,9 @@
 #include "LMK_stdinc.h"
 
 #if (LMK_HAVE_SDL) && (LMK_HAVE_SDL_IMAGE)
+#include "LMK_systems.h"
 #include "LMK_coremdl.h"
 #include "LMK_gizmo.h"
-#include "LMK_time.h"
 
 LMK_BEGIN
 class lmkEngine {
@@ -41,7 +41,6 @@ public: // Functions
 		m_gizmo = new Gizmo(m_renderer);
 
 		// Initialize lmk::Time
-		m_time = new Time();
 
 		// Initialize properties
 		m_screenSize = Vector2Int(_w, _h);
@@ -99,7 +98,7 @@ private:
 	}
 
 	inline void Update() {
-		m_time->UpdateDeltaTime();
+		Time::UpdateDeltaTime();
 
 		OnUserUpdate();
 	}
@@ -114,7 +113,6 @@ private:
 	}
 
 	inline void OnExit() {
-		delete m_time;
 		delete m_gizmo;
 
 		SDL_DestroyWindow(m_window);
@@ -137,7 +135,6 @@ protected:
 	SDL_Renderer* m_renderer;
 
 	Gizmo* m_gizmo;
-	Time* m_time;
 
 	Vector2Int m_screenSize;
 
