@@ -1,6 +1,6 @@
 #pragma once
-#ifndef LMK_GAMEOBJ_H_
-#define LMK_GAMEOBJ_H_
+#ifndef _LMK_GAMEOBJ_H_
+#define _LMK_GAMEOBJ_H_
 
 #include "LMK_stdinc.h"
 #include "LMK_coremdl.h"
@@ -132,4 +132,4 @@ public:
 };
 LMK_END
 
-#endif // !LMK_GAMEOBJ_H_
+#endif // !_LMK_GAMEOBJ_H_

@@ -4,9 +4,8 @@
 
 #include "LMK_stdinc.h"
 
-#if LMK_HAVE_SDL
+#if LMK_HAVE_SDL2
 #include "LMK_coremdl.h"
-#include "LMK_render.h"
 
 LMK_BEGIN
 class Gizmo {
@@ -92,5 +91,5 @@ private: // Properties
 };
 LMK_END
 
-#endif // LMK_HAVE_SDL
+#endif // LMK_HAVE_SDL2
 #endif // !LMK_GISMO_H_

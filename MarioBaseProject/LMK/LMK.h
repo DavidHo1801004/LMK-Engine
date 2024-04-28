@@ -38,8 +38,8 @@
 //
 
 #pragma once
-#ifndef LMK_H_
-#define LMK_H_
+#ifndef _LMK_H_
+#define _LMK_H_
 
 //
 //+---------------------------------- LMK Engine library Manual ----------------------------------+
@@ -55,8 +55,8 @@
 // 
 // Example code:
 // 
-//	#define LMK_INCLUDE_DEBUG
-//	#define LMK_INCLUDE_2D_UTIL
+//	#define LMK_INCLUDE_PHYSICS
+//	#define LMK_INCLUDE_GIZMO
 //	#include "LMK.h"
 // 
 //	int main() {
@@ -65,7 +65,7 @@
 //
 #if defined(LMK_INCLUDE_ALL)
 	#define LMK_INCLUDE_SOUND	
-	#define LMK_INCLUDE_GIZMOS
+	#define LMK_INCLUDE_GIZMO
 	#define LMK_INCLUDE_PHYSICS
 	//
 	// Future defines are added here.
@@ -76,17 +76,16 @@
 // The core headers that implement basic classes required for LMK Engine to function.
 //
 #include "LMK_coremdl.h"
-#include "LMK_render.h"
 #include "LMK_engine.h"
 
 #if defined(LMK_INCLUDE_SOUND)
 	
 #endif
-#if defined(LMK_INCLUDE_GIZMOS)
+#if defined(LMK_INCLUDE_GIZMO)
 	#include "LMK_gizmo.h"
 #endif
 #if defined(LMK_INCLUDE_PHYSICS)
 	#include "LMK_physics2d.h"
 #endif
 
-#endif // !LMK_H_
+#endif // !_LMK_H_

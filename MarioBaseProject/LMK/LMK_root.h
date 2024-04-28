@@ -7,8 +7,8 @@
 //
 
 #pragma once
-#ifndef LMK_ROOT_H_
-#define LMK_ROOT_H_
+#ifndef _LMK_ROOT_H_
+#define _LMK_ROOT_H_
 
 // +--------------------------------------------------------------------------------+
 // |																				|
@@ -90,7 +90,21 @@
 //
 #if defined(__has_include) && __has_include(<SDL.h>)
 	#define LMK_HAVE_SDL	1
-	// Check for SDL extensions
+
+	// Check for SDL major version.
+	#include <SDL_version.h>
+	#if SDL_MAJOR_VERSION >= 2
+		#define	LMK_HAVE_SDL2	1
+	#else
+		#define LMK_HAVE_SDL2	0
+	#endif
+	#if SDL_MAJOR_VERSION >= 3
+		#define	LMK_HAVE_SDL3	1
+	#else
+		#define LMK_HAVE_SDL3	0
+	#endif
+
+	// Check for SDL extensions.
 	#if __has_include(<SDL_image.h>)
 		#define LMK_HAVE_SDL_IMAGE	1
 	#else
@@ -124,4 +138,4 @@
 #define IMPL_BEGIN	namespace impl {
 #define IMPL_END	}
 
-#endif // !LMK_ROOT_H_
+#endif // !_LMK_ROOT_H_

@@ -1,6 +1,6 @@
 #pragma once
-#ifndef LMK_COREMDL_H_
-#define LMK_COREMDL_H_
+#ifndef _LMK_COREMDL_H_
+#define _LMK_COREMDL_H_
 
 #include "LMK_stdinc.h"
 #include "LMK_systems.h"
@@ -1220,7 +1220,7 @@ public: // Operators Overloads
 	_NODISCARD inline operator SDL_FRect() {
 		return SDL_FRect{ m_xMin, m_yMin, m_width, m_height };
 	}
-#endif // LMK_HAVE_SDL
+#endif
 
 public: // Static Functions
 	//
@@ -1296,7 +1296,7 @@ public: // Operators Overloads
 	_NODISCARD inline operator SDL_Rect() {
 		return SDL_Rect{ m_xMin, m_yMin, m_width, m_height };
 	}
-#endif // LMK_HAVE_SDL
+#endif
 
 public: // Functions
 	//

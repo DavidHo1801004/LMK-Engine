@@ -173,7 +173,6 @@
     <ClInclude Include="LMK\LMK_gameobj.h" />
     <ClInclude Include="LMK\LMK_gizmo.h" />
     <ClInclude Include="LMK\LMK_physics2d.h" />
-    <ClInclude Include="LMK\LMK_render.h" />
     <ClInclude Include="LMK\LMK_root.h" />
     <ClInclude Include="LMK\LMK_stdinc.h" />
     <ClInclude Include="LMK\LMK_systems.h" />

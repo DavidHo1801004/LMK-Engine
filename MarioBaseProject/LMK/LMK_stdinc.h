@@ -5,8 +5,8 @@
 // 
 
 #pragma once
-#ifndef LMK_STDINC_H_
-#define LMK_STDINC_H_
+#ifndef _LMK_STDINC_H_
+#define _LMK_STDINC_H_
 
 #include "LMK_root.h"
 
@@ -163,4 +163,4 @@
 #endif
 
 
-#endif // !LMK_STDINC_H_
+#endif // !_LMK_STDINC_H_

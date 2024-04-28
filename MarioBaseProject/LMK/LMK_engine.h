@@ -1,10 +1,10 @@
 #pragma once
-#ifndef LMK_ENGINE_H_
-#define LMK_ENGINE_H_
+#ifndef _LMK_ENGINE_H_
+#define _LMK_ENGINE_H_
 
 #include "LMK_stdinc.h"
 
-#if (LMK_HAVE_SDL) && (LMK_HAVE_SDL_IMAGE)
+#if LMK_HAVE_SDL
 #include "LMK_systems.h"
 #include "LMK_coremdl.h"
 #include "LMK_gizmo.h"
@@ -143,5 +143,5 @@ private:
 };
 LMK_END
 
-#endif // (LMK_HAVE_SDL) && (LMK_HAVE_SDL_IMAGE) 
-#endif // !LMK_ENGINE_H_
+#endif // LMK_HAVE_SDL
+#endif // !_LMK_ENGINE_H_

@@ -1,6 +1,6 @@
 #pragma once
-#ifndef LMK_PHYSICS_2D_H_
-#define LMK_PHYSICS_2D_H_
+#ifndef _LMK_PHYSICS_2D_H_
+#define _LMK_PHYSICS_2D_H_
 
 #include "LMK_stdinc.h"
 #include "LMK_coremdl.h"
@@ -94,42 +94,62 @@ public:
 	// Checking for overlapping colliders using SAT (Seperating Axis Theorem).
 	//
 	_NODISCARD inline bool OverlapWith(const BaseCollider2D& _other) {
-		const BaseCollider2D* collider1 = this;
-		const BaseCollider2D* collider2 = &_other;
+		// For a detailed explaination of the Seperating Axis Theorem, see:
+		// http://programmerart.weebly.com/separating-axis-theorem.html
 
+		const BaseCollider2D* poly1 = this;
+		const BaseCollider2D* poly2 = &_other;
+
+		// We loop through each collider and check if any of its shadow projection
+		// are overlapping with the other collider.
 		for (size_t shapeID = 0; shapeID < 2; shapeID++) {
 			if (shapeID == 1) {
-				collider1 = &_other;
-				collider2 = this;
+				poly1 = &_other;
+				poly2 = this;
 			}
 
-			for (size_t curVert = 0; curVert < collider1->tvert.size(); curVert++) {
-				size_t nextVert = (curVert + 1) % collider1->tvert.size();	// 
+			for (size_t curVert = 0; curVert < poly1->tvert.size(); curVert++) {
+				// Get the adjacent vertex id.
+				// The reason for the modulo operator is to wrap the index back to the beginning 
+				// when we are at the last vertex.
+				size_t nextVert = (curVert + 1) % poly1->tvert.size();
 
-				// Calculate the projecting axis 
-				Vector2 axisProj = Vector2(
-					-(collider1->tvert[nextVert].y - collider1->tvert[curVert].y),
-					collider1->tvert[nextVert].x - collider1->tvert[curVert].x
-				);
+				// Calculate the projecting axis.
+				// The projecting axis is a vector perpendicular to the inspecting edge.
+				Vector2 projAxis = Vector2::Perpendicular(poly1->tvert[nextVert] - poly1->tvert[curVert]);
 
+				// Get the projected shadow length of the first collider.
 				float min_r1 = INFINITY, max_r1 = -INFINITY;
-				for (size_t p = 0; p < collider1->tvert.size(); p++) {
-					float q = (collider1->tvert[p].x * axisProj.x + collider1->tvert[p].y * axisProj.y);
+				for (size_t p = 0; p < poly1->tvert.size(); p++) {
+					// The projected point along the projecting axis
+					float q = (poly1->tvert[p].x * projAxis.x + poly1->tvert[p].y * projAxis.y);
+
 					min_r1 = LMK_Min(min_r1, q);
 					max_r1 = LMK_Max(max_r1, q);
 				}
 
+				min_r1 -= m_pS.radius;
+				max_r1 += m_pS.radius;
+
+				// Get the projected shadow length of the second collider.
 				float min_r2 = INFINITY, max_r2 = -INFINITY;
-				for (size_t p = 0; p < collider2->tvert.size(); p++) {
-					float q = (collider2->tvert[p].x * axisProj.x + collider2->tvert[p].y * axisProj.y);
+				for (size_t p = 0; p < poly2->tvert.size(); p++) {
+					// The projected point along the projecting axis
+					float q = (poly2->tvert[p].x * projAxis.x + poly2->tvert[p].y * projAxis.y);
+
 					min_r2 = LMK_Min(min_r2, q);
 					max_r2 = LMK_Max(max_r2, q);
 				}
 
+				min_r2 -= m_pS.radius;
+				max_r2 += m_pS.radius;
+
+				// If the projected shadows are not overlapping -> the polygons are not overlapping.
 				if (!(max_r2 >= min_r1 && max_r1 >= min_r2)) return false;
 			}
 		}
 
+		// If we get to this point -> all shadow projections overlapped -> polygon overlap.
 		return true;
 	}
 
@@ -220,4 +240,4 @@ public: // Properties
 };
 LMK_END
 
-#endif // !LMK_PHYSICS_2D_H_
+#endif // !_LMK_PHYSICS_2D_H_
