@@ -304,7 +304,7 @@ public: // Functions
 	}
 
 	// 
-	// Multiplies every component of this vector by the same component of _scale.
+	// Clamp every component of this vector to [0...1].
 	// 
 	inline Vector2& Clamp01() noexcept {
 		x = LMK_Clamp(x, 0, 1);
@@ -387,7 +387,7 @@ public: // Static Functions
 	//	
 	// The angle returned is the unsigned angle between the two vectors.
 	//	
-	// Note: The angle returned will always be between -180 and 180 degrees, 
+	// Note: The angle returned will always be between -180 and 180 degrees,
 	// because the method returns the smallest angle between the vectors.
 	// That is, it will never return a reflex angle.
 	// Angles are calculated from world origin point(0, 0, 0) as the vertex.
@@ -451,7 +451,7 @@ public: // Static Functions
 	// 
 	// Moves a point current towards target.
 	//		
-	// This is essentially the same as Vector2.Lerp but instead the function will ensure 
+	// This is essentially the same as Vector2::Lerp but instead the function will ensure 
 	// that the distance never exceeds maxDistanceDelta. 
 	//		
 	// Negative values of maxDistanceDelta pushes the vector away from target.
@@ -1604,7 +1604,7 @@ public: // Static Properties
 	// Yellow. RGBA is (255, 235, 4, 255).
 	//
 	_NODISCARD inline static Color yellow() {
-		return Color(255, 235, 4, 255);
+		return Color(255, 255, 0, 255);
 	}
 
 public: // Properties

@@ -85,5 +85,8 @@
 #if defined(LMK_INCLUDE_GIZMOS)
 	#include "LMK_gizmo.h"
 #endif
+#if defined(LMK_INCLUDE_PHYSICS)
+	#include "LMK_physics2d.h"
+#endif
 
 #endif // !LMK_H_

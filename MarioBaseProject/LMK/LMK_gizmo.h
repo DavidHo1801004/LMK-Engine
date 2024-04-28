@@ -15,7 +15,7 @@ public:
 
 public:
 	//
-	//
+	// 
 	//
 	inline void DrawLine(const Vector2& _from, const Vector2& _to) {
 		SDL_RenderDrawLineF(m_renderer, _from.x, _from.y, _to.x, _to.y);
@@ -24,26 +24,21 @@ public:
 	//
 	// Draw a rectangle on screen.
 	//
-	inline void DrawRect(const Rect& _rect, float _angle = 0) {
-		Vector2 points[4];
-		Vector2 rotaPivot = _rect.position() + Vector2::Scale(_rect.center, _rect.size());
-
-		// We need to transform the points before render it to screen.
-		points[0] = RenderUtil::RotatePointAround(_rect.minPos(), rotaPivot, _angle);
-		points[1] = RenderUtil::RotatePointAround(Vector2(_rect.xMax(), _rect.yMin()), rotaPivot, _angle);
-		points[2] = RenderUtil::RotatePointAround(_rect.maxPos(), rotaPivot, _angle);
-		points[3] = RenderUtil::RotatePointAround(Vector2(_rect.xMin(), _rect.yMax()), rotaPivot, _angle);
-
-		DrawLine(points[0], points[1]);
-		DrawLine(points[1], points[2]);
-		DrawLine(points[2], points[3]);
-		DrawLine(points[3], points[0]);
+	inline void DrawRect(const Rect& _rect) {
+		const SDL_FPoint points[5] = {
+			_rect.minPos(),
+			Vector2(_rect.xMax(), _rect.yMin()),
+			_rect.maxPos(),
+			Vector2(_rect.xMin(), _rect.yMax()),
+			_rect.minPos()
+		};
+		SDL_RenderDrawLinesF(m_renderer, points, 5);
 	}
 
 	//
 	// 
 	//
-	inline void DrawFillRect() {
+	inline void DrawFillRect(const Rect& _rect) {
 
 	}
 
@@ -57,8 +52,21 @@ public:
 	//
 	//
 	//
-	inline void DrawFillCircle() {
+	inline void DrawFillCircle(const Vector2& _center, float _radius) {
 
+	}
+	
+	//
+	// 
+	//
+	inline void DrawPolygon(const std::vector<Vector2>& _vertices) {
+		Vector2 start, end;
+		for (size_t i = 0; i < _vertices.size() - 1; i++) {
+			start = _vertices[i];
+			end = _vertices[i + 1];
+			DrawLine(start, end);
+		}
+		DrawLine(end, _vertices[0]);
 	}
 
 public: // Accesors & Mutators
@@ -72,7 +80,7 @@ public: // Accesors & Mutators
 	//
 	// 
 	//
-	inline void setColor(const Color& _color) {
+	inline void SetColor(const Color& _color) {
 		m_color = _color;
 		SDL_SetRenderDrawColor(m_renderer, m_color.r, m_color.g, m_color.b, m_color.a);
 	}

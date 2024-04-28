@@ -10,7 +10,7 @@
 #include "LMK_gizmo.h"
 
 LMK_BEGIN
-class lmkEngine {
+class LMKEngine {
 public: // Functions
 	inline bool Construct(std::string _tilte, int _x, int _y, int _w, int _h, bool _fullscr = false) {
 		m_running = false;

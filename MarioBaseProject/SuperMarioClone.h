@@ -4,48 +4,87 @@
 #define LMK_INCLUDE_ALL
 #include "LMK/LMK.h"
 
-class SuperMarioClone : public lmk::lmkEngine {
+using namespace lmk;
+
+#pragma warning(disable : 4244)
+class SuperMarioClone : public LMKEngine {
+private: // Properties
+	Vector2Int mousePos;
+
+	bool updated = false;
+	bool overlapping = false;
+
+	Vector2 offset = Vector2::one() * 200;
+	float rotation = 0;
+	Vector2 scale = Vector2::one();
+
+	PhysicsShape2D phyShape;
+	BaseCollider2D playerCollider;
+	BoxCollider2D staticCollider = BoxCollider2D(Vector2(30, 30), 0);
+
+	const float speed = 400;
+
 public: // Functions
 	inline void OnUserStart() override {
-		m_rotation = 0;
-		m_moveRect = lmk::Rect(lmk::Vector2::zero(), lmk::Vector2::one() * 100);
-		m_staticRect = lmk::Rect(m_screenSize / 2, lmk::Vector2::one() * 200);
+		phyShape.vert.clear();
+		phyShape.vert.push_back(Vector2(-30, 30));
+		phyShape.vert.push_back(Vector2(30, 30));
+		phyShape.vert.push_back(Vector2(30, -30));
+		phyShape.vert.push_back(Vector2(-30, -30));
 
-		m_overlapping = false;
+		playerCollider = BaseCollider2D(phyShape);
+
+		playerCollider.Transform(offset, rotation, scale);
+		staticCollider.Transform(Vector2::one() * 400, 0, Vector2::one());
 	}
 
 	inline void OnUserHandleEvents(const SDL_Event& _event) override {
 		switch (_event.type) {
 		case SDL_MOUSEMOTION:
-			m_mousePos.x = _event.motion.x;
-			m_mousePos.y = _event.motion.y;
+			mousePos.x = _event.motion.x;
+			mousePos.y = _event.motion.y;
 			break;
 
 		case SDL_KEYDOWN:
-			switch (_event.key.keysym.sym)
-			{
+			switch (_event.key.keysym.sym) {
 			case SDLK_e:
-				m_rotation -= 45 * lmk::Time::DeltaTime();
+				updated = true;
+				rotation += 360 * Time::DeltaTime();
 				break;
 
 			case SDLK_q:
-				m_rotation += 45 * lmk::Time::DeltaTime();
+				updated = true;
+				rotation -= 360 * Time::DeltaTime();
 				break;
 
 			case SDLK_w:
-				m_moveRect.Scale(1 + 10 * lmk::Time::DeltaTime());
+				updated = true;
+				offset.y -= speed * Time::DeltaTime();
 				break;
 
 			case SDLK_s:
-				m_moveRect.Scale(1 - 10 * lmk::Time::DeltaTime());
+				updated = true;
+				offset.y += speed * Time::DeltaTime();
 				break;
 
 			case SDLK_a:
-				m_staticRect.Offset(-10, 0);
+				updated = true;
+				offset.x -= speed * Time::DeltaTime();
 				break;
 
 			case SDLK_d:
-				m_staticRect.Offset(10, 0);
+				updated = true;
+				offset.x += speed * Time::DeltaTime();
+				break;
+
+			case SDLK_f:
+				updated = true;
+				scale -= Vector2(0.05f, 0.1f);
+				break;
+
+			case SDLK_r:
+				updated = true;
+				scale += Vector2(0.05f, 0.1f);
 				break;
 			}
 			break;
@@ -53,31 +92,38 @@ public: // Functions
 	}
 
 	inline virtual void OnUserUpdate() override {
-		m_overlapping = m_staticRect.Overlaps(m_moveRect);
-		m_moveRect.setPosition(m_mousePos);
+		if (updated) {
+			playerCollider.Transform(offset, rotation, scale);
+		}
+
+		if (playerCollider.OverlapWith(staticCollider)) {
+			overlapping = true;
+		}
+		else {
+			overlapping = false;
+		}
 	}
 
 	inline virtual void OnUserRender() override {
-		m_gizmo->setColor(lmk::Color::yellow());
-		m_gizmo->DrawRect(m_staticRect);
-
-		if (m_overlapping) {
-			m_gizmo->setColor(lmk::Color::red());
-		}
+		if (overlapping) {
+			m_gizmo->SetColor(Color::blue());
+		} 
 		else {
-			m_gizmo->setColor(lmk::Color::white());
+			m_gizmo->SetColor(Color::white());
 		}
 
-		m_gizmo->DrawRect(m_moveRect, m_rotation);
+		m_gizmo->DrawPolygon(playerCollider.tvert);
+
+		if (scale.x < 0 || scale.y < 0) {
+			m_gizmo->SetColor(Color::red());
+			m_gizmo->DrawLine(playerCollider.tvert[0], playerCollider.tvert[2]);
+			m_gizmo->DrawLine(playerCollider.tvert[1], playerCollider.tvert[3]);
+		}
+
+		m_gizmo->SetColor(Color::yellow());
+		m_gizmo->DrawPolygon(staticCollider.tvert);
 	}
-
-private: // Properties
-	lmk::Vector2Int m_mousePos;
-
-	bool m_overlapping;
-	float m_rotation;
-	lmk::Rect m_moveRect;
-	lmk::Rect m_staticRect;
 };
+#pragma warning(default : 4244)
 
 #endif // !SUPERMARIOCLONE_H_

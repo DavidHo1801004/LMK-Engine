@@ -96,42 +96,42 @@
 // +--------------------------------------------------------------------------------+
 
 #ifndef M_PI
-	#define M_PI	3.14159265358979323846
+	#define M_PI	3.14159265358979323846264338327950288
 #endif
 
-#ifndef min
+#ifndef LMK_Min
 	//
 	// Get the minimum value between _a and _b.
 	//
-	#define min(_a, _b)		((_a < _b) ? (_a) : (_b))
+	#define LMK_Min(_a, _b)		((_a < _b) ? (_a) : (_b))
 #endif
 
-#ifndef max
+#ifndef LMK_Max
 	//
 	// Get the maximum value between _a and _b.
 	//
-	#define max(_a, _b)		((_a > _b) ? (_a) : (_b))
+	#define LMK_Max(_a, _b)		((_a > _b) ? (_a) : (_b))
 #endif
 
 #ifndef LMK_Clamp
 	//
 	// Clamp value to range.
 	//
-	#define LMK_Clamp(_val, _min, _max)		min(max(_val, _min), _max)
+	#define LMK_Clamp(_val, _min, _max)		LMK_Min(LMK_Max(_val, _min), _max)
 #endif
 
 #ifndef LMK_DtoR
 	//
 	// Convert degree to radian.
 	//
-	#define LMK_DtoR(_degree)	(_degree / 180 * M_PI)
+	#define LMK_DtoR(_degree)	(_degree / 180.0f * M_PI)
 #endif
 
 #ifndef LMK_RtoD
 	//
 	// Convert radian to degree.
 	//
-	#define LMK_RtoD(_radian)	(_radian / M_PI * 180)
+	#define LMK_RtoD(_radian)	(_radian / M_PI * 180.0f)
 #endif
 
 #ifndef LMK_InRange
