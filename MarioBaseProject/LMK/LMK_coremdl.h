@@ -1635,21 +1635,47 @@ public: // Properties
 class Random {
 public: // Static Functions
 	//
-	// Returns a random value in [_minInclusive .. _maxInclusive] (range is inclusive).
+	// Returns a random floating point value within [_minInclusive .. _maxInclusive] (range is inclusive).
 	// 
 	// If minInclusive is greater than maxInclusive, then the numbers are automatically swapped.
+	// 
+	// Important: Both the lower and upper bounds are inclusive.Any given float value between them, 
+	// including both minInclusive and maxInclusive, will appear on average approximately once every ten million random samples.
+	// 
+	// There is an integral overload of this function that operates slightly differently.
 	//
 	template <typename value_type,
-		std::enable_if_t<std::is_arithmetic_v<value_type>, bool> = true>
+		std::enable_if_t<std::is_floating_point_v<value_type>, bool> = true>
 	_NODISCARD inline static value_type Range(value_type _minInclusive, value_type _maxInclusive) {
 		if (_minInclusive > _maxInclusive) std::swap(_minInclusive, _maxInclusive);
 
 		return (value_type)rand() / LMK_RANDMAX * (_maxInclusive - _minInclusive) + _minInclusive;
 	}
 
+	//
+	// Return a random integral value within [_minInclusive .. _maxExclusive).
+	// 
+	// This method will behave in the following ways:
+	// 
+	// 1. _maxExclusive is exclusive, so for example Random.Range(0, 10) will return a value between 0 and 9, 
+	// each with approximately equal probability.
+	// 2. If minInclusive and maxExclusive are equal, then the "exclusive rule" is ignored and minInclusive will be returned.
+	// 3. If minInclusive is greater than maxExclusive, then the numbers are automatically swapped.
+	// 
+	// There is a floating point overload of this function that operates slightly differently.
+	//
+	template <typename value_type,
+		std::enable_if_t<std::is_integral_v<value_type>, bool> = true>
+	_NODISCARD inline static value_type Range(value_type _minInclusive, value_type _maxExclusive) {
+		if (_minInclusive == _maxExclusive) return _minInclusive;
+		if (_minInclusive > _maxExclusive) std::swap(_minInclusive, _maxExclusive);
+
+		return rand() % (_maxExclusive - _minInclusive) + _minInclusive;
+	}
+
 private:
 	//
-	// Generate a psuedo random number based on Xorshift 128 algorithm.
+	// Generate a pseudo random number based on Xorshift 128 algorithm.
 	// 
 	// For detailed documentation regarding Xorshift 128 algorithm, see:
 	// (Xorshift RNGs by George Marsaglia)
