@@ -1610,6 +1610,63 @@ public: // Static Properties
 public: // Properties
 	uint8_t r, g, b, a;
 };
+
+// +--------------------------------------------------------------------------------+
+// |																				|
+// | RANDOM GENERATOR																|
+// |																				|
+// +--------------------------------------------------------------------------------+
+
+#ifndef LMK_RANDMAX 
+	#define LMK_RANDMAX 4294967295
+#endif
+
+//
+// General interface for generating random data.
+// 
+// This static class provides several easy game-oriented ways of generating pseudorandom numbers.
+// 
+// The generator is an Xorshift 128 algorithm.
+// 
+// It is statically initialized with a high-entropy seed from the operating system, and stored in 
+// native memory where it will survive domain reloads. 
+// This means that the generator is seeded exactly once on process start, and after that is left entirely under script control.
+//
+class Random {
+public: // Static Functions
+	//
+	// Returns a random value in [_minInclusive .. _maxInclusive] (range is inclusive).
+	// 
+	// If minInclusive is greater than maxInclusive, then the numbers are automatically swapped.
+	//
+	template <typename value_type,
+		std::enable_if_t<std::is_arithmetic_v<value_type>, bool> = true>
+	_NODISCARD inline static value_type Range(value_type _minInclusive, value_type _maxInclusive) {
+		if (_minInclusive > _maxInclusive) std::swap(_minInclusive, _maxInclusive);
+
+		return (value_type)rand() / LMK_RANDMAX * (_maxInclusive - _minInclusive) + _minInclusive;
+	}
+
+private:
+	//
+	// Generate a psuedo random number based on Xorshift 128 algorithm.
+	// 
+	// For detailed documentation regarding Xorshift 128 algorithm, see:
+	// (Xorshift RNGs by George Marsaglia)
+	// https://en.wikipedia.org/wiki/Xorshift
+	//
+	_NODISCARD inline static uint32_t rand() {
+		seed ^= seed << 13;
+		seed ^= seed >> 17;
+		seed ^= seed << 5;
+		return seed;
+	}
+
+private: // Properties
+	static uint32_t seed;
+};
+
+uint32_t Random::seed = std::time(NULL);	// Get 100% random seed value.
 LMK_END
 
 #endif // !LMK_COREMDL_2D_H_
