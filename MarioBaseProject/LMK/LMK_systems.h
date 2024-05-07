@@ -53,7 +53,6 @@ public: // Typedef
 		LAYER_28	= 0x10000000,
 		LAYER_29	= 0x20000000,
 		LAYER_30	= 0x40000000,
-		LAYER_31	= 0x80000000,
 	};
 
 public:
@@ -79,49 +78,70 @@ private:
 // A static class provides time related functions in the LMK Engine.
 //
 class Time {
-private:
+public: // Typedef
+	using time_point_t	= std::chrono::time_point<std::chrono::system_clock>;
+	using time_percis_t = float;
+	using duration_t	= std::chrono::duration<time_percis_t>;
+
 	friend class LMKEngine;
 
+public: // Constructors & Destructors
+#pragma region Singleton
+	Time(const Time&) = delete;
+
+private:
+	inline Time() {
+		m_lastFrame = std::chrono::system_clock::now();
+		m_currFrame = std::chrono::system_clock::now();
+	}
+
 public:
-	Time() = delete;	// To avoid initialization instances of this class.
+#pragma endregion
 
 public: // Static Functions
 	//
 	// The interval in seconds from the last frame to the current one.
 	//
 	_NODISCARD inline static float DeltaTime() noexcept {
-		return m_deltaTime.count() * 10;
+		return Instance.m_deltaTime;
 	}
 
 	//
 	// The average number of frames updated per second based on process time.
 	//
 	_NODISCARD inline static float FrameRate() noexcept {
-		return 1 / m_deltaTime.count() * 10;
+		return 1.0f / Instance.m_deltaTime;
 	}
 
 private:
+#pragma warning (disable : 4244)
 	//
 	// This should only be called by the LMK Engine within the main Update() loop.
 	//
 	inline static void UpdateDeltaTime() noexcept {
-		m_currFrame = std::chrono::system_clock::now();
-		m_deltaTime = m_currFrame - m_lastFrame;
-		m_lastFrame = m_currFrame;
-	}
+		Instance.m_currFrame = std::chrono::system_clock::now();
+		Instance.m_deltaDuration = Instance.m_currFrame - Instance.m_lastFrame;
+		Instance.m_lastFrame = Instance.m_currFrame;
 
+		Instance.m_deltaTime = Instance.m_deltaDuration.count();
+	}
+#pragma warning (default : 4244)
+
+#pragma warning (disable : 26495)
 public: // Properties
-	static float m_timeScale;
+	static float timeScale;
 
 private:
-	static std::chrono::time_point<std::chrono::system_clock> m_lastFrame;
-	static std::chrono::time_point<std::chrono::system_clock> m_currFrame;
-	static std::chrono::duration<float> m_deltaTime;
+	static Time Instance;
+
+	time_point_t	m_lastFrame;
+	time_point_t	m_currFrame;
+	duration_t		m_deltaDuration;
+	time_percis_t	m_deltaTime;
+#pragma warning (default : 26495)
 };
 
-std::chrono::time_point<std::chrono::system_clock> Time::m_lastFrame;
-std::chrono::time_point<std::chrono::system_clock> Time::m_currFrame;
-std::chrono::duration<float> Time::m_deltaTime;
+Time Time::Instance;
 LMK_END
 
 #endif // !_LMK_SYSTEMS_H_
