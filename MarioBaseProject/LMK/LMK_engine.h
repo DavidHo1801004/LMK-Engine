@@ -8,6 +8,7 @@
 #include "LMK_systems.h"
 #include "LMK_coremdl.h"
 #include "LMK_gizmo.h"
+#include "LMK_input.h"
 
 LMK_BEGIN
 class LMKEngine {
@@ -61,7 +62,6 @@ public: // Functions
 		OnStart();
 
 		while (m_running) {
-			HandleEvents();
 			Update();
 			Render();
 		}
@@ -72,46 +72,54 @@ public: // Functions
 protected: 
 	virtual void OnUserStart() {}
 
-	virtual void OnUserHandleEvents(const SDL_Event& _event) {}
-
 	virtual void OnUserUpdate() {}
 
-	virtual void OnUserRender() {}
+	virtual void OnDrawGizmos() {}
 
 private:
+	//
+	// 
+	//
 	inline void OnStart() {
+		Time::UpdateDeltaTime();
+
 		OnUserStart();
 	}
 
-	inline void HandleEvents() {
-		SDL_Event curEvent;
-		SDL_PollEvent(&curEvent);
-
-		OnUserHandleEvents(curEvent);
-
-		switch (curEvent.type)
-		{
-		case SDL_QUIT:
-			m_running = false;
-			break;
-		}
-	}
-
+	//
+	// Core update loop of LMK Engine.
+	//
 	inline void Update() {
+		while (SDL_PollEvent(&m_curEvent)) {	// Loop through all occoured events ->
+			if (m_curEvent.type == SDL_QUIT) {	// If the application received a Quit message ->
+				m_running = false;				// Flag the application loop to terminate after this iteration.
+				break;
+			}
+		}
+
 		Time::UpdateDeltaTime();
+		Input::UpdateInputStates();
 
 		OnUserUpdate();
+
+		Input::UpdateLastInputStates();
 	}
 
+	//
+	// 
+	//
 	inline void Render() {
 		SDL_SetRenderDrawColor(m_renderer, 0, 0, 0, 255);
 		SDL_RenderClear(m_renderer);
 
-		OnUserRender();
+		OnDrawGizmos();
 
 		SDL_RenderPresent(m_renderer);
 	}
 
+	//
+	// 
+	//
 	inline void OnExit() {
 		delete m_gizmo;
 
@@ -122,11 +130,13 @@ private:
 		SDL_Quit();
 	}
 
-public: // Property Modifiers
+public: // Accessors
+	// Is the main loop of LMKEngine still running?
 	inline bool isRunning() {
 		return m_running;
 	}
 
+#pragma warning (disable : 26495)
 public: // Properties
 	std::string name;
 
@@ -140,6 +150,9 @@ protected:
 
 private:
 	bool m_running;
+
+	SDL_Event m_curEvent;
+#pragma warning (default : 26495)
 };
 LMK_END
 

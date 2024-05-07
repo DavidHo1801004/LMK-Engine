@@ -18,93 +18,97 @@ private: // Properties
 	float rotation = 0;
 	Vector2 scale = Vector2::one();
 
-	PhysicsShape2D phyShape;
-	BaseCollider2D playerCollider;
-	BoxCollider2D staticCollider = BoxCollider2D(Vector2(30, 30), 0);
+	PolygonCollider2D playerCollider;
+	Vector2 direction;
 
-	const float speed = 400;
+	std::vector<BoxCollider2D> staticColliders;
+
+	const float movespeed = 100;
+	const float rotationSpeed = 90;
+	const Vector2 scaleSpeed = Vector2(1.0f, 1.5f);
 
 public: // Functions
 	inline void OnUserStart() override {
-		phyShape.vert.clear();
-		phyShape.vert.push_back(Vector2(-30, 30));
-		phyShape.vert.push_back(Vector2(30, 30));
-		phyShape.vert.push_back(Vector2(30, -30));
-		phyShape.vert.push_back(Vector2(-30, -30));
+		auto CreatePolygon = [&](uint8_t _corners, float _radius) {
+			auto rotationIter = 360 / _corners;
 
-		playerCollider = BaseCollider2D(phyShape);
+			std::vector<Vector2> vertices = { Vector2(0, _radius) };
+			for (uint8_t i = 1; i < _corners; i++) {
+				vertices.push_back(Vector2(
+					-1 * _radius * std::sinf(LMK_DtoR(rotationIter * i)),
+					_radius * std::cosf(LMK_DtoR(rotationIter * i)))
+				);
+			}
+			return vertices;
+		};
+
+		playerCollider = PolygonCollider2D(
+			CreatePolygon(5, 30)
+		);
 
 		playerCollider.Transform(offset, rotation, scale);
-		staticCollider.Transform(Vector2::one() * 400, 0, Vector2::one());
-	}
 
-	inline void OnUserHandleEvents(const SDL_Event& _event) override {
-		switch (_event.type) {
-		case SDL_MOUSEMOTION:
-			mousePos.x = _event.motion.x;
-			mousePos.y = _event.motion.y;
-			break;
-
-		case SDL_KEYDOWN:
-			switch (_event.key.keysym.sym) {
-			case SDLK_e:
-				updated = true;
-				rotation += 360 * Time::DeltaTime();
-				break;
-
-			case SDLK_q:
-				updated = true;
-				rotation -= 360 * Time::DeltaTime();
-				break;
-
-			case SDLK_w:
-				updated = true;
-				offset.y -= speed * Time::DeltaTime();
-				break;
-
-			case SDLK_s:
-				updated = true;
-				offset.y += speed * Time::DeltaTime();
-				break;
-
-			case SDLK_a:
-				updated = true;
-				offset.x -= speed * Time::DeltaTime();
-				break;
-
-			case SDLK_d:
-				updated = true;
-				offset.x += speed * Time::DeltaTime();
-				break;
-
-			case SDLK_f:
-				updated = true;
-				scale -= Vector2(0.05f, 0.1f);
-				break;
-
-			case SDLK_r:
-				updated = true;
-				scale += Vector2(0.05f, 0.1f);
-				break;
-			}
-			break;
+		for (int i = 0; i < 10; i++) {
+			staticColliders.push_back(BoxCollider2D(Vector2(30, 30), 0));
+			staticColliders[i].Transform(
+				Vector2(Random::Range<float>(30, m_screenSize.x - 30), Random::Range<float>(30, m_screenSize.y - 30)),
+				Random::Range<float>(0, 359),
+				Vector2(Random::Range<float>(0.5f, 3.0f), Random::Range<float>(0.5f, 3.0f)));
 		}
 	}
 
-	inline virtual void OnUserUpdate() override {
-		if (updated) {
-			playerCollider.Transform(offset, rotation, scale);
+	inline void OnUserUpdate() override {
+		// Transform player's collider.
+		if (Input::GetKey(KeyCode::D)) {
+			direction.x = 1;
 		}
-
-		if (playerCollider.OverlapWith(staticCollider)) {
-			overlapping = true;
+		else if (Input::GetKey(KeyCode::A)) {
+			direction.x = -1;
 		}
 		else {
-			overlapping = false;
+			direction.x = 0;
+		}
+
+		if (Input::GetKey(KeyCode::W)) {
+			direction.y = -1;
+		}
+		else if (Input::GetKey(KeyCode::S)) {
+			direction.y = +1;
+		}
+		else {
+			direction.y = 0;
+		}
+
+		offset += direction.normalized() * movespeed * Time::DeltaTime();
+
+		if (Input::GetKey(KeyCode::E)) {
+			rotation += rotationSpeed * Time::DeltaTime();
+		}
+		else if (Input::GetKey(KeyCode::Q)) {
+			rotation -= rotationSpeed * Time::DeltaTime();
+		}
+
+		if (Input::GetKey(KeyCode::R)) {
+			scale += scaleSpeed * Time::DeltaTime();
+		}
+		else if (Input::GetKey(KeyCode::F)) {
+			scale -= scaleSpeed * Time::DeltaTime();
+		}
+
+		playerCollider.Transform(offset, rotation, scale);
+
+		for (auto staticCollider : staticColliders) {
+			if (playerCollider.OverlapWith(staticCollider)) {
+				overlapping = true;
+				break;
+			}
+			else {
+				overlapping = false;
+			}
 		}
 	}
 
-	inline virtual void OnUserRender() override {
+	inline void OnDrawGizmos() override {
 		if (overlapping) {
 			m_gizmo->SetColor(Color::blue());
 		} 
@@ -112,16 +116,20 @@ public: // Functions
 			m_gizmo->SetColor(Color::white());
 		}
 
-		m_gizmo->DrawPolygon(playerCollider.tvert);
+		m_gizmo->DrawPolygon(playerCollider.vertices());
+		m_gizmo->DrawLine(offset, playerCollider.vertex(0));
 
 		if (scale.x < 0 || scale.y < 0) {
 			m_gizmo->SetColor(Color::red());
-			m_gizmo->DrawLine(playerCollider.tvert[0], playerCollider.tvert[2]);
-			m_gizmo->DrawLine(playerCollider.tvert[1], playerCollider.tvert[3]);
+			m_gizmo->DrawLine(playerCollider.vertex(0), playerCollider.vertex(2));
+			m_gizmo->DrawLine(playerCollider.vertex(1), playerCollider.vertex(3));
 		}
 
 		m_gizmo->SetColor(Color::yellow());
-		m_gizmo->DrawPolygon(staticCollider.tvert);
+
+		for (auto staticCollider : staticColliders) {
+			m_gizmo->DrawPolygon(staticCollider.vertices());
+		}
 	}
 };
 #pragma warning(default : 4244)
