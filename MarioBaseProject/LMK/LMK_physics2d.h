@@ -59,15 +59,33 @@ struct PhysicsShape2D {
 
 // +--------------------------------------------------------------------------------+
 // |																				|
+// | PHYSICS MATERIAL 2D															|
+// |																				|
+// +--------------------------------------------------------------------------------+
+
+//
+// Asset type that defines the surface properties of a Collider2D.
+//
+struct PhysicsMaterial2D {
+	float bounciness;	// The degree of elasticity during collisions.
+	float friction;		// Coefficient of friction.
+};
+
+// +--------------------------------------------------------------------------------+
+// |																				|
 // | BASE COLLIDER 2D																|
 // |																				|
 // +--------------------------------------------------------------------------------+
+
+// Forward declaration of Rigidbody2D
+class Rigidbody2D;
 
 //
 // Base class for collider types used with 2D physics.
 //
 class BaseCollider2D {
-public:
+public: // Constructors & Destructors
+#pragma warning (disable : 26495)
 	//
 	// Creates a new BaseCollider2D.
 	// 
@@ -83,6 +101,7 @@ public:
 	// This Collider does not contains any vertex information.
 	//
 	inline BaseCollider2D() {}
+#pragma warning (default : 26495)
 
 public: // Functions
 	//
@@ -183,7 +202,11 @@ public: // Accessors
 	}
 
 private: // Properties
-	PhysicsShape2D m_pS;	// The original "model" of the Collider2D.
+	Rigidbody2D* m_attachedRigidbody; // The Rigidbody2D attached to the Collider2D.
+
+	PhysicsShape2D		m_pS;				// The original "model" of the Collider2D.
+	Rect				m_bounds;			// The world space bounding area of the collider.
+	PhysicsMaterial2D	m_sharedMaterial;	// The PhysicsMaterial2D that is applied to this collider.
 
 	bool	m_isTrigger		= false;	// Is this collider a trigger?
 	float	m_bounciness	= 0.0f;		// Get the bounciness used by the collider.
@@ -352,12 +375,12 @@ ENUM_ENCAP_BEGIN(rgbody)
 // Use these flags to constrain motion of the Rigidbody2D.
 //
 enum RigidbodyConstraints2D {
-	None = 0x0000,								// No constraints.
-	FreezePositionX = 0x0001,								// Freeze motion along the X - axis.
-	FreezePositionY = 0x0002,								// Freeze motion along the Y - axis.
-	FreezeRotation = 0x0004,								// Freeze rotation along the Z - axis.
-	FreezePosition = FreezePositionX | FreezePositionY,	// Freeze motion along the X - axis and Y - axis.
-	FreezeAll = FreezeRotation | FreezePosition,		// Freeze rotation and motion along all axes.
+	None			= 0x0000,								// No constraints.
+	FreezePositionX	= 0x0001,								// Freeze motion along the X - axis.
+	FreezePositionY	= 0x0002,								// Freeze motion along the Y - axis.
+	FreezeRotation	= 0x0004,								// Freeze rotation along the Z - axis.
+	FreezePosition	= FreezePositionX | FreezePositionY,	// Freeze motion along the X - axis and Y - axis.
+	FreezeAll		= FreezeRotation | FreezePosition,		// Freeze rotation and motion along all axes.
 };
 
 //
@@ -421,23 +444,41 @@ USE_ENUM_NS(rgbody);
 // Adding a Rigidbody2D component to a sprite puts it under the control of the physics engine.
 //
 class Rigidbody2D {
+public: // Typedef
+
+
+public: // Constructors & Destructors
+#pragma warning (disable : 26495)
+	inline Rigidbody2D(
+		RigidbodyType2D _bodyType,
+		float m_drag,
+		float m_angularDrag,
+		float m_inertia,
+		float m_mass,
+		float m_gravityScale
+	) {
+
+	}
+#pragma warning (default : 26495)
+
 private: // Properties
+	RigidbodyConstraints2D	m_constrains;	// 
+	RigidbodyType2D			m_bodyType;		// 
+
 	float m_drag;			// 
 	float m_angularDrag;	// 
 	float m_inertia;		// 
 	float m_mass;			// 
 	float m_gravityScale;	// 
 
+	bool m_useAutoMass;					// 
+	bool m_useFullKinematicContacts;	// 
+
 	Vector2	m_position;			//
 	float	m_rotation;			//
 	Vector2	m_velocity;			//
 	float	m_angularVelocity;	//
 	Vector2	m_centerOfMass;		//
-
-	RigidbodyConstraints2D	m_constrains;				// 
-	RigidbodyType2D			m_bodyType;					// 
-	bool					m_useAutoMass;				// 
-	bool					m_useFullKinematicContacts;	// 
 
 	float totalForce;	// The total amount of force that has been explicitly applied to this Rigidbody2D since the last physics simulation step.
 	float totalTorque;	// The total amount of torque that has been explicitly applied to this Rigidbody2D since the last physics simulation step.
