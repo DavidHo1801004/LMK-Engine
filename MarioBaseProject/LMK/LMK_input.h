@@ -182,11 +182,13 @@ public: // Constructors & Destrutors
 	Input(const Input&) = delete;
 
 private:
+#pragma warning (disable : 26495)
 	Input() {
 		m_SDLKeyboardStates = SDL_GetKeyboardState(NULL);
 		m_lastKeyboardStates = new Uint8[m_keysLength];
 		memcpy(m_lastKeyboardStates, m_SDLKeyboardStates, m_keysLength);
 	}
+#pragma warning (default : 26495)
 
 public:
 #pragma endregion

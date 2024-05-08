@@ -90,10 +90,12 @@ public: // Constructors & Destructors
 	Time(const Time&) = delete;
 
 private:
+#pragma warning (disable : 26495)
 	inline Time() {
 		m_lastFrame = std::chrono::system_clock::now();
 		m_currFrame = std::chrono::system_clock::now();
 	}
+#pragma warning (default : 26495)
 
 public:
 #pragma endregion
@@ -127,7 +129,6 @@ private:
 	}
 #pragma warning (default : 4244)
 
-#pragma warning (disable : 26495)
 public: // Properties
 	static float timeScale;
 
@@ -138,7 +139,6 @@ private:
 	time_point_t	m_currFrame;
 	duration_t		m_deltaDuration;
 	time_percis_t	m_deltaTime;
-#pragma warning (default : 26495)
 };
 
 Time Time::Instance;
