@@ -347,16 +347,17 @@ public: // Constructors & Destructors
 // |																				|
 // +--------------------------------------------------------------------------------+
 
+ENUM_ENCAP_BEGIN(rgbody)
 //
 // Use these flags to constrain motion of the Rigidbody2D.
 //
 enum RigidbodyConstraints2D {
-	None			= 0x0000,								// No constraints.
-	FreezePositionX	= 0x0001,								// Freeze motion along the X - axis.
-	FreezePositionY	= 0x0002,								// Freeze motion along the Y - axis.
-	FreezeRotation	= 0x0004,								// Freeze rotation along the Z - axis.
-	FreezePosition	= FreezePositionX | FreezePositionY,	// Freeze motion along the X - axis and Y - axis.
-	FreezeAll		= FreezeRotation | FreezePosition,		// Freeze rotation and motion along all axes.
+	None = 0x0000,								// No constraints.
+	FreezePositionX = 0x0001,								// Freeze motion along the X - axis.
+	FreezePositionY = 0x0002,								// Freeze motion along the Y - axis.
+	FreezeRotation = 0x0004,								// Freeze rotation along the Z - axis.
+	FreezePosition = FreezePositionX | FreezePositionY,	// Freeze motion along the X - axis and Y - axis.
+	FreezeAll = FreezeRotation | FreezePosition,		// Freeze rotation and motion along all axes.
 };
 
 //
@@ -410,9 +411,14 @@ enum RigidbodyType2D {
 	// any Collider2D attached to Dynamic or Kinematic body types.
 	Static,
 };
+ENUM_ENCAP_END
+
+USE_ENUM_NS(rgbody);
 
 //
+// Rigidbody physics component for 2D sprites.
 // 
+// Adding a Rigidbody2D component to a sprite puts it under the control of the physics engine.
 //
 class Rigidbody2D {
 private: // Properties

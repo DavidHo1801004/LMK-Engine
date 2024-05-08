@@ -135,7 +135,21 @@
 // Macro for encapsulating implemental LMK features to the default ::impl:: namespace.
 // This is used to hide features that should not be manually called by the user.
 //
+#undef IMPL_BEGIN
 #define IMPL_BEGIN	namespace impl {
+#undef IMPL_END
 #define IMPL_END	}
+
+//
+// Macro for encapsulating LMK enumeration to a custom namespace.
+// This is used to avoid enum redefinitions between modules.
+//
+#undef ENUM_ENCAP_BEGIN
+#define ENUM_ENCAP_BEGIN(_name)	namespace _name {
+#undef ENUM_ENCAP_END
+#define ENUM_ENCAP_END			}
+
+#undef USE_ENUM_NS
+#define USE_ENUM_NS(_name)	using namespace _name;
 
 #endif // !_LMK_ROOT_H_
