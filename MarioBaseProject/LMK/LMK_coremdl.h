@@ -383,9 +383,9 @@ public: // Static Functions
 	}
 
 	// 
-	// Gets the unsigned angle in degrees between _from and _to.
+	// Gets the signed angle in degrees between _from and _to.
 	//	
-	// The angle returned is the unsigned angle between the two vectors.
+	// The angle returned is the signed angle between the two vectors.
 	//	
 	// Note: The angle returned will always be between -180 and 180 degrees,
 	// because the method returns the smallest angle between the vectors.

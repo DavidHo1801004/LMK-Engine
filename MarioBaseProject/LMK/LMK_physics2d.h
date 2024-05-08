@@ -86,7 +86,7 @@ public:
 
 public: // Functions
 	//
-	// 
+	// Returns a point on the perimeter of this Collider that is closest to the specified position.
 	//
 	_NODISCARD inline Vector2 ClosetPoint(Vector2 _position) {
 
@@ -350,7 +350,7 @@ public: // Constructors & Destructors
 //
 // Use these flags to constrain motion of the Rigidbody2D.
 //
-enum class RigidbodyConstraints2D {
+enum RigidbodyConstraints2D {
 	None			= 0x0000,								// No constraints.
 	FreezePositionX	= 0x0001,								// Freeze motion along the X - axis.
 	FreezePositionY	= 0x0002,								// Freeze motion along the Y - axis.
@@ -365,7 +365,7 @@ enum class RigidbodyConstraints2D {
 // Controls the physical behaviour of a Rigidbody2D in how it should move, 
 // react to forces and interact with the rest of the physics simulation.
 //
-enum class RigidbodyType2D {
+enum RigidbodyType2D {
 	// Sets the Rigidbody2D to have dynamic behaviour.
 	//
 	// Dynamic behaviour causes the Rigidbody2D to react to gravity and applied forces including contacts 

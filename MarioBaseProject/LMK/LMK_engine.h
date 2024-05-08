@@ -25,6 +25,13 @@ public: // Functions
 		// Initialize window
 		uint32_t flags = _fullscr ? SDL_WINDOW_FULLSCREEN : 0;
 
+		if (_fullscr) {
+			SDL_DisplayMode DM;
+			SDL_GetCurrentDisplayMode(0, &DM);
+			_w = DM.w;
+			_h = DM.h;
+		}
+
 		m_window = SDL_CreateWindow(_tilte.c_str(), _x, _y, _w, _h, flags);
 		if (!m_window) {
 			printf("Error: failed to initialize SDL_Window.\n");
