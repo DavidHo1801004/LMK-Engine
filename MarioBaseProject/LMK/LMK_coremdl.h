@@ -1692,7 +1692,7 @@ private: // Properties
 	static uint32_t seed;
 };
 
-uint32_t Random::seed = std::time(NULL);	// Get 100% random seed value.
+uint32_t Random::seed = (uint32_t)std::time(NULL);	// Get 100% random seed value.
 LMK_END
 
 #endif // !LMK_COREMDL_2D_H_

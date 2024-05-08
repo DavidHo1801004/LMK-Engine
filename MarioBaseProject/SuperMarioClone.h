@@ -27,7 +27,7 @@ private: // Properties
 
 	const float movespeed = 200;	// Pixels
 	const float rotationSpeed = 360;	// Degrees
-	const Vector2 scaleSpeed = Vector2(1.0f, 1.5f);
+	const Vector2 scaleSpeed = Vector2(1.5f, 1.5f);
 
 public: // Functions
 	inline void OnUserStart() override {
@@ -44,7 +44,7 @@ public: // Functions
 		};
 
 		playerCollider = PolygonCollider2D(
-			CreatePolygon(5, 30)
+			CreatePolygon(7, 30)
 		);
 		playerCollider.Transform(offset, rotation, scale);
 		forward = Vector2::up();
