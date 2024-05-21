@@ -26,12 +26,14 @@ public:
 	// The value of _layers should not be passed manually, but instead use predefined
 	// layer flags in TagsLayersSystem.
 	//
-	inline LayerMask(uint32_t _layers) : m_value(_layers) {}
+	inline explicit LayerMask(uint32_t _layers)
+		: m_value(_layers) {}
 
 	//
 	// Create a new LayerMask with the default id of LAYER_0.
 	//
-	inline LayerMask() : LayerMask(TagsLayersSystem::LAYER_0) {}
+	inline LayerMask() 
+		: LayerMask(TagsLayersSystem::LAYER_0) {}
 
 public: // Functions
 	//
@@ -108,11 +110,11 @@ IMPL_BEGIN
 // @tparam coord_type:
 //		Single coordinate as an arithmetic type (e.g. int, float, ...).
 //
-template <typename coord_type,
-	std::enable_if_t<std::is_arithmetic_v<coord_type>, bool> = true>
+template <typename coord_type>
 class BaseVector2 {
 public:	// Typedef
 	using coord_t = coord_type;
+	static_assert(std::is_arithmetic_v<coord_type>, "LMK Engine: Invalid coord type. (BaseVector2)");
 
 public:	// Constructors & Destructors
 	//
@@ -123,12 +125,8 @@ public:	// Constructors & Destructors
 	// @param _y:
 	//		The Y coordinate of the vector.
 	//
-	inline BaseVector2(coord_t _x, coord_t _y) : x(_x), y(_y) {}
-
-	//
-	// Creates a new BaseVector2<coord_type> with coordinate of (0, 0).
-	//
-	inline BaseVector2() : BaseVector2(0, 0) {}
+	inline explicit BaseVector2(coord_t _x, coord_t _y)
+		: x(_x), y(_y) {}
 
 public:	// Operators Overloads
 	//
@@ -152,7 +150,6 @@ public:	// Operators Overloads
 			return y;
 		default:
 			throw std::out_of_range("lmk::BaseVector2: index out of range for operator[] (index should be 0 or 1).");
-			return 0;
 		}
 	}
 
@@ -203,12 +200,14 @@ public:	// Constructors & Destructors
 	// @param _y:
 	//		The Y coordinate of the vector.
 	//
-	explicit inline Vector2(coord_t _x, coord_t _y) : BaseVector2(_x, _y) {}
+	inline explicit Vector2(coord_t _x, coord_t _y)
+		: BaseVector2(_x, _y) {}
 
 	//
 	// Creates a new Vector2 with coordinate of (0, 0).
 	//
-	explicit inline Vector2() : BaseVector2() {}
+	inline explicit Vector2()
+		: Vector2(0, 0) {}
 
 public: // Operators Overloads
 #if LMK_HAVE_SDL
@@ -594,12 +593,14 @@ public: // Constructors & Destructors
 	// @param _y:
 	//		The Y coordinate of the vector.
 	//
-	explicit inline Vector2Int(coord_t _x, coord_t _y) : BaseVector2(_x, _y) {}
+	inline explicit Vector2Int(coord_t _x, coord_t _y)
+		: BaseVector2(_x, _y) {}
 
 	//
 	// Creates a new Vector2Int with coordinate of (0, 0).
 	//
-	explicit inline Vector2Int() : BaseVector2() {}
+	inline explicit Vector2Int()
+		: Vector2Int(0, 0) {}
 
 public: // Operators Overloads
 	// 
@@ -814,8 +815,12 @@ public: // Static Properties
 // | RECTANGLE																		|
 // |																				|
 // +--------------------------------------------------------------------------------+
+
 //
-// LMK Engine uses a coordinate system similar to that of Window Application, 
+// Most 2D coordinate spaces in LMK Engine defines X as increasing to the right,
+// and Y increasing upwards. Except for classes in the GUI space.
+// 
+// GUI space in LMK Engine uses a coordinate system similar to that of Window Applications, 
 // where (0,0) represents the top-left corner and Y increases downwards:
 // 
 //				   x
@@ -863,12 +868,13 @@ constexpr bool is_lmkvector_t = std::_Is_any_of_v<std::remove_cv_t<T>,
 // @tparam My_Vector2_type:
 //		lmk::BaseVector2 type (e.g. Vector2Int, Vector2, ...).
 //
-template <typename coord_type, class My_Vector2_type,
-	std::enable_if_t<is_lmkvector_t<My_Vector2_type>, bool> = true>
+template <typename coord_type, class My_Vector2_type>
 class BaseRect {
 protected: // Typedef
-	using My_Vector2_t	= My_Vector2_type;
 	using coord_t		= coord_type;
+	static_assert(std::is_arithmetic_v<coord_type>, "LMK Engine: Invalid coord type. (BaseRect)");
+	using My_Vector2_t	= typename My_Vector2_type;
+	static_assert(is_lmkvector_t<My_Vector2_t>, "LMK Engine: Invalid Vector2 type. (BaseRect)");
 
 public: // Constructors & Destructors
 	//
@@ -883,7 +889,7 @@ public: // Constructors & Destructors
 	// @param _h:
 	//		Height of the rectangle.
 	//
-	inline BaseRect(coord_t _x, coord_t _y, coord_t _w, coord_t _h) 
+	inline explicit BaseRect(coord_t _x, coord_t _y, coord_t _w, coord_t _h)
 		: m_xMin(_x), m_yMin(_y), m_xMax(_x + _w), m_yMax(_y + _h), m_width(_w), m_height(_h) {}
 
 	//
@@ -894,7 +900,8 @@ public: // Constructors & Destructors
 	// @param _size:
 	//		The width (x) and height (y) of the rectangle.
 	//
-	inline BaseRect(My_Vector2_t _pos, My_Vector2_t _size) : BaseRect(_pos.x, _pos.y, _size.x, _size.y) {}
+	inline explicit BaseRect(const My_Vector2_t& _pos, const My_Vector2_t& _size)
+		: BaseRect(_pos.x, _pos.y, _size.x, _size.y) {}
 
 public: // Operators Overloads
 	//
@@ -1195,7 +1202,8 @@ public:	// Constructors & Destructors
 	// @param _h:
 	//		Height of the rectangle.
 	//
-	_NODISCARD inline Rect(coord_t _x, coord_t _y, coord_t _w, coord_t _h) : BaseRect(_x, _y, _w, _h) {}
+	inline explicit Rect(coord_t _x, coord_t _y, coord_t _w, coord_t _h)
+		: BaseRect(_x, _y, _w, _h) {}
 
 	//
 	// Creates a new Rect.
@@ -1205,12 +1213,14 @@ public:	// Constructors & Destructors
 	// @param _size:
 	//		The width (x) and height (y) of the rectangle.
 	//
-	_NODISCARD inline Rect(My_Vector2_t _position, My_Vector2_t _size) : Rect(_position.x, _position.y, _size.x, _size.y) {}
+	inline explicit Rect(const My_Vector2_t& _position, const My_Vector2_t& _size)
+		: Rect(_position.x, _position.y, _size.x, _size.y) {}
 
 	//
 	// Creates a new Rect with position and size of (0, 0).
 	//
-	_NODISCARD inline Rect() : Rect(0, 0, 0, 0) {}
+	inline Rect() 
+		: Rect(0, 0, 0, 0) {}
 
 public: // Operators Overloads
 #if LMK_HAVE_SDL
@@ -1236,13 +1246,16 @@ public: // Static Functions
 	}
 
 	//
-	// Get the normalized coordinates cooresponding the the point.
+	// Get the normalized coordinates cooresponding to the given point.
 	// 
 	// @return:
 	//		A Vector2 in the range 0 to 1 with values more 1 or less than zero clamped.
 	//
 	_NODISCARD inline static My_Vector2_t PointToNormalized(const Rect& _rect, const My_Vector2_t& _point) {
-
+		return Vector2(
+			(_point.x - _rect.xMin()) / _rect.width(),
+			(_point.y - _rect.yMin()) / _rect.height()
+		).Clamp01();
 	}
 
 public: // Static Properties
@@ -1271,7 +1284,8 @@ public:	// Constructors & Destructors
 	// @param _h:
 	//		Height of the rectangle.
 	//
-	inline RectInt(coord_t _x, coord_t _y, coord_t _w, coord_t _h) : BaseRect(_x, _y, _w, _h) {}
+	inline explicit RectInt(coord_t _x, coord_t _y, coord_t _w, coord_t _h) 
+		: BaseRect(_x, _y, _w, _h) {}
 
 	//
 	// Creates a new Rect.
@@ -1281,7 +1295,8 @@ public:	// Constructors & Destructors
 	// @param _size:
 	//		The width (x) and height (y) of the RectInt.
 	//
-	inline RectInt(My_Vector2_t _position, My_Vector2_t _size) : RectInt(_position.x, _position.y, _size.x, _size.y) {}
+	inline explicit RectInt(const My_Vector2_t& _position, const My_Vector2_t& _size)
+		: RectInt(_position.x, _position.y, _size.x, _size.y) {}
 
 	//
 	// Creates a new RectInt with position and size of (0, 0).
@@ -1319,6 +1334,265 @@ public: // Static Properties
 	}
 };
 #pragma warning(default : 4244)
+
+// +--------------------------------------------------------------------------------+
+// |																				|
+// | RAY																			|
+// |																				|
+// +--------------------------------------------------------------------------------+
+
+//
+// Representation of an infinite line starting at origin and going in some direction.
+//
+struct Ray {
+public: // Constructors & Destructors
+	//
+	// Creates a new Ray.
+	// 
+	// @param _origin:
+	//		The origin point of the ray.
+	// @param _direction:
+	//		The direction of the ray.
+	// 
+	inline Ray(const Vector2& _origin, const Vector2& _direction)
+		: origin(_origin), direction(_direction) {}
+
+	//
+	// Creates a new Ray with origin of (0, 0) and direction of (0, 1).
+	//
+	inline Ray()
+		: Ray(Vector2::zero(), Vector2::up()) {}
+
+public: // Functions
+	//
+	// Returns a point at distance units along the ray.
+	//
+	inline Vector2 GetPoint(float _distance) {
+		return origin + direction * _distance;
+	}
+
+public: // Properties
+	Vector2 origin;		// The origin point of the ray.
+	Vector2 direction;	// The direction of the ray.
+};
+
+// +--------------------------------------------------------------------------------+
+// |																				|
+// | BOUNDS																			|
+// |																				|
+// +--------------------------------------------------------------------------------+
+
+//
+// Represents an axis aligned bounding box that fully encloses some object.
+//
+// An axis-aligned bounding box, or AABB for short, is a box aligned with coordinate axes.
+// Because the box is never rotated with respect to the axes, it can be defined by 
+// just its center and extents, or alternatively by min and max points.
+//
+struct Bounds {
+public: // Constuctors & Destructors
+	//
+	// Creates a new Bound.
+	// 
+	// @param _center:
+	//		The location of the origin of the Bounds.
+	// @param _size:
+	//		The dimensions of the Bounds.
+	//
+	inline explicit Bounds(const Vector2& _center, const Vector2& _size)
+		: m_center(_center), m_size(_size), m_extents(_size / 2), m_min(_center - m_extents), m_max(_center + m_extents) {}
+
+	//
+	// Creates a new Bounds with center and size of (0, 0).
+	//
+	inline Bounds() 
+		: Bounds(Vector2::zero(), Vector2::zero()) {}
+
+public: // Functions
+	//
+	// Expand the bounds by increasing its size by _amount along each side.
+	// 
+	// This function will evenly changes its min and max point to preserve the center of the bounding box.
+	//
+	inline void Expand(float _amount) {
+		setSize(Vector2(m_size.x + _amount, m_size.y + _amount));
+	}
+
+	//
+	// Expand the bounds by increasing its size by _amount along the corresponding axes.
+	// 
+	// This function will evenly changes its min and max point to preserve the center of the bounding box.
+	//
+	inline void Expand(const Vector2& _amount) {
+		setSize(m_size + _amount);
+	}
+
+	//
+	// Grows the Bounds to include the _point.
+	// 
+	// This function will find the minimum extents 
+	//
+	inline void Encapsulate(const Vector2& _point) {
+		setMinMax(
+			Vector2::Min(_point, m_min),
+			Vector2::Max(_point, m_max)
+		);
+	}
+
+	//
+	// Grow the bounds to encapsulate the _bounds.
+	// 
+	// This will preserve the center point of the bounding box and extents its edges
+	// to include the _bounds on the bounding box.
+	//
+	inline void Encapsulate(const Bounds& _bounds) {
+		setMinMax(
+			Vector2::Min(_bounds.m_min, m_min),
+			Vector2::Max(_bounds.m_max, m_max)
+		);
+	}
+
+	// 
+	// The closest point on the bounding box.
+	// If _point is inside the bounding box, unmodified _point position will be returned.
+	// 
+	// @param _point:
+	//		Arbitrary point.
+	// 
+	// @return:
+	//		A Vector2 represents the point on the bounding box or inside the bounding box.
+	//
+	_NODISCARD inline Vector2 ClosestPoint(const Vector2& _point) const noexcept {
+		return Vector2(
+			LMK_Clamp(_point.x, m_min.x, m_max.x),
+			LMK_Clamp(_point.y, m_min.y, m_max.y)
+		);
+	}
+
+	//
+	// Is _point contained in the bounding box?
+	//
+	_NODISCARD inline bool Contains(const Vector2& _point) const noexcept {
+		return (_point.x > m_min.x) && (_point.x < m_max.x) 
+			&& (_point.y > m_min.y) && (_point.y < m_max.y);
+	}
+
+	//
+	// Does another bounding box intersect with this bounding box?
+	//
+	_NODISCARD inline bool Intersects(const Bounds& _bounds) const noexcept {
+		return (m_min.x < _bounds.m_max.x) 
+			&& (m_max.x > _bounds.m_min.x)
+			&& (m_min.y < _bounds.m_max.y)
+			&& (m_max.y > _bounds.m_min.y);
+	}
+
+	//
+	// Does _ray intersect this bounding box?
+	//
+	_NODISCARD inline bool IntersectRay(Ray& _ray) noexcept {
+		// For the original formula of box - ray intersection, see:
+		// https://tavianator.com/2022/ray_box_boundary.html
+
+		float tmin = 0.0f; 
+		float tmax = INFINITY;
+
+		// Loop through all dimentions of the bounding box and calculate the min and max
+		// Overlapping point between the ray and the bounding box.
+		for (int d = 0; d < 2; d++) {
+			float t1 = (m_min[d] - _ray.origin[d]) * _ray.direction[d];
+			float t2 = (m_max[d] - _ray.origin[d]) * _ray.direction[d];
+
+			tmin = LMK_Max(tmin, LMK_Min(t1, t2));
+			tmax = LMK_Min(tmax, LMK_Max(t1, t2));
+		}
+
+		return tmin < tmax;
+	}
+
+public: // Accessors
+	// Get the center of the bounding box.
+	_NODISCARD inline Vector2 center() const noexcept {
+		return m_center;
+	}
+
+	// Get the total size of the box. This is always twice as large as the extents.
+	_NODISCARD inline Vector2 size() const noexcept {
+		return m_size;
+	}
+
+	// Gett the extents of the Bounding Box. This is always half of the size of the Bounds.
+	_NODISCARD inline Vector2 extents() const noexcept {
+		return m_extents;
+	}
+
+	// Get the minimal point of the box. This is always equal to center - extents.
+	_NODISCARD inline Vector2 minPos() const noexcept {
+		return m_min;
+	}
+
+	// Get the maximal point of the box. This is always equal to center + extents.
+	_NODISCARD inline Vector2 maxPos() const noexcept {
+		return m_max;
+	}
+
+public: // Mutators
+	// Set the center of the bounding box.
+	inline void setCenter(const Vector2& _center) {
+		m_center = _center;
+		m_min = m_center - m_extents;
+		m_max = m_center + m_extents;
+	}
+
+	// Set the center of the bounding box. This is always twice as large as the extents.
+	inline void setSize(const Vector2& _size) {
+		m_size = _size;
+		m_extents = m_size / 2;
+		m_min = m_center - m_extents;
+		m_max = m_center + m_extents;
+	}
+
+	// Set the extents of the Bounding Box. This is always half of the size of the Bounds.
+	inline void setExtents(const Vector2& _extents) {
+		m_extents = _extents;
+		m_size = m_extents * 2;
+		m_min = m_center - m_extents;
+		m_max = m_center + m_extents;
+	}
+
+	// Set the minimal point of the box. This is always equal to center - extents.
+	inline void setMin(const Vector2& _min) {
+		m_min = _min;
+		m_size = m_max - m_min;
+		m_extents = m_size / 2;
+		m_center = m_min + m_extents;
+	}
+
+	// Set the maximal point of the box. This is always equal to center + extents.
+	inline void setMax(const Vector2& _max) {
+		m_max = _max;
+		m_size = m_max - m_min;
+		m_extents = m_size / 2;
+		m_center = m_max - m_extents;
+	}
+
+	// Sets the bounds to the min and max value of the box.
+	// Using this function is faster than assigning min and max separately.
+	inline void setMinMax(const Vector2& _min, const Vector2& _max) {
+		m_min = _min;
+		m_max = _max;
+		m_size = m_max - m_min;
+		m_extents = m_size / 2;
+		m_center = m_min + m_extents;
+	}
+
+private: // Properties
+	Vector2 m_center;	// The center of the bounding box.
+	Vector2 m_size;		// The total size of the box. This is always twice as large as the extents.
+	Vector2 m_extents;	// The extents of the Bounding Box. This is always half of the size of the Bounds.
+	Vector2 m_min;		// The minimal point of the box. This is always equal to center - extents.
+	Vector2 m_max;		// The maximal point of the box. This is always equal to center + extents.
+};
 
 // +--------------------------------------------------------------------------------+
 // |																				|
@@ -1612,87 +1886,58 @@ public: // Properties
 };
 
 // +--------------------------------------------------------------------------------+
-// |																				|
-// | RANDOM GENERATOR																|
-// |																				|
+// |					 															|
+// | OBJECT				 															|
+// |					 															|
 // +--------------------------------------------------------------------------------+
 
-#ifndef LMK_RANDMAX 
-	#define LMK_RANDMAX 4294967295
-#endif
+//
+// Base class for all objects LMK Engine can reference.
+//
+class Object {
+public: // Functions
+	//
+	// Gets the instance ID of the object.
+	//
+	_NODISCARD inline int GetInstanceID() {
+		return m_id;
+	}
 
-//
-// General interface for generating random data.
-// 
-// This static class provides several easy game-oriented ways of generating pseudorandom numbers.
-// 
-// The generator is an Xorshift 128 algorithm.
-// 
-// It is statically initialized with a high-entropy seed from the operating system, and stored in 
-// native memory where it will survive domain reloads. 
-// This means that the generator is seeded exactly once on process start, and after that is left entirely under script control.
-//
-class Random {
 public: // Static Functions
 	//
-	// Returns a random floating point value within [_minInclusive .. _maxInclusive] (range is inclusive).
+	// Removes a GameObject, component or asset.
 	// 
-	// If minInclusive is greater than maxInclusive, then the numbers are automatically swapped.
+	// The object _obj is destroyed immediately after the current Update loop, or _t seconds from now if a time is specified. 
 	// 
-	// Important: Both the lower and upper bounds are inclusive.Any given float value between them, 
-	// including both minInclusive and maxInclusive, will appear on average approximately once every ten million random samples.
+	// If _obj is a Component, this method removes the component from the GameObject and destroys it. 
+	// If obj is a GameObject, it destroys the GameObject, all its components and all transform children of the GameObject. 
+	// Actual object destruction is always delayed until after the current Update loop, but is always done before rendering.
 	// 
-	// There is an integral overload of this function that operates slightly differently.
+	// Note: When destroying MonoBehaviour scripts, LMK calls OnDisable and OnDestroy before the script is removed.
+	// 
+	// @param _obj:
+	//		The object to destroy.
+	// @param _t:
+	//		The optional amount of time to delay before destroying the object.
 	//
-	template <typename value_type,
-		std::enable_if_t<std::is_floating_point_v<value_type>, bool> = true>
-	_NODISCARD inline static value_type Range(value_type _minInclusive, value_type _maxInclusive) {
-		if (_minInclusive > _maxInclusive) std::swap(_minInclusive, _maxInclusive);
+	inline static void Destroy(Object* _obj, float _t = 0.0F) {
 
-		return (value_type)rand() / LMK_RANDMAX * (_maxInclusive - _minInclusive) + _minInclusive;
 	}
 
 	//
-	// Return a random integral value within [_minInclusive .. _maxExclusive).
-	// 
-	// This method will behave in the following ways:
-	// 
-	// 1. _maxExclusive is exclusive, so for example Random.Range(0, 10) will return a value between 0 and 9, 
-	// each with approximately equal probability.
-	// 2. If minInclusive and maxExclusive are equal, then the "exclusive rule" is ignored and minInclusive will be returned.
-	// 3. If minInclusive is greater than maxExclusive, then the numbers are automatically swapped.
-	// 
-	// There is a floating point overload of this function that operates slightly differently.
 	//
-	template <typename value_type,
-		std::enable_if_t<std::is_integral_v<value_type>, bool> = true>
-	_NODISCARD inline static value_type Range(value_type _minInclusive, value_type _maxExclusive) {
-		if (_minInclusive == _maxExclusive) return _minInclusive;
-		if (_minInclusive > _maxExclusive) std::swap(_minInclusive, _maxExclusive);
+	//
+	inline static void DontDestroyOnLoad(Object _target) {
 
-		return rand() % (_maxExclusive - _minInclusive) + _minInclusive;
 	}
+
+
+public: // Properties
+	std::string name;	// The name of the object.
 
 private:
-	//
-	// Generate a pseudo random number based on Xorshift 128 algorithm.
-	// 
-	// For detailed documentation regarding Xorshift 128 algorithm, see:
-	// (Xorshift RNGs by George Marsaglia)
-	// https://en.wikipedia.org/wiki/Xorshift
-	//
-	_NODISCARD inline static uint32_t rand() {
-		seed ^= seed << 13;
-		seed ^= seed >> 17;
-		seed ^= seed << 5;
-		return seed;
-	}
-
-private: // Properties
-	static uint32_t seed;
+	int m_id;
 };
-
-uint32_t Random::seed = (uint32_t)std::time(NULL);	// Get 100% random seed value.
 LMK_END
 
 #endif // !LMK_COREMDL_2D_H_
