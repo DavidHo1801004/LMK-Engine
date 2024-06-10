@@ -17,8 +17,8 @@
 // +--------------------------------------------------------------------------------+
 
 #include <cstdint>
-#include <typeinfo>
 #include <stdexcept>
+#include <cassert>
 
 #include <cstdio>
 #include <iostream>
@@ -29,15 +29,19 @@
 #include <cstring>
 #include <string>
 
+#include <array>
 #include <vector>
+#include <unordered_map>
 #include <unordered_set>
 
 #include <chrono>
 #include <atomic>
 
+#include <memory>
 #include <thread>
 #include <functional>
 #include <algorithm>
+#include <typeindex>
 
 #define _USE_MATH_DEFINES
 #include <cmath>
@@ -87,6 +91,9 @@
 	#if LMK_HAVE_SDL_TTF
 		#include <SDL_ttf.h>
 	#endif
+	#if LMK_HAVE_SDL_MIXER
+		#include <SDL_mixer.h>
+	#endif
 #endif
 
 // +--------------------------------------------------------------------------------+
@@ -100,67 +107,57 @@
 #endif
 
 #ifndef LMK_Min
-	//
 	// Get the minimum value between _a and _b.
-	//
 	#define LMK_Min(_a, _b)		((_a < _b) ? (_a) : (_b))
 #endif
 
 #ifndef LMK_Max
-	//
 	// Get the maximum value between _a and _b.
-	//
 	#define LMK_Max(_a, _b)		((_a > _b) ? (_a) : (_b))
 #endif
 
 #ifndef LMK_Clamp
-	//
 	// Clamp value to range.
-	//
 	#define LMK_Clamp(_val, _min, _max)		LMK_Min(LMK_Max(_val, _min), _max)
 #endif
 
 #ifndef LMK_DtoR
-	//
 	// Convert degree to radian.
-	//
 	#define LMK_DtoR(_degree)	(_degree / 180.0f * M_PI)
 #endif
 
 #ifndef LMK_RtoD
-	//
 	// Convert radian to degree.
-	//
 	#define LMK_RtoD(_radian)	(_radian / M_PI * 180.0f)
 #endif
 
 #ifndef LMK_InRange
-	//
 	// Check if value is in range.
-	//
 	#define LMK_InRange(_val, _min, _max)	((_val > _min) && (_val < _max))
 #endif
 
 #ifndef LMK_Lerp
-	//
 	// Linearly interpolates between _a and _b by _t.
-	// 
 	#define LMK_Lerp(_a, _b, _t)	(_a + ((_b - _a) * _t))
 #endif
 
 #ifndef LMK_ArraySize
-	//
 	// The number of elements in an array.
-	//
 	#define LMK_ArraySize(_array)	(sizeof(_array) / sizeof(_array[0]))
 #endif
 
 #ifndef LMK_RoundToInt
-	//
 	// Round a floating point value to integer value.
-	//
 	#define LMK_RoundToInt(f)	((int)(f >= 0.0 ? (f + 0.5) : (f - 0.5)))
 #endif
 
+#ifndef LMK_CORE_ASSERT
+	// Core assert macro for LMK Engine.
+	#define LMK_CORE_ASSERT(condition, message) \
+		if (!(condition)) {		\
+			assert(message);	\
+			std::abort();		\
+		}
+#endif
 
 #endif // !_LMK_STDINC_H_

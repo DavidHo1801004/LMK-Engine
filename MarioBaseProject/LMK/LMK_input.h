@@ -171,13 +171,13 @@ USE_ENUM_NS(input)
 // 
 // KeyCode maps to physical keys only.
 // 
-// Note: Input flags are not reset until Update(). You should make all the Input calls in the Update() Loop.
+// NOTE: Input flags are not reset until Update(). You should make all the Input calls in the Update() Loop.
 //
 class Input {
 public: // Typedef
 	friend class LMKEngine;
 
-public: // Constructors & Destrutors
+public: // Constructors & Destructors
 #pragma region Singleton
 	Input(const Input&) = delete;
 
@@ -242,20 +242,23 @@ public: // Static Functions
 		return (Instance.m_lastMouseState & _button) && !(Instance.m_mouseState & _button);
 	}
 
-#pragma warning (disable : 4244)
-	//
-	// Get the current mouse position in pixel coordinates. (Read Only).
-	//
-	_NODISCARD inline static Vector2 GetMousePos() {
-		return Vector2(Instance.m_mouseX, Instance.m_mouseY);
-	}
-#pragma warning (default : 4244)
-
 private:
+	// 
+	// Update mouse wheel properties.
+	// 
+	// We separate mouse wheel handling to a different function from UpdateInputStates()
+	// since SDL_GetMouseState() does not include mouse wheel events.
+	// 
+	// NOTE: This function should only be called by OnHandleEvents() in LMK Engine.
+	// 
+	inline static void UpdateMouseWheel(const SDL_MouseWheelEvent& _eventData) {
+		Instance.m_mouseScrollDelta = Vector2(_eventData.x, _eventData.y) * Time::deltaTime();
+	}
+
 	//
 	// Update all input flags.
 	// 
-	// Note: This function should only be called once within the main engine Update loop.
+	// NOTE: This function should only be called once within the main engine Update loop.
 	//
 	inline static void UpdateInputStates() {
 		Instance.m_mouseState = SDL_GetMouseState(&Instance.m_mouseX, &Instance.m_mouseY);
@@ -268,7 +271,24 @@ private:
 	inline static void UpdateLastInputStates() {
 		memcpy(Instance.m_lastKeyboardStates, Instance.m_SDLKeyboardStates, Instance.m_keysLength);
 		Instance.m_lastMouseState = Instance.m_mouseState;
+		Instance.m_mouseScrollDelta = Vector2::zero();
 	}
+
+public: // Accessors
+#pragma warning (disable : 4244)
+	// Get the current mouse position in pixel coordinates. (Read Only).
+	// 
+	// The bottom-left of the screen or window is at (0, 0). 
+	// The top-right of the screen or window is at (Screen::width, Screen::height).
+	_NODISCARD inline static Vector2 mousePosition() {
+		return Vector2(Instance.m_mouseX, Instance.m_mouseY);
+	}
+
+	// Get the current mouse scroll delta.
+	_NODISCARD inline static Vector2 mouseScrollDelta() {
+		return Instance.m_mouseScrollDelta;
+	}
+#pragma warning (default : 4244)
 
 private: // Properties
 	static Input Instance;
@@ -285,6 +305,7 @@ private: // Properties
 
 	int m_mouseX = 0;	// Mouse position in the X axis. (Read Only)
 	int m_mouseY = 0;	// Mouse position in the Y axis. (Read Only)
+	Vector2 m_mouseScrollDelta;	// Mouse wheel scroll delta. (Read Only)
 };
 
 Input Input::Instance;

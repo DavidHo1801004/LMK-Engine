@@ -5,7 +5,7 @@
 #include "LMK_stdinc.h"
 #include "LMK_coremdl.h"
 #include "LMK_systems.h"
-
+#include "LMK_gameobj.h"
 LMK_BEGIN
 // +--------------------------------------------------------------------------------+
 // |																				|
@@ -38,7 +38,7 @@ enum PhysicsShapeType2D {
 	// 
 	// These edges must result in a convex polygon.
 	// If this is not the case then the physics system will constrain the polygon to be convex by producing a convex hull.
-	// All polygon collision detection uses SAT (Seperating Axis Theorem) convex polygons for performance reasons.
+	// All polygon collision detection uses SAT (Separating Axis Theorem) convex polygons for performance reasons.
 	Polygon,
 };
 
@@ -83,39 +83,51 @@ class Rigidbody2D;
 //
 // Base class for collider types used with 2D physics.
 //
-class BaseCollider2D {
+class BaseCollider2D : public Component {
 public: // Constructors & Destructors
-#pragma warning (disable : 26495)
 	//
 	// Creates a new BaseCollider2D.
 	// 
 	// @param _phyShape:
 	//		The original "model" of the Collider.
 	//
-	inline BaseCollider2D(const PhysicsShape2D& _phyShape) 
-		: m_pS(_phyShape), m_tvert(_phyShape.vert) {}
-
-	//
-	// Creates a new empty BaseCollider2D.
-	// 
-	// This Collider does not contains any vertex information.
-	//
-	inline BaseCollider2D() {}
-#pragma warning (default : 26495)
-
-public: // Functions
-	//
-	// Returns a point on the perimeter of this Collider that is closest to the specified position.
-	//
-	_NODISCARD inline Vector2 ClosetPoint(Vector2 _position) {
-
+	inline BaseCollider2D(PhysicsShape2D* _phyShape) 
+		: m_pS(_phyShape), m_tvert(_phyShape->vert), Component() {
+		UpdateBounds();
 	}
 
 	//
-	// Checking for overlapping colliders using SAT (Seperating Axis Theorem).
+	// Creates a new BaseCollider2D with no vertex.
+	//
+	inline BaseCollider2D() {}
+
+public: // Functions
+	//
+	// Check if a collider overlaps a point in space.
+	// 
+	// @return
+	//		True if _point overlap the collider. Otherwise false.
+	//
+	_NODISCARD inline bool OverlapPoint(Vector2 _point) {
+		bool c = false; // True if point is inside the polygon else false.
+		size_t n = m_tvert.size();
+		for (size_t i = 0, j = n - 1; i < n; j = i++) {
+			if (((m_tvert[i].y > _point.y) != (m_tvert[j].y > _point.y)) &&
+				(_point.x < (m_tvert[j].x - m_tvert[i].x) * (_point.y - m_tvert[i].y) / (m_tvert[j].y - m_tvert[i].y) + m_tvert[i].x))
+				c = !c;
+		}
+		return c;
+	}
+
+	//
+	// Checking for overlapping colliders using SAT (Separating Axis Theorem).
 	//
 	_NODISCARD inline bool OverlapWith(const BaseCollider2D& _other) {
-		// For a detailed explaination of the Seperating Axis Theorem, see:
+		// If the bounding box of this collider is not overlapping 
+		// with the bounding box of the other collider.
+		if (!m_bounds->Intersects(*_other.m_bounds)) return false;
+
+		// For a detailed explanation of the Separating Axis Theorem, see:
 		// http://programmerart.weebly.com/separating-axis-theorem.html
 
 		const BaseCollider2D* poly1 = this;
@@ -149,8 +161,8 @@ public: // Functions
 					max_r1 = LMK_Max(max_r1, q);
 				}
 
-				min_r1 -= m_pS.radius;
-				max_r1 += m_pS.radius;
+				min_r1 -= m_pS->radius;
+				max_r1 += m_pS->radius;
 
 				// Get the projected shadow length of the second collider.
 				float min_r2 = INFINITY, max_r2 = -INFINITY;
@@ -162,8 +174,8 @@ public: // Functions
 					max_r2 = LMK_Max(max_r2, q);
 				}
 
-				min_r2 -= m_pS.radius;
-				max_r2 += m_pS.radius;
+				min_r2 -= m_pS->radius;
+				max_r2 += m_pS->radius;
 
 				// If the projected shadows are not overlapping -> the polygons are not overlapping.
 				if (!(max_r2 >= min_r1 && max_r1 >= min_r2)) return false;
@@ -176,19 +188,34 @@ public: // Functions
 
 #pragma warning (disable : 4244)
 	//
-	// Tranform to world space position from the original vertices.
+	// Transform to world space position from the original vertices.
 	//
 	_NODISCARD inline void Transform(Vector2 _offset, float _rotation, Vector2 _scale) {
-		for (size_t i = 0; i < m_pS.vert.size(); i++) {
+		for (size_t i = 0; i < m_pS->vert.size(); i++) {
 			m_tvert[i] = Vector2(
-				(m_pS.vert[i].x * std::cosf(LMK_DtoR(_rotation))) * _scale.x - (m_pS.vert[i].y * std::sinf(LMK_DtoR(_rotation))) * _scale.y + _offset.x,
-				(m_pS.vert[i].x * std::sinf(LMK_DtoR(_rotation))) * _scale.x + (m_pS.vert[i].y * std::cosf(LMK_DtoR(_rotation))) * _scale.y + _offset.y
+				(m_pS->vert[i].x * std::cosf(LMK_DtoR(_rotation))) * _scale.x - (m_pS->vert[i].y * std::sinf(LMK_DtoR(_rotation))) * _scale.y + _offset.x,
+				(m_pS->vert[i].x * std::sinf(LMK_DtoR(_rotation))) * _scale.x + (m_pS->vert[i].y * std::cosf(LMK_DtoR(_rotation))) * _scale.y + _offset.y
 			);
 		}
+		UpdateBounds();
 	}
 #pragma warning (default : 4244)
+
 private:
-	
+	//
+	// Update the bounding box of this collider.
+	//
+	inline void UpdateBounds() {
+		if (!m_bounds) m_bounds = std::make_unique<Bounds>();
+
+		Vector2 min = m_tvert[0], max = m_tvert[0];
+		for (auto vertex : m_tvert) {
+			min = Vector2::Min(min, vertex);
+			max = Vector2::Max(max, vertex);
+		}
+
+		m_bounds->setMinMax(min, max);
+	}
 
 public: // Accessors
 	// Get the transformed vertices of this Collider.
@@ -201,20 +228,25 @@ public: // Accessors
 		return m_tvert[_index];
 	}
 
-private: // Properties
-	Rigidbody2D* m_attachedRigidbody; // The Rigidbody2D attached to the Collider2D.
+	// Get the bounding box of this collider.
+	_NODISCARD inline const Bounds bounds() {
+		return *m_bounds;
+	}
 
-	PhysicsShape2D		m_pS;				// The original "model" of the Collider2D.
-	Rect				m_bounds;			// The world space bounding area of the collider.
-	PhysicsMaterial2D	m_sharedMaterial;	// The PhysicsMaterial2D that is applied to this collider.
+public: // Properties
+	bool	isTrigger	= false;	// Is this collider a trigger?
+	float	bounciness	= 0.0f;		// Get the bounciness used by the collider.
+	float	friction	= 0.0f;		// Get the friction used by the collider.
+	float	density		= 7.874f;	// The density of the collider used to calculate its mass (when auto mass is enabled).
 
-	bool	m_isTrigger		= false;	// Is this collider a trigger?
-	float	m_bounciness	= 0.0f;		// Get the bounciness used by the collider.
-	float	m_friction		= 0.0f;		// Get the friction used by the collider.
-	float	m_density		= 7.874f;	// The density of the collider used to calculate its mass (when auto mass is enabled).
+	Vector2	offset	= Vector2::zero();	// The local offset of this collider relative to the owning transform.
+	Vector2	scale	= Vector2::one();	// The size multiplier of this collider.
 
-	Vector2	m_offset	= Vector2::zero();	// The local offset of this collider relative to the owning transform.
-	Vector2	m_scale		= Vector2::one();	// The size multiplier of this collider.
+private:
+	std::shared_ptr<Rigidbody2D> m_attachedRigidbody; // The Rigidbody2D attached to the Collider2D.
+
+	std::unique_ptr<PhysicsShape2D>	m_pS		= nullptr;	// The original "model" of the Collider2D.
+	std::unique_ptr<Bounds>			m_bounds	= nullptr;	// The world space bounding area of the collider.
 
 	std::vector<Vector2> m_tvert;	// The transformed verticies of the original PhysicsShape2D.
 };
@@ -236,7 +268,8 @@ public: // Constructors & Destructors
 	// @param _radius:
 	//		Radius of the circle.
 	//
-	inline CircleCollider2D(float _radius) : BaseCollider2D(PhysicsShape2D{
+	inline CircleCollider2D(float _radius) 
+		: BaseCollider2D(new PhysicsShape2D {
 		PhysicsShapeType2D::Circle, 
 		_radius,
 		{
@@ -245,9 +278,10 @@ public: // Constructors & Destructors
 		}) {}
 
 	//
-	// Creates a new empty CircleCollider2D.
+	// Creates a new CircleCollider2D with radius of 1.
 	//
-	inline CircleCollider2D() : BaseCollider2D() {}
+	inline CircleCollider2D()
+		: CircleCollider2D(1) {}
 };
 
 // +--------------------------------------------------------------------------------+
@@ -276,7 +310,8 @@ public: // Constructors & Destructors
 	//		to fit this area. When the capsule area is a 1:1 ratio, the capsule ends will fit together exactly 
 	//		resulting in a circle only.
 	//
-	inline CapsuleCollider2D(bool _hori, const Vector2& _size) : BaseCollider2D(PhysicsShape2D{
+	inline CapsuleCollider2D(bool _hori, Vector2 _size) 
+		: BaseCollider2D(new PhysicsShape2D {
 		PhysicsShapeType2D::Capsule,
 		_hori ? _size.y : _size.x,
 		{
@@ -286,9 +321,10 @@ public: // Constructors & Destructors
 		}) {}
 
 	//
-	// Creates a new empty CapsuleCollider2D.
+	// Creates a new CapsuleCollider2D with size of (0.5, 1) and extend vertically.
 	//
-	inline CapsuleCollider2D() : BaseCollider2D() {}
+	inline CapsuleCollider2D()
+		: CapsuleCollider2D(false, Vector2(0.5f, 1)) {}
 };
 
 // +--------------------------------------------------------------------------------+
@@ -316,9 +352,10 @@ public: // Constructors & Destructors
 	//			When an edge has zero radius it is effectively infinitely thin. 
 	//			When an edge has a radius greater than zero, each edge acts like a 'capsule' shape with rounded ends. 
 	//			This results in a box with rounded corners.
-	//			Note: using the _edgeRadius does not effect the Rigidbody.mass even though the collision area has changed.
+	//			NOTE: using the _edgeRadius does not effect the Rigidbody.mass even though the collision area has changed.
 	//
-	inline BoxCollider2D(const Vector2& _size, float _edgeRadius) : BaseCollider2D(PhysicsShape2D{
+	inline BoxCollider2D(Vector2 _size, float _edgeRadius) 
+		: BaseCollider2D(new PhysicsShape2D {
 		PhysicsShapeType2D::Polygon, 
 		_edgeRadius, 
 		{
@@ -330,9 +367,10 @@ public: // Constructors & Destructors
 		}) {}
 
 	//
-	// Creates a new empty BoxCollider2D.
+	// Creates a new BoxCollider2D with size of (1, 1) and edge radius of 0.
 	//
-	inline BoxCollider2D() : BaseCollider2D() {}
+	inline BoxCollider2D() 
+		: BoxCollider2D(Vector2::one(), 0) {}
 };
 
 // +--------------------------------------------------------------------------------+
@@ -352,17 +390,55 @@ public: // Constructors & Destructors
 	// @param _vertices:
 	//		Corner points that define the collider's shape in local space.
 	//
-	inline PolygonCollider2D(const std::vector<Vector2>& _vertices) : BaseCollider2D(PhysicsShape2D{
+	inline PolygonCollider2D(const std::vector<Vector2>& _vertices) 
+		: BaseCollider2D(new PhysicsShape2D {
 		PhysicsShapeType2D::Polygon, 
 		0, 
 		_vertices
 		}) {}
 
 	//
-	// Creates a new empty PolygonCollider2D.
+	// Creates a new PolygonCollider2D with no vertex data.
 	//
-	inline PolygonCollider2D() : BaseCollider2D() {}
+	inline PolygonCollider2D()
+		: BaseCollider2D() {}
 };
+
+// +--------------------------------------------------------------------------------+
+// |																				|
+// | PHYSICS 2D																		|
+// |																				|
+// +--------------------------------------------------------------------------------+
+
+//
+// Global settings and helpers for 2D physics.
+//
+class Physics2D {
+public: // Constructors & Destructors
+#pragma region Singleton
+	inline Physics2D(const Physics2D&) = delete;
+
+private:
+	inline Physics2D() {}
+
+public:
+#pragma endregion
+
+public: // Static Functions
+
+public: // Accessors
+	//
+	inline static float gravitationalAcceleration() {
+		return Instance.m_gravitationalAcceleration;
+	}
+
+private: // Properties
+	static Physics2D Instance;
+
+	float m_gravitationalAcceleration = 9.8f;
+};
+
+Physics2D Physics2D::Instance;
 
 // +--------------------------------------------------------------------------------+
 // |																				|
@@ -443,7 +519,7 @@ USE_ENUM_NS(rgbody);
 // 
 // Adding a Rigidbody2D component to a sprite puts it under the control of the physics engine.
 //
-class Rigidbody2D {
+class Rigidbody2D : public Component {
 public: // Typedef
 
 
@@ -459,26 +535,33 @@ public: // Constructors & Destructors
 	) {
 
 	}
+
+	inline Rigidbody2D() = default;
 #pragma warning (default : 26495)
 
-private: // Properties
-	RigidbodyConstraints2D	m_constrains;	// 
-	RigidbodyType2D			m_bodyType;		// 
+public:
+	//
+	// 
+	//
+	inline void Update() {
+		velocity += Vector2::down() * Physics2D::gravitationalAcceleration() * m_gravityScale;
+		transform->setPosition(transform->position() + velocity * Time::fixedDeltaTime());
+	}
 
-	float m_drag;			// 
-	float m_angularDrag;	// 
-	float m_inertia;		// 
-	float m_mass;			// 
-	float m_gravityScale;	// 
+public: // Properties
+	Vector2	velocity;	// 
 
-	bool m_useAutoMass;					// 
+private:
+	RigidbodyType2D			m_bodyType;		//  
+
+	float m_drag;			//  
+	float m_angularDrag;	//  
+	float m_inertia;		//  
+	float m_mass;			//  
+	float m_gravityScale;	//  
+
+	bool m_useAutoMass;					//  
 	bool m_useFullKinematicContacts;	// 
-
-	Vector2	m_position;			//
-	float	m_rotation;			//
-	Vector2	m_velocity;			//
-	float	m_angularVelocity;	//
-	Vector2	m_centerOfMass;		//
 
 	float totalForce;	// The total amount of force that has been explicitly applied to this Rigidbody2D since the last physics simulation step.
 	float totalTorque;	// The total amount of torque that has been explicitly applied to this Rigidbody2D since the last physics simulation step.
@@ -486,35 +569,21 @@ private: // Properties
 
 // +--------------------------------------------------------------------------------+
 // |																				|
-// | RAYCAST HIT 2D																	|
+// | RIGIDBODY 2D																	|
 // |																				|
 // +--------------------------------------------------------------------------------+
 
 //
-// 
 //
-struct RaycastHit2D {
-	BaseCollider2D collider;
-
-};
-
-// +--------------------------------------------------------------------------------+
-// |																				|
-// | PHYSICS 2D																		|
-// |																				|
-// +--------------------------------------------------------------------------------+
-
 //
-// Global settings and helpers for 2D physics.
-//
-class Physics2D {
-public: // Functions
-	inline static RaycastHit2D Raycast(Vector2 origin, Vector2 direction, float distance = INFINITY, int layerMask = 0, float minDepth = -INFINITY, float maxDepth = INFINITY) {
+class PhysicsSystem {
+public:
+	inline bool Submit() {
 
 	}
 
-public: // Properties
-	static float gravitationalAcceleration;
+private:
+	std::vector<std::shared_ptr<Rigidbody2D>> m_bodies;
 };
 LMK_END
 

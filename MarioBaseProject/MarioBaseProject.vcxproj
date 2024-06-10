@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="utf-8"?>
+﻿<?xml version="1.0" encoding="utf-8"?>
 <Project DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <ItemGroup Label="ProjectConfigurations">
     <ProjectConfiguration Include="Debug|Win32">
@@ -94,7 +94,7 @@
       <SubSystem>Console</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <AdditionalLibraryDirectories>$(ProjectDir)SDL2\SDL\lib\x86;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
-      <AdditionalDependencies>SDL2.lib;SDL2main.lib;SDL2test.lib;SDL2_mixer.lib;SDL2_image.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>SDL2.lib;SDL2main.lib;SDL2test.lib;SDL2_mixer.lib;SDL2_image.lib;SDL2_ttf.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
     <PostBuildEvent />
     <PostBuildEvent>
@@ -171,13 +171,15 @@
     <ClInclude Include="LMK\LMK_coremdl.h" />
     <ClInclude Include="LMK\LMK_engine.h" />
     <ClInclude Include="LMK\LMK_gameobj.h" />
-    <ClInclude Include="LMK\LMK_gizmo.h" />
     <ClInclude Include="LMK\LMK_input.h" />
+    <ClInclude Include="LMK\LMK_observer.h" />
     <ClInclude Include="LMK\LMK_physics2d.h" />
+    <ClInclude Include="LMK\LMK_render2d.h" />
     <ClInclude Include="LMK\LMK_root.h" />
     <ClInclude Include="LMK\LMK_stdinc.h" />
     <ClInclude Include="LMK\LMK_systems.h" />
-    <ClInclude Include="SuperMarioClone.h" />
+    <ClInclude Include="LMK\LMK_uimdl.h" />
+    <ClInclude Include="TestEngines.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

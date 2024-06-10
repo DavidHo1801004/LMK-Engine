@@ -65,8 +65,8 @@
 //
 #if defined(LMK_INCLUDE_ALL)
 	#define LMK_INCLUDE_SOUND	
-	#define LMK_INCLUDE_GIZMO
 	#define LMK_INCLUDE_PHYSICS
+	#define LMK_INCLUDE_GUI
 	//
 	// Future defines are added here.
 	//
@@ -76,16 +76,17 @@
 // The core headers that implement basic classes required for LMK Engine to function.
 //
 #include "LMK_coremdl.h"
+#include "LMK_render2d.h"
 #include "LMK_engine.h"
 
 #if defined(LMK_INCLUDE_SOUND)
 	
 #endif
-#if defined(LMK_INCLUDE_GIZMO)
-	#include "LMK_gizmo.h"
-#endif
 #if defined(LMK_INCLUDE_PHYSICS)
 	#include "LMK_physics2d.h"
+#endif
+#if defined(LMK_INCLUDE_GUI)
+	#include "LMK_uimdl.h"
 #endif
 
 #endif // !_LMK_H_

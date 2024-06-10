@@ -1,14 +1,14 @@
-#include "SuperMarioClone.h"
+#include "TestEngines.h"
 
 int main(int argc, char* args[])
 {
-	SuperMarioClone game;
+	RenderTest application;
 
-	if (!game.Construct("Feature Test", SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED, 800, 800, true)) {
+	if (!application.Construct("Test", SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED, 1300, 800, false)) {
 		return EXIT_FAILURE;
 	}
-		
-	game.Start();
+	
+	application.Start();
 	
 	return EXIT_SUCCESS;
 }

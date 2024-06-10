@@ -115,6 +115,11 @@
 	#else
 		#define LMK_HAVE_SDL_TTF	0
 	#endif
+	#if __has_include(<SDL_mixer.h>)
+		#define LMK_HAVE_SDL_MIXER	1
+	#else
+		#define LMK_HAVE_SDL_MIXER	0
+	#endif
 #else
 	#define LMK_HAVE_SDL	0
 #endif

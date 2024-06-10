@@ -38,11 +38,8 @@
     <ClInclude Include="LMK\LMK_engine.h">
       <Filter>Header Files\LMK</Filter>
     </ClInclude>
-    <ClInclude Include="SuperMarioClone.h">
+    <ClInclude Include="TestEngines.h">
       <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="LMK\LMK_gizmo.h">
-      <Filter>Header Files\LMK</Filter>
     </ClInclude>
     <ClInclude Include="LMK\LMK_gameobj.h">
       <Filter>Header Files\LMK</Filter>
@@ -55,6 +52,15 @@
     </ClInclude>
     <ClInclude Include="LMK\LMK_input.h">
       <Filter>Header Files\LMK</Filter>
+    </ClInclude>
+    <ClInclude Include="LMK\LMK_render2d.h">
+      <Filter>Header Files\LMK</Filter>
+    </ClInclude>
+    <ClInclude Include="LMK\LMK_uimdl.h">
+      <Filter>Header Files\LMK</Filter>
+    </ClInclude>
+    <ClInclude Include="LMK\LMK_observer.h">
+      <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>
