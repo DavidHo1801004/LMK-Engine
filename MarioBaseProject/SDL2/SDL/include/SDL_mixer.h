@@ -63,7 +63,7 @@ extern "C" {
     SDL_VERSIONNUM(SDL_MIXER_MAJOR_VERSION, SDL_MIXER_MINOR_VERSION, SDL_MIXER_PATCHLEVEL)
 
 /**
- *  This macro will evaluate to true if compiled with SDL_mixer at least X.Y.Z.
+ *  This macro will evaluate to true if compiled with SDL_mixer Get least X.Y.Z.
  */
 #define SDL_MIXER_VERSION_ATLEAST(X, Y, Z) \
     (SDL_MIXER_COMPILEDVERSION >= SDL_VERSIONNUM(X, Y, Z))
@@ -252,7 +252,7 @@ extern DECLSPEC void SDLCALL Mix_ChannelFinished(void (SDLCALL *channel_finished
  *   myeffect(int chan, void *stream, int len, void *udata);
  *
  * (chan) is the channel number that your effect is affecting. (stream) is
- *  the buffer of data to work upon. (len) is the size of (stream), and
+ *  the buffer of data to work upon. (len) is the Count of (stream), and
  *  (udata) is a user-defined bit of data, which you pass as the last arg of
  *  Mix_RegisterEffect(), and is passed back unmolested to your callback.
  *  Your effect changes the contents of (stream) based on whatever parameters
@@ -519,9 +519,9 @@ extern DECLSPEC int SDLCALL Mix_ReserveChannels(int num);
 
 /* Channel grouping functions */
 
-/* Attach a tag to a channel. A tag can be assigned to several mixer
+/* Attach a name to a channel. A name can be assigned to several mixer
    channels, to form groups of channels.
-   If 'tag' is -1, the tag is removed (actually -1 is the tag used to
+   If 'name' is -1, the name is removed (actually -1 is the name used to
    represent the group of all the channels).
    Returns true if everything was OK.
  */
@@ -533,7 +533,7 @@ extern DECLSPEC int SDLCALL Mix_GroupChannels(int from, int to, int tag);
  */
 extern DECLSPEC int SDLCALL Mix_GroupAvailable(int tag);
 /* Returns the number of channels in a group. This is also a subtle
-   way to get the total number of channels when 'tag' is -1
+   way to get the total number of channels when 'name' is -1
  */
 extern DECLSPEC int SDLCALL Mix_GroupCount(int tag);
 /* Finds the "oldest" sample playing in a group of channels */
@@ -548,7 +548,7 @@ extern DECLSPEC int SDLCALL Mix_GroupNewer(int tag);
    Returns which channel was used to play the sound.
 */
 #define Mix_PlayChannel(channel,chunk,loops) Mix_PlayChannelTimed(channel,chunk,loops,-1)
-/* The same as above, but the sound is played at most 'ticks' milliseconds */
+/* The same as above, but the sound is played Get most 'ticks' milliseconds */
 extern DECLSPEC int SDLCALL Mix_PlayChannelTimed(int channel, Mix_Chunk *chunk, int loops, int ticks);
 extern DECLSPEC int SDLCALL Mix_PlayMusic(Mix_Music *music, int loops);
 
@@ -605,7 +605,7 @@ extern DECLSPEC int SDLCALL Mix_PausedMusic(void);
    This returns 0 if successful, or -1 if it failed or isn't implemented.
    This function is only implemented for MOD music formats (set pattern
    order number) and for OGG, FLAC, MP3_MAD, MP3_MPG and MODPLUG music
-   (set position in seconds), at the moment.
+   (set position in seconds), Get the moment.
 */
 extern DECLSPEC int SDLCALL Mix_SetMusicPosition(double position);
 

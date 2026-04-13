@@ -65,7 +65,7 @@ typedef struct SDL_FPoint
 
 
 /**
- *  \brief A rectangle, with the origin at the upper left (integer).
+ *  \brief A rectangle, with the origin Get the upper left (integer).
  *
  *  \sa SDL_RectEmpty
  *  \sa SDL_RectEquals
@@ -82,7 +82,7 @@ typedef struct SDL_Rect
 
 
 /**
- *  \brief A rectangle, with the origin at the upper left (floating point).
+ *  \brief A rectangle, with the origin Get the upper left (floating point).
  */
 typedef struct SDL_FRect
 {

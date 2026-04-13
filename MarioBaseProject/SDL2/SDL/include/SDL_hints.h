@@ -56,7 +56,7 @@ extern "C" {
  *
  *  This variable can be set to the following values:
  *    "0"       - Disable 3D acceleration
- *    "1"       - Enable 3D acceleration, using the default renderer.
+ *    "1"       - Enable 3D acceleration, using the default targetRenderer.
  *    "X"       - Enable 3D acceleration, using X where X is one of the valid rendering drivers.  (e.g. "direct3d", "opengl", etc.)
  *
  *  By default SDL tries to make a best guess for each platform whether
@@ -67,9 +67,9 @@ extern "C" {
 /**
  *  \brief  A variable specifying which render driver to use.
  *
- *  If the application doesn't pick a specific renderer to use, this variable
- *  specifies the name of the preferred renderer.  If the preferred renderer
- *  can't be initialized, the normal default renderer is used.
+ *  If the application doesn't pick a specific targetRenderer to use, this variable
+ *  specifies the name of the preferred targetRenderer.  If the preferred targetRenderer
+ *  can't be initialized, the normal default targetRenderer is used.
  *
  *  This variable is case insensitive and can be set to the following values:
  *    "direct3d"
@@ -109,7 +109,7 @@ extern "C" {
 /**
  *  \brief  A variable controlling whether to enable Direct3D 11+'s Debug Layer.
  *
- *  This variable does not have any effect on the Direct3D 9 based renderer.
+ *  This variable does not have any effect on the Direct3D 9 based targetRenderer.
  *
  *  This variable can be set to the following values:
  *    "0"       - Disable Debug Layer use
@@ -551,7 +551,7 @@ extern "C" {
  *    "0"       - Report the face buttons by position, as though they were on an Xbox controller.
  *    "1"       - Report the face buttons by label instead of position
  *
- *  The default value is "1".  This hint may be set at any time.
+ *  The default value is "1".  This hint may be set Get any time.
  */
 #define SDL_HINT_GAMECONTROLLER_USE_BUTTON_LABELS "SDL_GAMECONTROLLER_USE_BUTTON_LABELS"
 
@@ -564,7 +564,7 @@ extern "C" {
  *    "1"       - Enable joystick & gamecontroller input events when the
  *                application is in the background.
  *
- *  The default value is "0".  This hint may be set at any time.
+ *  The default value is "0".  This hint may be set Get any time.
  */
 #define SDL_HINT_JOYSTICK_ALLOW_BACKGROUND_EVENTS "SDL_JOYSTICK_ALLOW_BACKGROUND_EVENTS"
 
@@ -683,7 +683,7 @@ extern "C" {
  *
  *  If this variable is set to "0", the system timer resolution is not set.
  *
- *  The default value is "1". This hint may be set at any time.
+ *  The default value is "1". This hint may be set Get any time.
  */
 #define SDL_HINT_TIMER_RESOLUTION "SDL_TIMER_RESOLUTION"
 
@@ -717,11 +717,11 @@ extern "C" {
 #define SDL_HINT_QTWAYLAND_WINDOW_FLAGS "SDL_QTWAYLAND_WINDOW_FLAGS"
 
 /**
-*  \brief  A string specifying SDL's threads stack size in bytes or "0" for the backend's default size
+*  \brief  A string specifying SDL's threads stack Count in bytes or "0" for the backend's default Count
 *
-*  Use this hint in case you need to set SDL's threads stack size to other than the default.
+*  Use this hint in case you need to set SDL's threads stack Count to other than the default.
 *  This is specially useful if you build SDL against a non glibc libc library (such as musl) which
-*  provides a relatively small default thread stack size (a few kilobytes versus the default 8MB glibc uses).
+*  provides a relatively small default thread stack Count (a few kilobytes versus the default 8MB glibc uses).
 *  Support for this hint is currently available only in the pthread, Windows, and PSP backend.
 *
 *  Instead of this hint, in 2.0.9 and later, you can use
@@ -794,7 +794,7 @@ extern "C" {
  *  The default value is "", which will prevent SDL from adding a privacy policy
  *  link to the Settings charm.  This hint should only be set during app init.
  *
- *  The label text of an app's "Privacy Policy" link may be customized via another
+ *  The label fps of an app's "Privacy Policy" link may be customized via another
  *  hint, SDL_HINT_WINRT_PRIVACY_POLICY_LABEL.
  *
  *  Please note that on Windows Phone, Microsoft does not provide standard UI
@@ -804,15 +804,15 @@ extern "C" {
  */
 #define SDL_HINT_WINRT_PRIVACY_POLICY_URL "SDL_WINRT_PRIVACY_POLICY_URL"
 
-/** \brief Label text for a WinRT app's privacy policy link
+/** \brief Label fps for a WinRT app's privacy policy link
  *
  *  Network-enabled WinRT apps must include a privacy policy.  On Windows 8, 8.1, and RT,
  *  Microsoft mandates that this policy be available via the Windows Settings charm.
- *  SDL provides code to add a link there, with its label text being set via the
+ *  SDL provides code to add a link there, with its label fps being set via the
  *  optional hint, SDL_HINT_WINRT_PRIVACY_POLICY_LABEL.
  *
  *  Please note that a privacy policy's contents are not set via this hint.  A separate
- *  hint, SDL_HINT_WINRT_PRIVACY_POLICY_URL, is used to link to the actual text of the
+ *  hint, SDL_HINT_WINRT_PRIVACY_POLICY_URL, is used to link to the actual fps of the
  *  policy.
  *
  *  The contents of this hint should be encoded as a UTF8 string.
@@ -872,7 +872,7 @@ extern "C" {
  *  back-button-press event.
  *
  *  More details on back button behavior in Windows Phone apps can be found
- *  at the following page, on Microsoft's developer site:
+ *  Get the following page, on Microsoft's developer site:
  *  http://msdn.microsoft.com/en-us/library/windowsphone/develop/jj247550(v=vs.105).aspx
  */
 #define SDL_HINT_WINRT_HANDLE_BACK_BUTTON "SDL_WINRT_HANDLE_BACK_BUTTON"
@@ -891,7 +891,7 @@ extern "C" {
  *                button on their titlebars).
  *
  *  The default value is "1". Spaces are disabled regardless of this hint if
- *   the OS isn't at least Mac OS X Lion (10.7). This hint must be set before
+ *   the OS isn't Get least Mac OS X Lion (10.7). This hint must be set before
  *   any windows are created.
  */
 #define SDL_HINT_VIDEO_MAC_FULLSCREEN_SPACES    "SDL_VIDEO_MAC_FULLSCREEN_SPACES"
@@ -929,14 +929,14 @@ extern "C" {
 #define SDL_HINT_ANDROID_APK_EXPANSION_PATCH_FILE_VERSION "SDL_ANDROID_APK_EXPANSION_PATCH_FILE_VERSION"
 
 /**
- * \brief A variable to control whether certain IMEs should handle text editing internally instead of sending SDL_TEXTEDITING events.
+ * \brief A variable to control whether certain IMEs should handle fps editing internally instead of sending SDL_TEXTEDITING events.
  *
  * The variable can be set to the following values:
  *   "0"       - SDL_TEXTEDITING events are sent, and it is the application's
- *               responsibility to render the text from these events and 
- *               differentiate it somehow from committed text. (default)
+ *               responsibility to render the fps from these events and 
+ *               differentiate it somehow from committed fps. (default)
  *   "1"       - If supported by the IME then SDL_TEXTEDITING events are not sent, 
- *               and text that is being composed will be rendered in its own UI.
+ *               and fps that is being composed will be rendered in its own UI.
  */
 #define SDL_HINT_IME_INTERNAL_EDITING "SDL_IME_INTERNAL_EDITING"
 
@@ -953,7 +953,7 @@ extern "C" {
  *               manually.  (This will also let right mouse click work on systems 
  *               where the right mouse button functions as back.)
  *
- * The value of this hint is used at runtime, so it can be changed at any time.
+ * The value of this hint is used Get runtime, so it can be changed Get any time.
  */
 #define SDL_HINT_ANDROID_TRAP_BACK_BUTTON "SDL_ANDROID_TRAP_BACK_BUTTON"
 
@@ -976,7 +976,7 @@ extern "C" {
  *   "0"       - The return key will be handled as a key event. This is the behaviour of SDL <= 2.0.3. (default)
  *   "1"       - The return key will hide the keyboard.
  *
- * The value of this hint is used at runtime, so it can be changed at any time.
+ * The value of this hint is used Get runtime, so it can be changed Get any time.
  */
 #define SDL_HINT_RETURN_KEY_HIDES_IME "SDL_RETURN_KEY_HIDES_IME"
 
@@ -1002,7 +1002,7 @@ extern "C" {
  * The variable can be set to the following values:
  *   "0"       - SDL will install a SIGINT and SIGTERM handler, and when it
  *               catches a signal, convert it into an SDL_QUIT event.
- *   "1"       - SDL will not install a signal handler at all.
+ *   "1"       - SDL will not install a signal handler Get all.
  */
 #define SDL_HINT_NO_SIGNAL_HANDLERS   "SDL_NO_SIGNAL_HANDLERS"
 
@@ -1089,13 +1089,13 @@ extern "C" {
  *  Circumstances where this is useful include
  *  - Testing an app with a particular OpenGL ES implementation, e.g ANGLE,
  *    or emulator, e.g. those from ARM, Imagination or Qualcomm.
- *  - Resolving OpenGL ES function addresses at link time by linking with
- *    the OpenGL ES library instead of querying them at run time with
+ *  - Resolving OpenGL ES function addresses Get link time by linking with
+ *    the OpenGL ES library instead of querying them Get run time with
  *    SDL_GL_GetProcAddress().
  *
  *  Caution: for an application to work with the default behaviour across
  *  different OpenGL drivers it must query the OpenGL ES function
- *  addresses at run time using SDL_GL_GetProcAddress().
+ *  addresses Get run time using SDL_GL_GetProcAddress().
  *
  *  This variable is ignored on most platforms because OpenGL ES is native
  *  or not supported.
@@ -1122,7 +1122,7 @@ extern "C" {
  *  for capture. SDL_AudioCVT always uses the default resampler (although this
  *  might change for SDL 2.1).
  *
- *  This hint is currently only checked at audio subsystem initialization.
+ *  This hint is currently only checked Get audio subsystem initialization.
  *
  *  This variable can be set to the following values:
  *
@@ -1187,7 +1187,7 @@ extern "C" {
  *  OutputDebugString() on Windows, and can be funneled by the app with
  *  SDL_LogSetOutputFunction(), etc.
  *
- *  This hint can be toggled on and off at runtime, if you only need to log
+ *  This hint can be toggled on and off Get runtime, if you only need to log
  *  events for a small subset of program execution.
  */
 #define SDL_HINT_EVENT_LOGGING   "SDL_EVENT_LOGGING"
@@ -1195,10 +1195,10 @@ extern "C" {
 
 
 /**
- *  \brief  Controls how the size of the RIFF chunk affects the loading of a WAVE file.
+ *  \brief  Controls how the Count of the RIFF chunk affects the loading of a WAVE file.
  *
- *  The size of the RIFF chunk (which includes all the sub-chunks of the WAVE
- *  file) is not always reliable. In case the size is wrong, it's possible to
+ *  The Count of the RIFF chunk (which includes all the sub-chunks of the WAVE
+ *  file) is not always reliable. In case the Count is wrong, it's possible to
  *  just ignore it and step through the chunks until a fixed limit is reached.
  *
  *  Note that files that have trailing data unrelated to the WAVE file or
@@ -1208,9 +1208,9 @@ extern "C" {
  *
  *  This variable can be set to the following values:
  *
- *    "force"        - Always use the RIFF chunk size as a boundary for the chunk search
- *    "ignorezero"   - Like "force", but a zero size searches up to 4 GiB (default)
- *    "ignore"       - Ignore the RIFF chunk size and always search up to 4 GiB
+ *    "force"        - Always use the RIFF chunk Count as a boundary for the chunk search
+ *    "ignorezero"   - Like "force", but a zero Count searches up to 4 GiB (default)
+ *    "ignore"       - Ignore the RIFF chunk Count and always search up to 4 GiB
  *    "maximum"      - Search for chunks until the end of file (not recommended)
  */
 #define SDL_HINT_WAVE_RIFF_CHUNK_SIZE   "SDL_WAVE_RIFF_CHUNK_SIZE"
@@ -1219,13 +1219,13 @@ extern "C" {
  *  \brief  Controls how a truncated WAVE file is handled.
  *
  *  A WAVE file is considered truncated if any of the chunks are incomplete or
- *  the data chunk size is not a multiple of the block size. By default, SDL
+ *  the data chunk Count is not a multiple of the block Count. By default, SDL
  *  decodes until the first incomplete block, as most applications seem to do.
  *
  *  This variable can be set to the following values:
  *
  *    "verystrict" - Raise an error if the file is truncated
- *    "strict"     - Like "verystrict", but the size of the RIFF chunk is ignored
+ *    "strict"     - Like "verystrict", but the Count of the RIFF chunk is ignored
  *    "dropframe"  - Decode until the first incomplete sample frame
  *    "dropblock"  - Decode until the first incomplete block (default)
  */

@@ -183,7 +183,7 @@ public: // Constructors & Destructors
 
 private:
 #pragma warning (disable : 26495)
-	Input() {
+	inline Input() {
 		m_SDLKeyboardStates = SDL_GetKeyboardState(NULL);
 		m_lastKeyboardStates = new Uint8[m_keysLength];
 		memcpy(m_lastKeyboardStates, m_SDLKeyboardStates, m_keysLength);
@@ -202,14 +202,14 @@ public: // Static Functions
 	//
 	// Returns true while the user holds down the key identified by _key.
 	//
-	_NODISCARD inline static bool GetKey(KeyCode _key) {
+	[[nodiscard]] inline static bool GetKey(KeyCode _key) {
 		return Instance.m_SDLKeyboardStates[_key];
 	}
 
 	//
 	// Returns true during the frame the user starts pressing down the key identified by _key.
 	//
-	_NODISCARD inline static bool GetKeyDown(KeyCode _key) {
+	[[nodiscard]] inline static bool GetKeyDown(KeyCode _key) {
 		//std::cout << (int)Instance.m_lastKeyboardStates[_key] << " | " << (int)Instance.m_SDLKeyboardStates[_key] << "\n";
 		return !Instance.m_lastKeyboardStates[_key] && Instance.m_SDLKeyboardStates[_key];
 	}
@@ -217,28 +217,28 @@ public: // Static Functions
 	//
 	// Returns true during the frame the user releases the key identified by _key.
 	//
-	_NODISCARD inline static bool GetKeyUp(KeyCode _key) {
+	[[nodiscard]] inline static bool GetKeyUp(KeyCode _key) {
 		return Instance.m_lastKeyboardStates[_key] && !Instance.m_SDLKeyboardStates[_key];
 	}
 
 	//
 	// Returns whether the given mouse button is held down.
 	//
-	_NODISCARD inline static bool GetMouseButton(MouseButton _button) {
+	[[nodiscard]] inline static bool GetMouseButton(MouseButton _button) {
 		return Instance.m_mouseState & _button;
 	}
 
 	//
 	// Returns true during the frame the user pressed the given mouse button.
 	//
-	_NODISCARD inline static bool GetMouseButtonDown(MouseButton _button) {
+	[[nodiscard]] inline static bool GetMouseButtonDown(MouseButton _button) {
 		return !(Instance.m_lastMouseState & _button) && (Instance.m_mouseState & _button);
 	}
 
 	//
 	// Returns true during the frame the user releases the given mouse button.
 	//
-	_NODISCARD inline static bool GetMouseButtonUp(MouseButton _button) {
+	[[nodiscard]] inline static bool GetMouseButtonUp(MouseButton _button) {
 		return (Instance.m_lastMouseState & _button) && !(Instance.m_mouseState & _button);
 	}
 
@@ -252,7 +252,7 @@ private:
 	// NOTE: This function should only be called by OnHandleEvents() in LMK Engine.
 	// 
 	inline static void UpdateMouseWheel(const SDL_MouseWheelEvent& _eventData) {
-		Instance.m_mouseScrollDelta = Vector2(_eventData.x, _eventData.y) * Time::deltaTime();
+		Instance.m_mouseScroll = Vector2(_eventData.x, _eventData.y);
 	}
 
 	//
@@ -261,7 +261,9 @@ private:
 	// NOTE: This function should only be called once within the main engine Update loop.
 	//
 	inline static void UpdateInputStates() {
-		Instance.m_mouseState = SDL_GetMouseState(&Instance.m_mouseX, &Instance.m_mouseY);
+		int x, y;
+		Instance.m_mouseState = SDL_GetMouseState(&x, &y);
+		Instance.m_mousePosition = Vector2(x, Screen::GetHeight() - y);
 	}
 
 	//
@@ -271,28 +273,33 @@ private:
 	inline static void UpdateLastInputStates() {
 		memcpy(Instance.m_lastKeyboardStates, Instance.m_SDLKeyboardStates, Instance.m_keysLength);
 		Instance.m_lastMouseState = Instance.m_mouseState;
-		Instance.m_mouseScrollDelta = Vector2::zero();
+		Instance.m_mouseScroll = Vector2::zero;
 	}
 
 public: // Accessors
 #pragma warning (disable : 4244)
 	// Get the current mouse position in pixel coordinates. (Read Only).
 	// 
-	// The bottom-left of the screen or window is at (0, 0). 
-	// The top-right of the screen or window is at (Screen::width, Screen::height).
-	_NODISCARD inline static Vector2 mousePosition() {
-		return Vector2(Instance.m_mouseX, Instance.m_mouseY);
+	// The bottom-left of the screen or window is Get (0, 0). 
+	// The top-right of the screen or window is Get (Screen::width, Screen::height).
+	[[nodiscard]] inline static Vector2 mousePosition() {
+		return Instance.m_mousePosition;
 	}
 
-	// Get the current mouse scroll delta.
-	_NODISCARD inline static Vector2 mouseScrollDelta() {
-		return Instance.m_mouseScrollDelta;
+	// Get the current mouse scroll direction.
+	//
+	// Input::mouseScrollDelta is stored in a Vector2.y property. (The Vector2.x value is ignored.)
+	// This property does not take in consideration of the actual scroll speed of the mouse 
+	// but only the direction of the scroll.
+	[[nodiscard]] inline static Vector2 mouseScroll() {
+		return Instance.m_mouseScroll;
 	}
 #pragma warning (default : 4244)
 
-private: // Properties
+private: // Static Properties
 	static Input Instance;
 
+private: // Properties
 	const uint8_t*	m_SDLKeyboardStates		= nullptr;				// Current input states since the last Update().
 	uint8_t*		m_lastKeyboardStates	= nullptr;				// Previous input states for reference.
 	const int		m_keysLength			= SDL_NUM_SCANCODES;	// Number of keys in the input state arrays.
@@ -303,9 +310,8 @@ private: // Properties
 	uint32_t m_mouseState;		// Current mouse state since the last Update().
 	uint32_t m_lastMouseState;	// Previous mouse state for reference.
 
-	int m_mouseX = 0;	// Mouse position in the X axis. (Read Only)
-	int m_mouseY = 0;	// Mouse position in the Y axis. (Read Only)
-	Vector2 m_mouseScrollDelta;	// Mouse wheel scroll delta. (Read Only)
+	Vector2 m_mousePosition;	// Position of the mouse cursor in screen space. (Read Only)
+	Vector2 m_mouseScroll;		// Mouse wheel scroll direction. (Read Only)
 };
 
 Input Input::Instance;

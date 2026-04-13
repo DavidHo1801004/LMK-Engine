@@ -32,7 +32,8 @@ public:
 	//
 	// Create a new LayerMask with the default id of LAYER_0.
 	//
-	inline LayerMask() {}
+	inline LayerMask()
+		: m_value(0) {}
 
 public: // Functions
 	//
@@ -86,7 +87,8 @@ public: // Static Functions
 
 public: // Accessors
 	// Converts a layer mask value to an integer value.
-	_NODISCARD inline layer_size_type value() {
+	[[nodiscard]]
+    inline layer_size_type GetValue() {
 		return m_value;
 	}
 
@@ -94,6 +96,7 @@ private:
 	layer_size_type m_value;
 };
 
+IMPL_BEGIN
 // +--------------------------------------------------------------------------------+
 // |																				|
 // | 2D VECTOR																		|
@@ -101,7 +104,6 @@ private:
 // +--------------------------------------------------------------------------------+
 
 #pragma warning(disable : 4244)
-IMPL_BEGIN
 //
 // The base class for Vector2 and Vector2Int.
 // 
@@ -117,7 +119,7 @@ public:	// Typedef
 
 public:	// Constructors & Destructors
 	//
-	// Creates a new BaseVector2 with the given x and y components.
+	// Create a new BaseVector2 with the given x and y components.
 	//
 	inline explicit BaseVector2(base_type _x, base_type _y)
 		: x(_x), y(_y) {}
@@ -129,14 +131,16 @@ public:	// Operators Overloads
 	// @return
 	//		A formatted string: {x; y}
 	//
-	_NODISCARD inline operator std::string() const {
+	[[nodiscard]]
+    inline operator std::string() const {
 		return "{" + std::to_string(x) + "; " + std::to_string(y) + "}";
 	}
 
 	//
 	// Access the x or y component using [0] or [1] respectively.
 	//
-	_NODISCARD constexpr base_type& operator[](int _index) {
+	[[nodiscard]]
+    constexpr base_type& operator[](int _index) {
 		switch (_index) {
 		case 0: return x;
 		case 1: return y;
@@ -147,7 +151,8 @@ public:	// Operators Overloads
 	//
 	// Access the x or y component using [0] or [1] respectively.
 	//
-	_NODISCARD constexpr base_type operator[](int _index) const {
+	[[nodiscard]]
+    constexpr base_type operator[](int _index) const {
 		switch (_index) {
 		case 0: return x;
 		case 1: return y;
@@ -156,7 +161,8 @@ public:	// Operators Overloads
 	}
 
 	template <typename Right_Type>
-	_NODISCARD constexpr bool operator==(const BaseVector2<Right_Type>& _right) const noexcept {
+	[[nodiscard]]
+    constexpr bool operator==(const BaseVector2<Right_Type>& _right) const noexcept {
 		return (x == _right.x) && (y == _right.y);
 	}
 
@@ -167,7 +173,8 @@ public: // Functions
 	// @return
 	//		Square root of (x * x + y * y).
 	//
-	_NODISCARD constexpr float magnitude() const noexcept {
+	[[nodiscard]]
+    constexpr float GetMagnitude() const noexcept {
 		return std::sqrt(x * x + y * y);
 	}
 
@@ -180,7 +187,8 @@ public: // Functions
 	// @return
 	//		The result of (x * x + y * y).
 	//
-	_NODISCARD constexpr float sqrMagnitude() const noexcept {
+	[[nodiscard]]
+    constexpr float GetSqrMagnitude() const noexcept {
 		return x * x + y * y;
 	}
 
@@ -199,7 +207,7 @@ class Vector3;
 class Vector2 : public impl::BaseVector2<float> {
 public:	// Constructors & Destructors
 	//
-	// Creates a new Vector2.
+	// Create a new Vector2.
 	// 
 	// @param _x:
 	//		The X coordinate of the vector.
@@ -210,7 +218,7 @@ public:	// Constructors & Destructors
 		: BaseVector2(_x, _y) {}
 
 	//
-	// Creates a new Vector2 with coordinate of (0, 0).
+	// Create a new Vector2 with coordinate of (0, 0).
 	//
 	inline Vector2()
 		: Vector2(0, 0) {}
@@ -220,8 +228,17 @@ public: // Operators Overloads
 	//
 	// Converts a lmk::Vector2 to SDL_FPoint.
 	//
-	_NODISCARD inline operator SDL_FPoint() {
+	[[nodiscard]]
+    inline operator SDL_FPoint() {
 		return SDL_FPoint{x, y};
+	}
+
+	//
+	// Converts a lmk::Vector2 to SDL_FPoint.
+	//
+	[[nodiscard]]
+    inline operator const SDL_FPoint*() {
+		return new SDL_FPoint{ x, y };
 	}
 #endif
 
@@ -230,7 +247,8 @@ public: // Operators Overloads
 	// 
 	// A Vector2 can be implicitly converted into a Vector3. (The z is set to zero in the result).
 	//
-	_NODISCARD inline operator Vector3();
+	[[nodiscard]]
+    inline operator Vector3();
 
 	inline Vector2& operator+=(Vector2 _right) noexcept {
 		x += _right.x;
@@ -256,28 +274,37 @@ public: // Operators Overloads
 		return *this;
 	}
 
-	_NODISCARD inline Vector2 operator+(Vector2 _right) const {
+	[[nodiscard]]
+    inline Vector2 operator+(Vector2 _right) const {
 		Vector2 temp = *this;
 		temp += _right;
 		return temp;
 	}
 
-	_NODISCARD inline Vector2 operator-(Vector2 _right) const {
+	[[nodiscard]]
+    inline Vector2 operator-(Vector2 _right) const {
 		Vector2 temp = *this;
 		temp -= _right;
 		return temp;
 	}
 
-	_NODISCARD inline Vector2 operator/(float _right) const {
+	[[nodiscard]]
+    inline Vector2 operator/(float _right) const {
 		Vector2 temp = *this;
 		temp /= _right;
 		return temp;
 	}
 
-	_NODISCARD inline Vector2 operator*(float _right) const {
+	[[nodiscard]]
+    inline Vector2 operator*(float _right) const {
 		Vector2 temp = *this;
 		temp *= _right;
 		return temp;
+	}
+
+	[[nodiscard]]
+    inline Vector2 operator-() {
+		return *this * -1;
 	}
 
 public: // Functions
@@ -290,8 +317,9 @@ public: // Functions
 	// @return
 	//		A normalized vector based on the current vector.
 	// 
-	_NODISCARD inline Vector2 normalized() const {
-		return (sqrMagnitude() > 0) ? *this / magnitude() : *this;
+	[[nodiscard]]
+    inline Vector2 GetNormalized() const {
+		return (GetSqrMagnitude() > 0) ? *this / GetMagnitude() : *this;
 	}
 
 	// 
@@ -301,7 +329,7 @@ public: // Functions
 	// NOTE: This function will change the current vector. If you want to keep the current vector unchanged, use normalized().
 	//		
 	inline Vector2& Normalize() {
-		*this /= magnitude();
+		*this /= GetMagnitude();
 		return *this;
 	}
 
@@ -330,8 +358,9 @@ public: // Static Functions
 	// @return
 	//		A normalized Vector2 represents the calculated direction.
 	// 
-	_NODISCARD inline static Vector2 Direction(Vector2 _from, Vector2 _to) noexcept {
-		return (_to - _from).normalized();
+	[[nodiscard]]
+    inline static Vector2 Direction(Vector2 _from, Vector2 _to) noexcept {
+		return (_to - _from).GetNormalized();
 	}
 
 	// 
@@ -340,8 +369,9 @@ public: // Static Functions
 	// @return
 	//		The distance between _a and _b.
 	// 
-	_NODISCARD inline static float Distance(Vector2 _a, Vector2 _b) noexcept {
-		return (_b - _a).magnitude();
+	[[nodiscard]]
+    inline static float Distance(Vector2 _a, Vector2 _b) noexcept {
+		return (_b - _a).GetMagnitude();
 	}
 
 	// 
@@ -350,8 +380,9 @@ public: // Static Functions
 	// @return
 	//		A copy of _vector with its magnitude clamped to _maxLength.
 	// 
-	_NODISCARD inline static Vector2 ClampMagnitude(Vector2 _vector, float _maxLength) {
-		return _vector.normalized() * _maxLength;
+	[[nodiscard]]
+    inline static Vector2 ClampMagnitude(Vector2 _vector, float _maxLength) {
+		return _vector.GetNormalized() * _maxLength;
 	}
 
 	// 
@@ -367,8 +398,25 @@ public: // Static Functions
 	// @return
 	//		Returns (_lhs . _rhs).
 	// 
-	_NODISCARD inline static float Dot(Vector2 _lhs, Vector2 _rhs) noexcept {
+	[[nodiscard]]
+    inline static float Dot(Vector2 _lhs, Vector2 _rhs) noexcept {
 		return _lhs.x * _rhs.x + _lhs.y * _rhs.y;
+	}
+
+	// 
+	// Cross Product of two vectors.
+	// 
+	// The returned value of a cross product between 2D vectors is represented 
+	// as scalar instead of vector.
+	// 
+	// To get the perpendicular vector of 2D vectors, use Vector3::Cross instead.
+	//	
+	// @return
+	//		Returns (_lhs x _rhs).
+	// 
+	[[nodiscard]]
+    inline static float Cross(Vector2 _lhs, Vector2 _rhs) noexcept {
+		return _lhs.x * _rhs.y - _lhs.y * _rhs.x;
 	}
 
 	// 
@@ -389,7 +437,8 @@ public: // Static Functions
 	// @return
 	//		The unsigned angle in degrees between the two vectors.
 	// 
-	_NODISCARD inline static float Angle(Vector2 _from, Vector2 _to) {
+	[[nodiscard]]
+    inline static float Angle(Vector2 _from, Vector2 _to) {
 		return std::abs(SignedAngle(_from, _to));
 	}
 
@@ -411,14 +460,16 @@ public: // Static Functions
 	// @return
 	//		The signed angle in degrees between the two vectors.
 	// 
-	_NODISCARD inline static float SignedAngle(Vector2 _from, Vector2 _to) {
+	[[nodiscard]]
+    inline static float SignedAngle(Vector2 _from, Vector2 _to) {
 		return LMK_RtoD(std::atan2(_from.x * _to.y - _from.y * _to.x, _from.x * _to.x + _from.y * _to.y));
 	}
 
 	// 
 	// Returns a vector that is made from the largest components of two vectors.
 	// 
-	_NODISCARD inline static Vector2 Max(Vector2 _a, Vector2 _b) noexcept {
+	[[nodiscard]]
+    inline static Vector2 Max(Vector2 _a, Vector2 _b) noexcept {
 		return Vector2(
 			LMK_Max(_a.x, _b.x),
 			LMK_Max(_a.y, _b.y)
@@ -428,7 +479,8 @@ public: // Static Functions
 	// 
 	// Returns a vector that is made from the smallest components of two vectors.
 	// 
-	_NODISCARD inline static Vector2 Min(Vector2 _a, Vector2 _b) noexcept {
+	[[nodiscard]]
+    inline static Vector2 Min(Vector2 _a, Vector2 _b) noexcept {
 		return Vector2(
 			LMK_Min(_a.x, _b.x),
 			LMK_Min(_a.y, _b.y)
@@ -444,7 +496,8 @@ public: // Static Functions
 	// When _t = 1 return _b.
 	// When _t = 0.5 returns the midpoint of _a and _b.
 	// 
-	_NODISCARD inline static Vector2 Lerp(Vector2 _from, Vector2 _to, float _t) noexcept {
+	[[nodiscard]]
+    inline static Vector2 Lerp(Vector2 _from, Vector2 _to, float _t) noexcept {
 		return LMK_Lerp(_from, _to, LMK_Clamp(_t, 0.0f, 1.0f));
 	}
 
@@ -455,7 +508,8 @@ public: // Static Functions
 	// When _t = 1 return _b.
 	// When _t = 0.5 returns the midpoint of _a and _b.
 	// 
-	_NODISCARD inline static Vector2 LerpUnclamped(Vector2 _from, Vector2 _to, float _t) noexcept {
+	[[nodiscard]]
+    inline static Vector2 LerpUnclamped(Vector2 _from, Vector2 _to, float _t) noexcept {
 		return LMK_Lerp(_from, _to, _t);
 	}
 
@@ -467,7 +521,8 @@ public: // Static Functions
 	//		
 	// Negative values of maxDistanceDelta pushes the vector away from target.
 	// 
-	_NODISCARD inline static Vector2 MoveTowards(Vector2 _current, Vector2 _target, float _maxDistanceDelta) {
+	[[nodiscard]]
+    inline static Vector2 MoveTowards(Vector2 _current, Vector2 _target, float _maxDistanceDelta) noexcept {
 		if (Distance(_current, _target) <= _maxDistanceDelta)
 			return _target;
 		return _current + (Direction(_current, _target) * _maxDistanceDelta);
@@ -476,7 +531,7 @@ public: // Static Functions
 	// 
 	// Returns the 2D vector perpendicular to this 2D vector.
 	// 
-	// The result is always rotated 90-degrees in a counter-clockwise direction for a 
+	// The result is always rotated 90 degrees in a counter-clockwise direction for a
 	// 2D coordinate system where the positive Y axis goes up.
 	// 
 	// @param _inDirection: 
@@ -485,10 +540,9 @@ public: // Static Functions
 	// @return
 	//		The perpendicular vector.
 	// 
-	_NODISCARD inline static Vector2 Perpendicular(Vector2 _inDirection) {
-		base_type x = std::cos(LMK_DtoR(90)) * _inDirection.x - std::sin(LMK_DtoR(90)) * _inDirection.y;
-		base_type y = std::sin(LMK_DtoR(90)) * _inDirection.x + std::cos(LMK_DtoR(90)) * _inDirection.y;
-		return Vector2(x, y);
+	[[nodiscard]]
+    inline static Vector2 Perpendicular(Vector2 _inDirection) noexcept {
+		return Vector2(-_inDirection.y, _inDirection.x);
 	}
 
 	// 
@@ -510,7 +564,8 @@ public: // Static Functions
 	// @return
 	//		The reflected vector.
 	// 
-	_NODISCARD inline static Vector2 Reflect(Vector2 _inDirection, Vector2 _inNormal) {
+	[[nodiscard]]
+    inline static Vector2 Reflect(Vector2 _inDirection, Vector2 _inNormal) noexcept {
 		return _inDirection - (_inNormal * 2) * Dot(_inDirection, _inNormal);
 	}
 
@@ -519,59 +574,39 @@ public: // Static Functions
 	// 
 	// Every component in the result is a component of _a multiplied by the same component of _b.
 	// 
-	_NODISCARD inline static Vector2 Scale(Vector2 _a, Vector2 _b) {
-		base_type x = _a.x * _b.x;
-		base_type y = _a.y * _b.y;
-		return Vector2(x, y);
+	[[nodiscard]]
+    inline static Vector2 Scale(Vector2 _a, Vector2 _b) noexcept {
+		return Vector2{
+			_a.x* _b.x,
+			_a.y* _b.y
+		};
 	}
 
-	// 
-	// Shorthand for writing Vector2(0, 1).
-	// 
-	_NODISCARD inline static Vector2 up() noexcept {
-		return Vector2(0, 1);
-	}
-
-	// 
-	// Shorthand for writing Vector2(0, -1).
-	// 
-	_NODISCARD inline static Vector2 down() noexcept {
-		return Vector2(0, -1);
-	}
-
-	// 
-	// Shorthand for writing Vector2(1, 0).
-	// 
-	_NODISCARD inline static Vector2 right() noexcept {
-		return Vector2(1, 0);
-	}
-
-	// 
-	// Shorthand for writing Vector2(-1, 0).
-	// 
-	_NODISCARD inline static Vector2 left() noexcept {
-		return Vector2(-1, 0);
-	}
-
-	// 
-	// Shorthand for writing Vector2(1, 1).
-	// 
-	_NODISCARD inline static Vector2 one() noexcept {
-		return Vector2(1, 1);
-	}
-
-	// 
-	// Shorthand for writing Vector2(0, 0).
-	// 
-	_NODISCARD inline static Vector2 zero() noexcept {
-		return Vector2(0, 0);
-	}
+public: // Static Properties
+	static Vector2 up;		// Shorthand for writing Vector2(0, 1).
+	static Vector2 down;	// Shorthand for writing Vector2(0, -1).
+	static Vector2 right;	// Shorthand for writing Vector2(1, 0).
+	static Vector2 left;	// Shorthand for writing Vector2(-1, 0).
+	static Vector2 one;		// Shorthand for writing Vector2(1, 1).
+	static Vector2 zero;	// Shorthand for writing Vector2(0, 0).
+	static Vector2 positiveInfinity;	// Shorthand for writing Vector2(INFINITY, INFINITY).
+	static Vector2 negativeInfinity;	// Shorthand for writing Vector2(-INFINITY, -INFINITY).
 };
+
+// Static Properties Initialization
+Vector2 Vector2::up = Vector2{ 0, 1 };
+Vector2 Vector2::down = Vector2{ 0, -1 };
+Vector2 Vector2::right = Vector2{ 1, 0 };
+Vector2 Vector2::left = Vector2{ -1, 0 };
+Vector2 Vector2::one = Vector2{ 1, 1 };
+Vector2 Vector2::zero = Vector2{ 0, 0 };
+Vector2 Vector2::positiveInfinity = Vector2{ INFINITY, INFINITY };
+Vector2 Vector2::negativeInfinity = Vector2{ -INFINITY, -INFINITY };
 
 // Vector2:
 // Non-member Operators Overloads
-
-_NODISCARD inline Vector2 operator*(float _left, Vector2 _right) {
+[[nodiscard]]
+    inline Vector2 operator*(float _left, Vector2 _right) {
 	Vector2 temp = _right;
 	temp *= _left;
 	return temp;
@@ -586,7 +621,7 @@ private:
 
 public: // Constructors & Destructors
 	//
-	// Creates a new Vector2Int.
+	// Create a new Vector2Int.
 	// 
 	// @param _x:
 	//		The X coordinate of the vector.
@@ -597,7 +632,7 @@ public: // Constructors & Destructors
 		: BaseVector2(_x, _y) {}
 
 	//
-	// Creates a new Vector2Int with coordinate of (0, 0).
+	// Create a new Vector2Int with coordinate of (0, 0).
 	//
 	inline Vector2Int()
 		: Vector2Int(0, 0) {}
@@ -606,7 +641,8 @@ public: // Operators Overloads
 	// 
 	// Converts a Vector2Int to Vector2.
 	// 
-	_NODISCARD inline operator Vector2() noexcept {
+	[[nodiscard]]
+    inline operator Vector2() noexcept {
 		return Vector2(x, y);
 	}
 
@@ -614,7 +650,8 @@ public: // Operators Overloads
 	//
 	// Converts a lmk::Vector2Int to SDL_Point.
 	//
-	_NODISCARD inline operator SDL_Point() {
+	[[nodiscard]]
+    inline operator SDL_Point() {
 		return SDL_Point{ x, y };
 	}
 #endif
@@ -643,25 +680,29 @@ public: // Operators Overloads
 		return *this;
 	}
 
-	_NODISCARD inline Vector2Int operator+(Vector2Int _right) const noexcept {
+	[[nodiscard]]
+    inline Vector2Int operator+(Vector2Int _right) const noexcept {
 		Vector2Int temp = *this;
 		temp += _right;
 		return temp;
 	}
 
-	_NODISCARD inline Vector2Int operator-(Vector2Int _right) const noexcept {
+	[[nodiscard]]
+    inline Vector2Int operator-(Vector2Int _right) const noexcept {
 		Vector2Int temp = *this;
 		temp -= _right;
 		return temp;
 	}
 
-	_NODISCARD inline Vector2Int operator/(int _right) const {
+	[[nodiscard]]
+    inline Vector2Int operator/(int _right) const {
 		Vector2Int temp = *this;
 		temp /= _right;
 		return temp;
 	}
 
-	_NODISCARD inline Vector2Int operator*(int _right) const noexcept {
+	[[nodiscard]]
+    inline Vector2Int operator*(int _right) const noexcept {
 		Vector2Int temp = *this;
 		temp *= _right;
 		return temp;
@@ -680,7 +721,8 @@ public: // Functions
 	// 
 	// Multiplies every component of this vector by the same component of _scale.
 	// 
-	_NODISCARD inline void Scale(Vector2Int _scale) {
+	[[nodiscard]]
+    inline void Scale(Vector2Int _scale) {
 		x *= _scale.x;
 		y *= _scale.y;
 	}
@@ -691,7 +733,8 @@ public: // Static Functions
 	//
 	// As there is a conversion of float to integer, there is a loss of precision.
 	// 
-	_NODISCARD inline static Vector2Int CeilToInt(Vector2 _v) noexcept {
+	[[nodiscard]]
+    inline static Vector2Int CeilToInt(Vector2 _v) noexcept {
 		return Vector2Int(std::ceil(_v.x), std::ceil(_v.y));
 	}
 
@@ -700,7 +743,8 @@ public: // Static Functions
 	// 
 	// As there is a conversion of float to integer, there is a loss of precision.
 	// 
-	_NODISCARD inline static Vector2Int FloorToInt(Vector2 _v) noexcept {
+	[[nodiscard]]
+    inline static Vector2Int FloorToInt(Vector2 _v) noexcept {
 		return Vector2Int(std::floor(_v.x), std::floor(_v.y));
 	}
 
@@ -709,7 +753,8 @@ public: // Static Functions
 	// 
 	// As there is a conversion of float to integer, there is a loss of precision.
 	// 
-	_NODISCARD inline static Vector2Int RoundToInt(Vector2 _v) noexcept {
+	[[nodiscard]]
+    inline static Vector2Int RoundToInt(Vector2 _v) noexcept {
 		return Vector2Int(std::round(_v.x), std::round(_v.y));
 	}
 
@@ -719,8 +764,9 @@ public: // Static Functions
 	// @return
 	//		The distance between _a and _b.
 	// 
-	_NODISCARD inline static float Distance(Vector2Int _a, Vector2Int _b) noexcept {
-		return (_b - _a).magnitude();
+	[[nodiscard]]
+    inline static float Distance(Vector2Int _a, Vector2Int _b) noexcept {
+		return (_b - _a).GetMagnitude();
 	}
 
 	// 
@@ -729,8 +775,9 @@ public: // Static Functions
 	// @return
 	//		A copy of the larger Vector2Int.
 	// 
-	_NODISCARD inline static Vector2Int Max(Vector2Int _a, Vector2Int _b) noexcept {
-		return (_a.sqrMagnitude() > _b.sqrMagnitude()) ? _a : _b;
+	[[nodiscard]]
+    inline static Vector2Int Max(Vector2Int _a, Vector2Int _b) noexcept {
+		return (_a.GetSqrMagnitude() > _b.GetSqrMagnitude()) ? _a : _b;
 	}
 
 	// 
@@ -739,8 +786,9 @@ public: // Static Functions
 	// @return
 	//		A copy of the smaller Vector2Int.
 	// 
-	_NODISCARD inline static Vector2Int Min(Vector2Int _a, Vector2Int _b) noexcept {
-		return (_a.sqrMagnitude() < _b.sqrMagnitude()) ? _a : _b;
+	[[nodiscard]]
+    inline static Vector2Int Min(Vector2Int _a, Vector2Int _b) noexcept {
+		return (_a.GetSqrMagnitude() < _b.GetSqrMagnitude()) ? _a : _b;
 	}
 
 	// 
@@ -748,59 +796,36 @@ public: // Static Functions
 	// 
 	// Every component in the result is a component of _a multiplied by the same component of _b.
 	// 
-	_NODISCARD inline static Vector2Int Scale(Vector2Int _a, Vector2Int _b) {
-		base_type x = _a.x * _b.x;
-		base_type y = _a.y * _b.y;
-		return Vector2Int(x, y);
+	[[nodiscard]]
+    inline static Vector2Int Scale(Vector2Int _a, Vector2Int _b) {
+		return Vector2Int{
+			_a.x* _b.x,
+			_a.y* _b.y
+		};
 	}
 
-	// 
-	// Shorthand for writing Vector2Int(0, 1).
-	// 
-	_NODISCARD inline static Vector2Int up() noexcept {
-		return Vector2Int(0, 1);
-	}
-
-	// 
-	// Shorthand for writing Vector2Int(0, -1).
-	// 
-	_NODISCARD inline static Vector2Int down() noexcept {
-		return Vector2Int(0, -1);
-	}
-
-	// 
-	// Shorthand for writing Vector2Int(1, 0).
-	// 
-	_NODISCARD inline static Vector2Int right() noexcept {
-		return Vector2Int(1, 0);
-	}
-
-	// 
-	// Shorthand for writing Vector2Int(-1, 0).
-	// 
-	_NODISCARD inline static Vector2Int left() noexcept {
-		return Vector2Int(-1, 0);
-	}
-
-	// 
-	// Shorthand for writing Vector2Int(1, 1).
-	// 
-	_NODISCARD inline static Vector2Int one() noexcept {
-		return Vector2Int(1, 1);
-	}
-
-	// 
-	// Shorthand for writing Vector2Int(0, 0).
-	// 
-	_NODISCARD inline static Vector2Int zero() noexcept {
-		return Vector2Int(0, 0);
-	}
+public: // Static Properties
+	static Vector2Int up;		// Shorthand for writing Vector2Int(0, 1).
+	static Vector2Int down;		// Shorthand for writing Vector2Int(0, -1).
+	static Vector2Int right;	// Shorthand for writing Vector2Int(1, 0).
+	static Vector2Int left;		// Shorthand for writing Vector2Int(-1, 0).
+	static Vector2Int one;		// Shorthand for writing Vector2Int(1, 1).
+	static Vector2Int zero;		// Shorthand for writing Vector2Int(0, 0).
 };
+
+// Static Properties Initialization
+Vector2Int Vector2Int::up = Vector2Int{ 0, 1 };
+Vector2Int Vector2Int::down = Vector2Int{ 0, -1 };
+Vector2Int Vector2Int::right = Vector2Int{ 1, 0 };
+Vector2Int Vector2Int::left = Vector2Int{ -1, 0 };
+Vector2Int Vector2Int::one = Vector2Int{ 1, 1 };
+Vector2Int Vector2Int::zero = Vector2Int{ 0, 0 };
 
 // Vector2Int
 // Non-member Operators Overloads
 
-_NODISCARD inline Vector2Int operator*(float _left, Vector2Int _right) {
+[[nodiscard]]
+    inline Vector2Int operator*(float _left, Vector2Int _right) {
 	Vector2Int temp = _right;
 	temp *= _left;
 	return temp;
@@ -827,13 +852,13 @@ public: // Typedef
 
 public: // Constructors & Destructors
 	//
-	// Creates a new BaseVector3 with the given x, y, and z components.
+	// Create a new BaseVector3 with the given x, y, and z components.
 	//
 	inline BaseVector3(base_type _x, base_type _y, base_type _z)
 		: x(_x), y(_y), z(_z) {}
 
 	//
-	// Creates a new BaseVector3 with the given x and y components.
+	// Create a new BaseVector3 with the given x and y components.
 	//
 	inline BaseVector3(base_type _x, base_type _y)
 		: x(_x), y(_y), z(0) {}
@@ -845,14 +870,16 @@ public:	// Operators Overloads
 	// @return
 	//		A formatted string: {x; y; z}
 	//
-	_NODISCARD inline operator std::string() const {
+	[[nodiscard]]
+    inline operator std::string() const {
 		return "{" + std::to_string(x) + "; " + std::to_string(y) + "; " + std::to_string(z) + "}";
 	}
 
 	//
 	// Access the x, y, or z component using [0], [1], or [2] respectively.
 	//
-	_NODISCARD constexpr base_type& operator[](int _index) {
+	[[nodiscard]]
+    constexpr base_type& operator[](int _index) {
 		switch (_index) {
 		case 0: return x;
 		case 1: return y;
@@ -864,7 +891,8 @@ public:	// Operators Overloads
 	//
 	// Access the x, y, or z component using [0], [1], or [2] respectively.
 	//
-	_NODISCARD constexpr base_type operator[](int _index) const {
+	[[nodiscard]]
+    constexpr base_type operator[](int _index) const {
 		switch (_index) {
 		case 0: return x;
 		case 1: return y;
@@ -874,7 +902,8 @@ public:	// Operators Overloads
 	}
 
 	template <typename Right_Type>
-	_NODISCARD constexpr bool operator==(const BaseVector3<Right_Type>& _right) const noexcept {
+	[[nodiscard]]
+    constexpr bool operator==(const BaseVector3<Right_Type>& _right) const noexcept {
 		return (x == _right.x) && (y == _right.y) && (z == _right.z);
 	}
 
@@ -885,7 +914,8 @@ public: // Functions
 	// @return
 	//		Square root of (x * x + y * y + z * z).
 	//
-	_NODISCARD constexpr float magnitude() const noexcept {
+	[[nodiscard]]
+    constexpr float GetMagnitude() const noexcept {
 		return std::sqrt(x * x + y * y + z * z);
 	}
 
@@ -898,7 +928,8 @@ public: // Functions
 	// @return
 	//		The result of (x * x + y * y + z * z).
 	//
-	_NODISCARD constexpr float sqrMagnitude() const noexcept {
+	[[nodiscard]]
+    constexpr float GetSqrMagnitude() const noexcept {
 		return x * x + y * y + z * z;
 	}
 
@@ -914,19 +945,19 @@ public: // Properties
 class Vector3 : public BaseVector3<float> {
 public:	// Constructors & Destructors
 	//
-	// Creates a new Vector2 with the given x, y, and z components.
+	// Create a new Vector2 with the given x, y, and z components.
 	//
 	inline explicit Vector3(base_type _x, base_type _y, base_type _z)
 		: BaseVector3(_x, _y, _z) {}
 
 	//
-	// Creates a new Vector2 with the given x and y components.
+	// Create a new Vector2 with the given x and y components.
 	//
 	inline explicit Vector3(base_type _x, base_type _y)
 		: BaseVector3(_x, _y) {}
 
 	//
-	// Creates a new Vector3 with coordinate of (0, 0, 0).
+	// Create a new Vector3 with coordinate of (0, 0, 0).
 	//
 	inline Vector3()
 		: Vector3(0, 0, 0) {}
@@ -937,7 +968,8 @@ public: // Operators Overloads
 	// 
 	// A Vector3 can be implicitly converted into a Vector2. (The z is discarded).
 	//
-	_NODISCARD inline explicit operator Vector2() {
+	[[nodiscard]]
+    inline operator Vector2() {
 		return Vector2(x, y);
 	}
 
@@ -969,25 +1001,29 @@ public: // Operators Overloads
 		return *this;
 	}
 
-	_NODISCARD inline Vector3 operator+(const Vector3& _right) const {
+	[[nodiscard]]
+    inline Vector3 operator+(const Vector3& _right) const {
 		Vector3 temp = *this;
 		temp += _right;
 		return temp;
 	}
 
-	_NODISCARD inline Vector3 operator-(const Vector3& _right) const {
+	[[nodiscard]]
+    inline Vector3 operator-(const Vector3& _right) const {
 		Vector3 temp = *this;
 		temp -= _right;
 		return temp;
 	}
 
-	_NODISCARD inline Vector3 operator/(float _right) const {
+	[[nodiscard]]
+    inline Vector3 operator/(float _right) const {
 		Vector3 temp = *this;
 		temp /= _right;
 		return temp;
 	}
 
-	_NODISCARD inline Vector3 operator*(float _right) const {
+	[[nodiscard]]
+    inline Vector3 operator*(float _right) const {
 		Vector3 temp = *this;
 		temp *= _right;
 		return temp;
@@ -1003,8 +1039,9 @@ public: // Functions
 	// @return
 	//		A normalized vector based on the current vector.
 	// 
-	_NODISCARD inline Vector3 normalized() const {
-		return (sqrMagnitude() > 0) ? *this / magnitude() : *this;
+	[[nodiscard]]
+    inline Vector3 GetNormalized() const {
+		return (GetSqrMagnitude() > 0) ? *this / GetMagnitude() : *this;
 	}
 
 	// 
@@ -1014,7 +1051,7 @@ public: // Functions
 	// NOTE: This function will change the current vector. If you want to keep the current vector unchanged, use normalized().
 	//		
 	inline Vector3& Normalize() {
-		*this /= magnitude();
+		*this /= GetMagnitude();
 		return *this;
 	}
 
@@ -1045,8 +1082,9 @@ public: // Static Functions
 	// @return
 	//		A normalized Vector2 represents the calculated direction.
 	// 
-	_NODISCARD inline static Vector3 Direction(const Vector3& _from, const Vector3& _to) noexcept {
-		return (_to - _from).normalized();
+	[[nodiscard]]
+    inline static Vector3 Direction(const Vector3& _from, const Vector3& _to) noexcept {
+		return (_to - _from).GetNormalized();
 	}
 
 	// 
@@ -1055,8 +1093,9 @@ public: // Static Functions
 	// @return
 	//		The distance between _a and _b.
 	// 
-	_NODISCARD inline static float Distance(const Vector3& _a, const Vector3& _b) noexcept {
-		return (_b - _a).magnitude();
+	[[nodiscard]]
+    inline static float Distance(const Vector3& _a, const Vector3& _b) noexcept {
+		return (_b - _a).GetMagnitude();
 	}
 
 	// 
@@ -1065,8 +1104,9 @@ public: // Static Functions
 	// @return
 	//		A copy of _vector with its magnitude clamped to _maxLength.
 	// 
-	_NODISCARD inline static Vector3 ClampMagnitude(const Vector3& _vector, float _maxLength) {
-		return _vector.normalized() * _maxLength;
+	[[nodiscard]]
+    inline static Vector3 ClampMagnitude(const Vector3& _vector, float _maxLength) {
+		return _vector.GetNormalized() * _maxLength;
 	}
 
 	// 
@@ -1082,7 +1122,8 @@ public: // Static Functions
 	// @return
 	//		Returns (_lhs . _rhs).
 	// 
-	_NODISCARD inline static float Dot(const Vector3& _lhs, const Vector3& _rhs) noexcept {
+	[[nodiscard]]
+    inline static float Dot(const Vector3& _lhs, const Vector3& _rhs) noexcept {
 		return _lhs.x * _rhs.x + _lhs.y * _rhs.y + _lhs.z * _rhs.z;
 	}
 
@@ -1098,12 +1139,13 @@ public: // Static Functions
 	// @return
 	//		Returns (_lhs x _rhs).
 	// 
-	_NODISCARD inline static Vector3 Cross(const Vector3& _lhs, const Vector3& _rhs) noexcept {
-		Vector3 result;
-		result.x = _lhs.y * _rhs.z - _lhs.z * _rhs.y;
-		result.y = _lhs.z * _rhs.x - _lhs.x * _rhs.z;
-		result.x = _lhs.x * _rhs.y - _lhs.y * _rhs.x;
-		return result;
+	[[nodiscard]]
+    inline static Vector3 Cross(const Vector3& _lhs, const Vector3& _rhs) noexcept {
+		return Vector3{
+			_lhs.y * _rhs.z - _lhs.z * _rhs.y,
+			_lhs.z * _rhs.x - _lhs.x * _rhs.z,
+			_lhs.x * _rhs.y - _lhs.y * _rhs.x
+		};
 	}
 
 	// 
@@ -1124,7 +1166,8 @@ public: // Static Functions
 	// @return
 	//		The unsigned angle in degrees between the two vectors.
 	// 
-	_NODISCARD inline static float Angle(const Vector3& _from, const Vector3& _to) {
+	[[nodiscard]]
+    inline static float Angle(const Vector3& _from, const Vector3& _to) {
 		return std::abs(SignedAngle(_from, _to));
 	}
 
@@ -1146,14 +1189,16 @@ public: // Static Functions
 	// @return
 	//		The signed angle in degrees between the two vectors.
 	// 
-	_NODISCARD inline static float SignedAngle(const Vector3& _from, const Vector3& _to) {
-		return LMK_RtoD(std::atan2(Cross(_from, _to).magnitude(), Dot(_from, _to)));
+	[[nodiscard]]
+    inline static float SignedAngle(const Vector3& _from, const Vector3& _to) {
+		return LMK_RtoD(std::atan2(Cross(_from, _to).GetMagnitude(), Dot(_from, _to)));
 	}
 
 	// 
 	// Returns a vector that is made from the largest components of two vectors.
 	// 
-	_NODISCARD inline static Vector3 Max(const Vector3& _a, const Vector3& _b) noexcept {
+	[[nodiscard]]
+    inline static Vector3 Max(const Vector3& _a, const Vector3& _b) noexcept {
 		return Vector3(
 			LMK_Max(_a.x, _b.x),
 			LMK_Max(_a.y, _b.y),
@@ -1164,7 +1209,8 @@ public: // Static Functions
 	// 
 	// Returns a vector that is made from the smallest components of two vectors.
 	// 
-	_NODISCARD inline static Vector3 Min(const Vector3& _a, const Vector3& _b) noexcept {
+	[[nodiscard]]
+    inline static Vector3 Min(const Vector3& _a, const Vector3& _b) noexcept {
 		return Vector3(
 			LMK_Min(_a.x, _b.x),
 			LMK_Min(_a.y, _b.y),
@@ -1181,7 +1227,8 @@ public: // Static Functions
 	// When _t = 1 return _b.
 	// When _t = 0.5 returns the midpoint of _a and _b.
 	// 
-	_NODISCARD inline static Vector3 Lerp(const Vector3& _from, const Vector3& _to, float _t) noexcept {
+	[[nodiscard]]
+    inline static Vector3 Lerp(const Vector3& _from, const Vector3& _to, float _t) noexcept {
 		return LMK_Lerp(_from, _to, LMK_Clamp(_t, 0.0f, 1.0f));
 	}
 
@@ -1192,7 +1239,8 @@ public: // Static Functions
 	// When _t = 1 return _b.
 	// When _t = 0.5 returns the midpoint of _a and _b.
 	// 
-	_NODISCARD inline static Vector3 LerpUnclamped(const Vector3& _from, const Vector3& _to, float _t) noexcept {
+	[[nodiscard]]
+    inline static Vector3 LerpUnclamped(const Vector3& _from, const Vector3& _to, float _t) noexcept {
 		return LMK_Lerp(_from, _to, _t);
 	}
 
@@ -1204,7 +1252,8 @@ public: // Static Functions
 	//		
 	// Negative values of maxDistanceDelta pushes the vector away from target.
 	// 
-	_NODISCARD inline static Vector3 MoveTowards(const Vector3& _current, const Vector3& _target, float _maxDistanceDelta) {
+	[[nodiscard]]
+    inline static Vector3 MoveTowards(const Vector3& _current, const Vector3& _target, float _maxDistanceDelta) {
 		if (Distance(_current, _target) <= _maxDistanceDelta)
 			return _target;
 		return _current + (Direction(_current, _target) * _maxDistanceDelta);
@@ -1229,7 +1278,8 @@ public: // Static Functions
 	// @return
 	//		The reflected vector.
 	//
-	_NODISCARD inline static Vector3 Reflect(const Vector3& _inDirection, const Vector3& _inNormal) {
+	[[nodiscard]]
+    inline static Vector3 Reflect(const Vector3& _inDirection, const Vector3& _inNormal) {
 		return _inDirection - (_inNormal * 2) * Dot(_inDirection, _inNormal);
 	}
 
@@ -1238,11 +1288,13 @@ public: // Static Functions
 	// 
 	// Every component in the result is a component of _a multiplied by the same component of _b.
 	// 
-	_NODISCARD inline static Vector3 Scale(const Vector3& _a, const Vector3& _b) {
-		base_type x = _a.x * _b.x;
-		base_type y = _a.y * _b.y;
-		base_type z = _a.z * _b.z;
-		return Vector3(x, y, z);
+	[[nodiscard]]
+    inline static Vector3 Scale(const Vector3& _a, const Vector3& _b) {
+		return Vector3{
+			_a.x * _b.x,
+			_a.y * _b.y,
+			_a.z * _b.z
+		};
 	}
 
 	//
@@ -1251,8 +1303,9 @@ public: // Static Functions
 	// @return
 	//		_a projected onto _b.
 	// 
-	_NODISCARD inline static Vector3 Project(const Vector3& _a, const Vector3& _b) {
-		return _b * (Dot(_a, _b) / _b.sqrMagnitude());
+	[[nodiscard]]
+    inline static Vector3 Project(const Vector3& _a, const Vector3& _b) {
+		return _b * (Dot(_a, _b) / _b.GetSqrMagnitude());
 	}
 
 	//
@@ -1271,7 +1324,8 @@ public: // Static Functions
 	// @return
 	//		The orthogonal projection of vector on the plane.
 	// 
-	_NODISCARD inline static Vector3 ProjectOnPlane(const Vector3& _vector, const Vector3& _planeNormal) {
+	[[nodiscard]]
+    inline static Vector3 ProjectOnPlane(const Vector3& _vector, const Vector3& _planeNormal) {
 		Vector3 projection;
 		float dotProduct = Dot(_vector, _planeNormal);
 		for (size_t i = 0; i < 3; i++) {
@@ -1279,68 +1333,36 @@ public: // Static Functions
 		}
 		return projection;
 	}
-
-	// 
-	// Shorthand for writing Vector3(0, 1, 0).
-	// 
-	_NODISCARD inline static Vector3 up() noexcept {
-		return Vector3(0, 1, 0);
-	}
-
-	// 
-	// Shorthand for writing Vector3(0, -1, 0).
-	// 
-	_NODISCARD inline static Vector3 down() noexcept {
-		return Vector3(0, -1, 0);
-	}
-
-	// 
-	// Shorthand for writing Vector3(1, 0, 0).
-	// 
-	_NODISCARD inline static Vector3 right() noexcept {
-		return Vector3(1, 0, 0);
-	}
-
-	// 
-	// Shorthand for writing Vector3(-1, 0, 0).
-	// 
-	_NODISCARD inline static Vector3 left() noexcept {
-		return Vector3(-1, 0, 0);
-	}
-
-	// 
-	// Shorthand for writing Vector3(0, 0, 1).
-	// 
-	_NODISCARD inline static Vector3 forward() noexcept {
-		return Vector3(1, 1, 1);
-	}
-
-	// 
-	// Shorthand for writing Vector3(0, 0, -1).
-	// 
-	_NODISCARD inline static Vector3 back() noexcept {
-		return Vector3(1, 1, 1);
-	}
-
-	// 
-	// Shorthand for writing Vector3(1, 1, 1).
-	// 
-	_NODISCARD inline static Vector3 one() noexcept {
-		return Vector3(1, 1, 1);
-	}
-
-	// 
-	// Shorthand for writing Vector3(0, 0, 0).
-	// 
-	_NODISCARD inline static Vector3 zero() noexcept {
-		return Vector3(0, 0, 0);
-	}
+	
+public: // Static Properties
+	static Vector3 up;		// Shorthand for writing Vector3(0, 1, 0).
+	static Vector3 down;	// Shorthand for writing Vector3(0, -1, 0).
+	static Vector3 right;	// Shorthand for writing Vector3(1, 0, 0).
+	static Vector3 left;	// Shorthand for writing Vector3(-1, 0, 0).
+	static Vector3 forward;	// Shorthand for writing Vector3(0, 0, 1).
+	static Vector3 back;	// Shorthand for writing Vector3(0, 0, -1).
+	static Vector3 one;		// Shorthand for writing Vector3(1, 1, 1).
+	static Vector3 zero;	// Shorthand for writing Vector3(0, 0, 0).
+	static Vector3 positiveInfinity;	// Shorthand for writing Vector3(INFINITY, INFINITY, INFINITY).
+	static Vector3 negativeInfinity;	// Shorthand for writing Vector3(-INFINITY, -INFINITY, -INFINITY).
 };
+
+// Static Properties Initialization
+Vector3 Vector3::up = Vector3{ 0, 1, 0 };
+Vector3 Vector3::down = Vector3{ 0, -1, 0 };
+Vector3 Vector3::right = Vector3{ 1, 0, 0 };
+Vector3 Vector3::left = Vector3{ -1, 0, 0 };
+Vector3 Vector3::forward = Vector3{ 0, 0, 1 };
+Vector3 Vector3::back = Vector3{ 0, 0, -1 };
+Vector3 Vector3::one = Vector3{ 1, 1, 1 };
+Vector3 Vector3::zero = Vector3{ 0, 0, 0 };
+Vector3 Vector3::positiveInfinity = Vector3{ INFINITY, INFINITY, INFINITY };
+Vector3 Vector3::negativeInfinity = Vector3{ -INFINITY, -INFINITY, -INFINITY };
 
 // Vector3:
 // Non-member Operators Overloads
-
-_NODISCARD inline Vector3 operator*(float _left, const Vector3& _right) {
+[[nodiscard]]
+    inline Vector3 operator*(float _left, const Vector3& _right) {
 	Vector3 temp = _right;
 	temp *= _left;
 	return temp;
@@ -1348,8 +1370,8 @@ _NODISCARD inline Vector3 operator*(float _left, const Vector3& _right) {
 
 // Vector2:
 // Member Operators Overloads implementation.
-
-_NODISCARD inline Vector2::operator Vector3() {
+[[nodiscard]]
+    inline Vector2::operator Vector3() {
 	return Vector3(x, y, 0);
 }
 
@@ -1359,19 +1381,19 @@ _NODISCARD inline Vector2::operator Vector3() {
 class Vector3Int : public BaseVector3<int> {
 public:	// Constructors & Destructors
 	//
-	// Creates a new Vector2 with the given x, y, and z components.
+	// Create a new Vector2 with the given x, y, and z components.
 	//
 	inline explicit Vector3Int(base_type _x, base_type _y, base_type _z)
 		: BaseVector3(_x, _y, _z) {}
 
 	//
-	// Creates a new Vector2 with the given x and y components.
+	// Create a new Vector2 with the given x and y components.
 	//
 	inline explicit Vector3Int(base_type _x, base_type _y)
 		: BaseVector3(_x, _y) {}
 
 	//
-	// Creates a new Vector3 with coordinate of (0, 0, 0).
+	// Create a new Vector3 with coordinate of (0, 0, 0).
 	//
 	inline Vector3Int()
 		: Vector3Int(0, 0, 0) {}
@@ -1382,14 +1404,16 @@ public: // Operators Overloads
 	// 
 	// Vector3Ints can be explicitly converted to Vector2Int (z is discarded).
 	//
-	_NODISCARD inline explicit operator Vector2Int() {
+	[[nodiscard]]
+    inline explicit operator Vector2Int() {
 		return Vector2Int(x, y);
 	}
 
 	//
 	// Converts a Vector3Int to Vector3.
 	//
-	_NODISCARD inline operator Vector3() {
+	[[nodiscard]]
+    inline operator Vector3() {
 		return Vector3(x, y, z);
 	}
 
@@ -1421,25 +1445,29 @@ public: // Operators Overloads
 		return *this;
 	}
 
-	_NODISCARD inline Vector3Int operator+(const Vector3Int& _right) const {
+	[[nodiscard]]
+    inline Vector3Int operator+(const Vector3Int& _right) const {
 		Vector3Int temp = *this;
 		temp += _right;
 		return temp;
 	}
 
-	_NODISCARD inline Vector3Int operator-(const Vector3Int& _right) const {
+	[[nodiscard]]
+    inline Vector3Int operator-(const Vector3Int& _right) const {
 		Vector3Int temp = *this;
 		temp -= _right;
 		return temp;
 	}
 
-	_NODISCARD inline Vector3Int operator/(int _right) const {
+	[[nodiscard]]
+    inline Vector3Int operator/(int _right) const {
 		Vector3Int temp = *this;
 		temp /= _right;
 		return temp;
 	}
 
-	_NODISCARD inline Vector3Int operator*(int _right) const {
+	[[nodiscard]]
+    inline Vector3Int operator*(int _right) const {
 		Vector3Int temp = *this;
 		temp *= _right;
 		return temp;
@@ -1451,7 +1479,8 @@ public: // Functions
 	//
 	// As there is a conversion of float to integer, there is a loss of precision.
 	// 
-	_NODISCARD inline static Vector3Int CeilToInt(const Vector3& _v) noexcept {
+	[[nodiscard]]
+    inline static Vector3Int CeilToInt(const Vector3& _v) noexcept {
 		return Vector3Int(std::ceil(_v.x), std::ceil(_v.y), std::ceil(_v.z));
 	}
 
@@ -1460,7 +1489,8 @@ public: // Functions
 	// 
 	// As there is a conversion of float to integer, there is a loss of precision.
 	// 
-	_NODISCARD inline static Vector3Int FloorToInt(const Vector3& _v) noexcept {
+	[[nodiscard]]
+    inline static Vector3Int FloorToInt(const Vector3& _v) noexcept {
 		return Vector3Int(std::floor(_v.x), std::floor(_v.y), std::floor(_v.z));
 	}
 
@@ -1469,7 +1499,8 @@ public: // Functions
 	// 
 	// As there is a conversion of float to integer, there is a loss of precision.
 	// 
-	_NODISCARD inline static Vector3Int RoundToInt(const Vector3& _v) noexcept {
+	[[nodiscard]]
+    inline static Vector3Int RoundToInt(const Vector3& _v) noexcept {
 		return Vector3Int(std::round(_v.x), std::round(_v.y), std::round(_v.z));
 	}
 
@@ -1502,14 +1533,16 @@ public: // Static Functions
 	// @return
 	//		The distance between _a and _b.
 	// 
-	_NODISCARD inline static float Distance(const Vector3& _a, const Vector3& _b) noexcept {
-		return (_b - _a).magnitude();
+	[[nodiscard]]
+    inline static float Distance(const Vector3& _a, const Vector3& _b) noexcept {
+		return (_b - _a).GetMagnitude();
 	}
 
 	// 
 	// Returns a vector that is made from the largest components of two vectors.
 	// 
-	_NODISCARD inline static Vector3 Max(const Vector3& _a, const Vector3& _b) noexcept {
+	[[nodiscard]]
+    inline static Vector3 Max(const Vector3& _a, const Vector3& _b) noexcept {
 		return Vector3(
 			LMK_Max(_a.x, _b.x),
 			LMK_Max(_a.y, _b.y),
@@ -1520,7 +1553,8 @@ public: // Static Functions
 	// 
 	// Returns a vector that is made from the smallest components of two vectors.
 	// 
-	_NODISCARD inline static Vector3 Min(const Vector3& _a, const Vector3& _b) noexcept {
+	[[nodiscard]]
+    inline static Vector3 Min(const Vector3& _a, const Vector3& _b) noexcept {
 		return Vector3(
 			LMK_Min(_a.x, _b.x),
 			LMK_Min(_a.y, _b.y),
@@ -1533,75 +1567,39 @@ public: // Static Functions
 	// 
 	// Every component in the result is a component of _a multiplied by the same component of _b.
 	// 
-	_NODISCARD inline static Vector3 Scale(const Vector3& _a, const Vector3& _b) {
-		base_type x = _a.x * _b.x;
-		base_type y = _a.y * _b.y;
-		base_type z = _a.z * _b.z;
-		return Vector3(x, y, z);
+	[[nodiscard]]
+    inline static Vector3 Scale(const Vector3& _a, const Vector3& _b) {
+		return Vector3{
+			_a.x * _b.x,
+			_a.y * _b.y,
+			_a.z * _b.z
+		};
 	}
 
-
-
-	// 
-	// Shorthand for writing Vector3(0, 1, 0).
-	// 
-	_NODISCARD inline static Vector3Int up() noexcept {
-		return Vector3Int(0, 1, 0);
-	}
-
-	// 
-	// Shorthand for writing Vector3(0, -1, 0).
-	// 
-	_NODISCARD inline static Vector3Int down() noexcept {
-		return Vector3Int(0, -1, 0);
-	}
-
-	// 
-	// Shorthand for writing Vector3(1, 0, 0).
-	// 
-	_NODISCARD inline static Vector3Int right() noexcept {
-		return Vector3Int(1, 0, 0);
-	}
-
-	// 
-	// Shorthand for writing Vector3(-1, 0, 0).
-	// 
-	_NODISCARD inline static Vector3Int left() noexcept {
-		return Vector3Int(-1, 0, 0);
-	}
-
-	// 
-	// Shorthand for writing Vector3(0, 0, 1).
-	// 
-	_NODISCARD inline static Vector3Int forward() noexcept {
-		return Vector3Int(1, 1, 1);
-	}
-
-	// 
-	// Shorthand for writing Vector3(0, 0, -1).
-	// 
-	_NODISCARD inline static Vector3Int back() noexcept {
-		return Vector3Int(1, 1, 1);
-	}
-
-	// 
-	// Shorthand for writing Vector3(1, 1, 1).
-	// 
-	_NODISCARD inline static Vector3Int one() noexcept {
-		return Vector3Int(1, 1, 1);
-	}
-
-	// 
-	// Shorthand for writing Vector3(0, 0, 0).
-	// 
-	_NODISCARD inline static Vector3Int zero() noexcept {
-		return Vector3Int(0, 0, 0);
-	}
+public: // Static Properties
+	static Vector3Int up;		// Shorthand for writing Vector3(0, 1, 0).
+	static Vector3Int down;		// Shorthand for writing Vector3(0, -1, 0).
+	static Vector3Int right;	// Shorthand for writing Vector3(1, 0, 0).
+	static Vector3Int left;		// Shorthand for writing Vector3(-1, 0, 0).
+	static Vector3Int forward;	// Shorthand for writing Vector3(0, 0, 1).
+	static Vector3Int back;		// Shorthand for writing Vector3(0, 0, -1).
+	static Vector3Int one;		// Shorthand for writing Vector3(1, 1, 1).
+	static Vector3Int zero;		// Shorthand for writing Vector3(0, 0, 0).
 };
 
+// Static Properties Initialization
+Vector3Int Vector3Int::up = Vector3Int{ 0, 1, 0 };
+Vector3Int Vector3Int::down = Vector3Int{ 0, -1, 0 };
+Vector3Int Vector3Int::right = Vector3Int{ 1, 0, 0 };
+Vector3Int Vector3Int::left = Vector3Int{ -1, 0, 0 };
+Vector3Int Vector3Int::forward = Vector3Int{ 0, 0, 1 };
+Vector3Int Vector3Int::back = Vector3Int{ 0, 0, -1 };
+Vector3Int Vector3Int::one = Vector3Int{ 1, 1, 1 };
+Vector3Int Vector3Int::zero = Vector3Int{ 0, 0, 0 };
 // Vector3Int:
 // Non-member Operators Overloads
-_NODISCARD inline Vector3Int operator*(int _left, const Vector3Int& _right) {
+[[nodiscard]]
+    inline Vector3Int operator*(int _left, const Vector3Int& _right) {
 	Vector3Int temp = _right;
 	temp *= _left;
 	return temp;
@@ -1630,25 +1628,25 @@ public: // Typedef
 
 public: // Constructors && Destructors
 	//
-	// Creates a new Vector4 with given x, y, z, w components.
+	// Create a new Vector4 with given x, y, z, w components.
 	//
 	inline Vector4(base_type _x, base_type _y, base_type _z, base_type _w)
 		: x(_x), y(_y), z(_z), w(_w) {}
 
 	//
-	// Creates a new Vector4 with given x, y, z components and sets w to zero.
+	// Create a new Vector4 with given x, y, z components and sets w to zero.
 	//
 	inline Vector4(base_type _x, base_type _y, base_type _z)
 		: Vector4(_x, _y, _z, 0) {}
 
 	//
-	// Creates a new Vector4 with given x, y components and sets z and w to zero.
+	// Create a new Vector4 with given x, y components and sets z and w to zero.
 	//
 	inline Vector4(base_type _x, base_type _y)
 		: Vector4(_x, _y, 0) {}
 
 	//
-	// Creates a new Vector4 and sets all component to zero.
+	// Create a new Vector4 and sets all component to zero.
 	//
 	inline Vector4() = default;
 
@@ -1659,14 +1657,16 @@ public: // Operators Overloads
 	// @return
 	//		A formatted string: {x; y; z; w}
 	//
-	_NODISCARD inline operator std::string() const {
+	[[nodiscard]]
+    inline operator std::string() const {
 		return "{" + std::to_string(x) + "; " + std::to_string(y) + "; " + std::to_string(z) + "; " + std::to_string(w) + "}";
 	}
 
 	//
 	// Access the x, y, z, w components using [0], [1], [2], [3] respectively.
 	//
-	_NODISCARD inline base_type& operator[](int _index) {
+	[[nodiscard]]
+    inline base_type& operator[](int _index) {
 		switch (_index) {
 		case 0: return x;
 		case 1: return y;
@@ -1679,7 +1679,8 @@ public: // Operators Overloads
 	//
 	// Access the x, y, z, w components using [0], [1], [2], [3] respectively.
 	//
-	_NODISCARD inline base_type operator[](int _index) const {
+	[[nodiscard]]
+    inline base_type operator[](int _index) const {
 		switch (_index) {
 		case 0: return x;
 		case 1: return y;
@@ -1689,7 +1690,8 @@ public: // Operators Overloads
 		LMK_CORE_ASSERT(false, "lmk::Vector4: index out of range for operator[] (index should be 0, 1, 2 or 3).");
 	}
 
-	_NODISCARD constexpr bool operator==(const Vector4& _right) const noexcept {
+	[[nodiscard]]
+    constexpr bool operator==(const Vector4& _right) const noexcept {
 		return (x == _right.x) && (y == _right.y) && (z == _right.z) && (w == _right.w);
 	}
 
@@ -1717,25 +1719,29 @@ public: // Operators Overloads
 		return *this;
 	}
 
-	_NODISCARD inline Vector4 operator+(Vector4 _right) const noexcept {
+	[[nodiscard]]
+    inline Vector4 operator+(Vector4 _right) const noexcept {
 		Vector4 temp = *this;
 		temp += _right;
 		return temp;
 	}
 
-	_NODISCARD inline Vector4 operator-(Vector4 _right) const noexcept {
+	[[nodiscard]]
+    inline Vector4 operator-(Vector4 _right) const noexcept {
 		Vector4 temp = *this;
 		temp -= _right;
 		return temp;
 	}
 
-	_NODISCARD inline Vector4 operator/(float _right) const {
+	[[nodiscard]]
+    inline Vector4 operator/(float _right) const {
 		Vector4 temp = *this;
 		temp /= _right;
 		return temp;
 	}
 
-	_NODISCARD inline Vector4 operator*(float _right) const noexcept {
+	[[nodiscard]]
+    inline Vector4 operator*(float _right) const noexcept {
 		Vector4 temp = *this;
 		temp *= _right;
 		return temp;
@@ -1748,7 +1754,8 @@ public: // Functions
 	// @return 
 	//		Square root of (x * x + y * y + z * z + w * w).
 	//
-	_NODISCARD inline base_type magnitude() const noexcept {
+	[[nodiscard]]
+    inline base_type GetMagnitude() const noexcept {
 		return std::sqrt((x * x + y * y + z * z + w * w));
 	}
 
@@ -1761,7 +1768,8 @@ public: // Functions
 	// @return
 	//		The result of (x * x + y * y + z * z + w * w).
 	//
-	_NODISCARD inline base_type sqrMagnitude() const noexcept {
+	[[nodiscard]]
+    inline base_type GetSqrMagnitude() const noexcept {
 		return x * x + y * y + z * z + w * w;
 	}
 
@@ -1774,8 +1782,9 @@ public: // Functions
 	// @return
 	//		A normalized vector based on the current vector.
 	// 
-	_NODISCARD inline Vector4 normalized() const noexcept {
-		return (sqrMagnitude() > 0) ? *this / magnitude() : *this;
+	[[nodiscard]]
+    inline Vector4 GetNormalized() const noexcept {
+		return (GetSqrMagnitude() > 0) ? *this / GetMagnitude() : *this;
 	}
 
 	// 
@@ -1786,7 +1795,7 @@ public: // Functions
 	//		
 	inline Vector4& Normalize() {
 		Vector4 temp = *this;
-		temp /= magnitude();
+		temp /= GetMagnitude();
 		return temp;
 	}
 
@@ -1837,8 +1846,9 @@ public: // Static Functions
 	// @return
 	//		A normalized Vector2 represents the calculated direction.
 	// 
-	_NODISCARD inline static Vector4 Direction(const Vector4& _from, const Vector4& _to) noexcept {
-		return (_to - _from).normalized();
+	[[nodiscard]]
+    inline static Vector4 Direction(const Vector4& _from, const Vector4& _to) noexcept {
+		return (_to - _from).GetNormalized();
 	}
 
 	// 
@@ -1847,8 +1857,9 @@ public: // Static Functions
 	// @return
 	//		The distance between _a and _b.
 	// 
-	_NODISCARD inline static float Distance(const Vector4& _a, const Vector4& _b) noexcept {
-		return (_b - _a).magnitude();
+	[[nodiscard]]
+    inline static float Distance(const Vector4& _a, const Vector4& _b) noexcept {
+		return (_b - _a).GetMagnitude();
 	}
 
 	// 
@@ -1864,7 +1875,8 @@ public: // Static Functions
 	// @return
 	//		The result of (_lhs . _rhs).
 	// 
-	_NODISCARD inline static float Dot(const Vector4& _lhs, const Vector4& _rhs) noexcept {
+	[[nodiscard]]
+    inline static float Dot(const Vector4& _lhs, const Vector4& _rhs) noexcept {
 		double result = 0;
 		for (size_t i = 0; i < 4; i++) {
 			result += _lhs[i] * _rhs[i];
@@ -1875,7 +1887,8 @@ public: // Static Functions
 	// 
 	// Returns a vector that is made from the largest components of two vectors.
 	// 
-	_NODISCARD inline static Vector4 Max(const Vector4& _a, const Vector4& _b) noexcept {
+	[[nodiscard]]
+    inline static Vector4 Max(const Vector4& _a, const Vector4& _b) noexcept {
 		return Vector4(
 			LMK_Max(_a.x, _b.x),
 			LMK_Max(_a.y, _b.y),
@@ -1887,7 +1900,8 @@ public: // Static Functions
 	// 
 	// Returns a vector that is made from the smallest components of two vectors.
 	// 
-	_NODISCARD inline static Vector4 Min(const Vector4& _a, const Vector4& _b) noexcept {
+	[[nodiscard]]
+    inline static Vector4 Min(const Vector4& _a, const Vector4& _b) noexcept {
 		return Vector4(
 			LMK_Min(_a.x, _b.x),
 			LMK_Min(_a.y, _b.y),
@@ -1905,7 +1919,8 @@ public: // Static Functions
 	// When _t = 1 return _b.
 	// When _t = 0.5 returns the midpoint of _a and _b.
 	// 
-	_NODISCARD inline static Vector4 Lerp(const Vector4& _from, const Vector4& _to, float _t) noexcept {
+	[[nodiscard]]
+    inline static Vector4 Lerp(const Vector4& _from, const Vector4& _to, float _t) noexcept {
 		return LMK_Lerp(_from, _to, LMK_Clamp(_t, 0.0f, 1.0f));
 	}
 
@@ -1916,7 +1931,8 @@ public: // Static Functions
 	// When _t = 1 return _b.
 	// When _t = 0.5 returns the midpoint of _a and _b.
 	// 
-	_NODISCARD inline static Vector4 LerpUnclamped(const Vector4& _from, const Vector4& _to, float _t) noexcept {
+	[[nodiscard]]
+    inline static Vector4 LerpUnclamped(const Vector4& _from, const Vector4& _to, float _t) noexcept {
 		return LMK_Lerp(_from, _to, _t);
 	}
 
@@ -1928,7 +1944,8 @@ public: // Static Functions
 	//		
 	// Negative values of _maxDistanceDelta pushes the vector away from target.
 	// 
-	_NODISCARD inline static Vector4 MoveTowards(const Vector4& _current, const Vector4& _target, float _maxDistanceDelta) noexcept {
+	[[nodiscard]]
+    inline static Vector4 MoveTowards(const Vector4& _current, const Vector4& _target, float _maxDistanceDelta) noexcept {
 		if (Distance(_current, _target) <= _maxDistanceDelta)
 			return _target;
 		return _current + (Direction(_current, _target) * _maxDistanceDelta);
@@ -1939,7 +1956,8 @@ public: // Static Functions
 	// 
 	// Every component in the result is a component of _a multiplied by the same component of _b.
 	// 
-	_NODISCARD inline static Vector4 Scale(const Vector4& _a, const Vector4& _b) noexcept {
+	[[nodiscard]]
+    inline static Vector4 Scale(const Vector4& _a, const Vector4& _b) noexcept {
 		return _a.Scale(_b);
 	}
 
@@ -1949,37 +1967,16 @@ public: // Static Functions
 	// @return
 	//		_a projected onto _b.
 	// 
-	_NODISCARD inline static Vector4 Project(const Vector4& _a, const Vector4& _b) {
-		return _b * (Dot(_a, _b) / _b.sqrMagnitude());
+	[[nodiscard]]
+    inline static Vector4 Project(const Vector4& _a, const Vector4& _b) {
+		return _b * (Dot(_a, _b) / _b.GetSqrMagnitude());
 	}
 
-	//
-	// Shorthand for writing Vector4(0, 0, 0, 0).
-	//
-	_NODISCARD inline static Vector4 zero() {
-		return Vector4(0, 0, 0, 0);
-	}
-
-	//
-	// Shorthand for writing Vector4(1, 1, 1, 1).
-	//
-	_NODISCARD inline static Vector4 one() {
-		return Vector4(1, 1, 1, 1);
-	}
-
-	//
-	// Shorthand for writing Vector4(INFINITY, INFINITY, INFINITY, INFINITY).
-	//
-	_NODISCARD inline static Vector4 positiveInfinity() {
-		return Vector4(INFINITY, INFINITY, INFINITY, INFINITY);
-	}
-
-	//
-	// Shorthand for writing Vector4(-INFINITY, -INFINITY, -INFINITY, -INFINITY).
-	//
-	_NODISCARD inline static Vector4 negativeInfinity() {
-		return Vector4(-INFINITY, -INFINITY, -INFINITY, -INFINITY);
-	}
+public: // Static Properties
+	static Vector4 zero;				// Shorthand for writing Vector4(0, 0, 0, 0).
+	static Vector4 one;					// Shorthand for writing Vector4(1, 1, 1, 1).
+	static Vector4 positiveInfinity;	// Shorthand for writing Vector4(INFINITY, INFINITY, INFINITY, INFINITY).
+	static Vector4 negativeInfinity;	// Shorthand for writing Vector4(-INFINITY, -INFINITY, -INFINITY, -INFINITY).
 
 public: // Properties
 	base_type x;	// The X component of this vector.
@@ -1988,10 +1985,16 @@ public: // Properties
 	base_type w;	// The W component of this vector.
 };
 
+// Static Properties Initialization
+Vector4 Vector4::zero = Vector4{ 0, 0, 0, 0 };
+Vector4 Vector4::one = Vector4{ 1, 1, 1, 1 };
+Vector4 Vector4::positiveInfinity = Vector4{ INFINITY, INFINITY, INFINITY, INFINITY };
+Vector4 Vector4::negativeInfinity = Vector4{ -INFINITY, -INFINITY, -INFINITY, -INFINITY };
+
 // Vector4:
 // Non-member Operators Overloads
-
-_NODISCARD inline Vector4 operator*(float _left, const Vector4& _right) {
+[[nodiscard]]
+    inline Vector4 operator*(float _left, const Vector4& _right) {
 	Vector4 temp = _right;
 	temp *= _left;
 	return temp;
@@ -2006,46 +2009,43 @@ _NODISCARD inline Vector4 operator*(float _left, const Vector4& _right) {
 //
 // A standard 3x3 transformation matrix used explicitly for 2D transformations.
 //
-class Matrix3 {
+class Matrix3x3 {
 public: // Typedef
 	// An lmk::BaseVector2 type.
 	using vector_type	= Vector3;
 	// An arithmetic type (i.e, int, float, double,...)
 	using base_type		= typename vector_type::base_type;
-	
-	// The size of the matrix in either dimension.
-	const static size_t size = 3;
 
 public: // Constructors & Destructors
 	//
-	// Creates a new Matrix3 from an array of Vector3.
+	// Create a new Matrix3x3 from an array of Vector3.
 	// Each vector represents a row in the matrix.
 	//
-	inline Matrix3(const vector_type (&_matrix)[3]) {
-		for (size_t i = 0; i < size; i++)
-			for (size_t j = 0; j < size; j++)
-				matrix[i][j] = _matrix[i][j];
+	inline Matrix3x3(const vector_type (&_matrix)[3]) {
+		for (size_t i = 0; i < 3; i++)
+			for (size_t j = 0; j < 3; j++)
+				m_matrix[i][j] = _matrix[i][j];
 	}
 
 	//
-	// Creates a new Matrix3 from an array of array.
+	// Create a new Matrix3x3 from an array of array.
 	// Each vector represents a row in the matrix.
 	//
-	inline Matrix3(const base_type (&_matrix)[3][3]) {
-		for (size_t i = 0; i < size; i++)
-			for (size_t j = 0; j < size; j++)
-				matrix[i][j] = _matrix[i][j];
+	inline Matrix3x3(const base_type (&_matrix)[3][3]) {
+		for (size_t i = 0; i < 3; i++)
+			for (size_t j = 0; j < 3; j++)
+				m_matrix[i][j] = _matrix[i][j];
 	}
 
 	//
-	// Creates an identity Matrix3.
+	// Create an identity Matrix3x3.
 	//
-	inline Matrix3()
-		: matrix{
+	inline Matrix3x3() 
+		: m_matrix{
 			{1, 0, 0},
 			{0, 1, 0},
-			{0, 0, 1}
-			} {}
+			{0, 0, 1} 
+		} {}
 
 public: // Operators Overloads
 	//
@@ -2054,59 +2054,49 @@ public: // Operators Overloads
 	// @return
 	//		A formatted string: [{m11; m12; m13}, {m21; m22; m23}, {m31; m32; m33}]
 	//
-	_NODISCARD inline operator std::string() const {
+	[[nodiscard]]
+    inline operator std::string() const {
 		std::string result;
-		for (size_t i = 0; i < size; i++) {
-			result += "[" + std::to_string(matrix[i][0]) + ", " + std::to_string(matrix[i][1]) + ", " + std::to_string(matrix[i][2]) + "]";
+		for (size_t i = 0; i < 3; i++) {
+			result += "[" + std::to_string(m_matrix[i][0]) + ", " + std::to_string(m_matrix[i][1]) + ", " + std::to_string(m_matrix[i][2]) + "]";
 		}
 		return result;
 	}
 
 	//
-	// Access matrix at [_rowIndex], stored as a standard C array.
+	// Access matrix Get [_rowIndex], stored as a standard C array.
 	//
-	_NODISCARD inline base_type* operator[](int _rowIndex) {
-		LMK_CORE_ASSERT(_rowIndex >= 0 && _rowIndex < size, "lmk::Matrix3: index out of range for operator[] (index should be 0, 1, or 2).");
-		return matrix[_rowIndex];
+	[[nodiscard]]
+    inline base_type* operator[](int _rowIndex) {
+		LMK_CORE_ASSERT(_rowIndex >= 0 && _rowIndex < 3, 
+			"lmk::Matrix3: operator[] - Index out of range. (index should be 0, 1, or 2).");
+		return m_matrix[_rowIndex];
 	}
 
 	//
-	// Access matrix at [_rowIndex], stored as a ::vector_type.
+	// Access matrix Get [_rowIndex], stored as a ::vector_type.
 	//
-	_NODISCARD inline const base_type* operator[](int _rowIndex) const {
-		LMK_CORE_ASSERT(_rowIndex >= 0 && _rowIndex < size, "lmk::Matrix3: index out of range for operator[] (index should be 0, 1, or 2).");
-		return matrix[_rowIndex];
+	[[nodiscard]]
+    inline const base_type* operator[](int _rowIndex) const {
+		LMK_CORE_ASSERT(_rowIndex >= 0 && _rowIndex < 3, 
+			"lmk::Matrix3: operator[] - Index out of range. (index should be 0, 1, or 2).");
+		return m_matrix[_rowIndex];
 	}
 
-	inline Matrix3& operator*=(const Matrix3& _right) noexcept {
-		Matrix3 temp = *this;
-		// Perform dot products for each row and column.
-		for (int i = 0; i < size; i++) {
-			for (int j = 0; j < size; j++) {
-				matrix[i][j] = vector_type::Dot(temp.GetRow(i), vector_type{_right[0][j], _right[1][j], _right[2][j]});
+	inline Matrix3x3& operator*=(const Matrix3x3& _right) noexcept {
+		Matrix3x3 temp = *this;
+		for (size_t i = 0; i < 3; i++) {
+			for (size_t j = 0; j < 3; j++) {
+				// Perform dot products for each row and column.
+				m_matrix[i][j] = vector_type::Dot(temp.GetRow(i), _right.GetColumn(j));
 			}
 		}
 		return *this;
 	}
 
-	inline Matrix3& operator*=(const vector_type& _right) noexcept {
-		Matrix3 temp = *this;
-		for (int i = 0; i < size; i++) {
-			for (int j = 0; j < size; j++) {
-				matrix[i][j] = vector_type::Dot(temp.GetRow(i), _right);
-			}
-		}
-		return *this;
-	}
-
-	_NODISCARD inline Matrix3 operator*(const Matrix3& _right) const noexcept {
-		Matrix3 temp = *this;
-		temp *= _right;
-		return temp;
-	}
-
-	_NODISCARD inline Matrix3 operator*(const vector_type& _right) const noexcept {
-		Matrix3 temp = *this;
+	[[nodiscard]]
+    inline Matrix3x3 operator*(const Matrix3x3& _right) const noexcept {
+		Matrix3x3 temp = *this;
 		temp *= _right;
 		return temp;
 	}
@@ -2115,10 +2105,11 @@ public: // Functions
 	// 
 	// Transforms a position by this matrix.
 	//
-	_NODISCARD inline Vector2 MultiplyPoint(Vector2 _vector) const noexcept {
+	[[nodiscard]]
+    inline Vector2 MultiplyPoint(Vector2 _vector) const noexcept {
 		Vector2 result;
-		result.x = matrix[0][0] * _vector.x + matrix[0][1] * _vector.y + matrix[0][2];
-		result.y = matrix[1][0] * _vector.x + matrix[1][1] * _vector.y + matrix[1][2];
+		result.x = m_matrix[0][0] * _vector.x + m_matrix[0][1] * _vector.y + m_matrix[0][2];
+		result.y = m_matrix[1][0] * _vector.x + m_matrix[1][1] * _vector.y + m_matrix[1][2];
 		return result;
 	}
 
@@ -2126,17 +2117,19 @@ public: // Functions
 	// Returns a column of the matrix.
 	// The _index-th column is returned as a Vector3. (_index must be from 0 to 2 inclusive)
 	//
-	_NODISCARD inline vector_type GetColumn(int _index) const noexcept {
-		return vector_type{ matrix[0][_index], matrix[1][_index], matrix[2][_index] };
+	[[nodiscard]]
+    inline vector_type GetColumn(int _index) const noexcept {
+		return vector_type{ m_matrix[0][_index], m_matrix[1][_index], m_matrix[2][_index] };
 	}
 
 	//
 	// Set a column of the matrix.
 	// The _index-th column is set from Vector3. (_index must be from 0 to 2 inclusive)
 	//
-	_NODISCARD inline void SetColumn(int _index, const vector_type& _column) noexcept {
-		for (size_t i = 0; i < size; i++) {
-			matrix[i][_index] = _column[i];
+	[[nodiscard]]
+    inline void SetColumn(int _index, const vector_type& _column) noexcept {
+		for (size_t i = 0; i < 3; i++) {
+			m_matrix[i][_index] = _column[i];
 		}
 	}
 
@@ -2144,24 +2137,26 @@ public: // Functions
 	// Returns a row of the matrix.
 	// The _index-th row is returned as a Vector3. (_index must be from 0 to 2 inclusive)
 	//
-	_NODISCARD inline vector_type GetRow(int _index) const noexcept {
-		return vector_type{ matrix[_index][0], matrix[_index][1], matrix[_index][2] };
+	[[nodiscard]]
+    inline vector_type GetRow(int _index) const noexcept {
+		return vector_type{ m_matrix[_index][0], m_matrix[_index][1], m_matrix[_index][2] };
 	}
 
 	//
 	// Sets a row of the matrix.
 	// The _index-th row is set from Vector3. (_index must be from 0 to 2 inclusive)
 	//
-	_NODISCARD inline void SetRow(int _index, const vector_type& _row) noexcept {
-		for (size_t i = 0; i < size; i++) {
-			matrix[_index][i] = _row[i];
+	[[nodiscard]]
+    inline void SetRow(int _index, const vector_type& _row) noexcept {
+		for (size_t i = 0; i < 3; i++) {
+			m_matrix[_index][i] = _row[i];
 		}
 	}
 
 	//
 	// Sets this matrix to a translation, rotation and scaling matrix.
 	// 
-	// The current matrix is modified so that it places objects at position _t, oriented in rotation _r and scaled by _s.
+	// The current matrix is modified so that it places objects Get position _t, oriented in rotation _r and scaled by _s.
 	// 
 	// @param _t:
 	//		A Vector2 represents the 2D translation.
@@ -2172,6 +2167,108 @@ public: // Functions
 	//
 	inline void SetTRS(Vector2 _t, float _r, Vector2 _s) {
 		*this = Translate(_t) * Rotate(_r) * Scale(_s);
+	}
+
+	//
+	// Returns the determinant of this matrix.
+	//
+	[[nodiscard]]
+    inline base_type Determinant() const {
+		// The formula for calculating a determinant of a matrix can be found here:
+		// https://www.cuemath.com/determinant-formula/
+		return	m_matrix[0][0] * (m_matrix[1][1] * m_matrix[2][2] - m_matrix[1][2] * m_matrix[2][1]) -
+				m_matrix[0][1] * (m_matrix[1][0] * m_matrix[2][2] - m_matrix[1][2] * m_matrix[2][0]) +
+				m_matrix[0][2] * (m_matrix[1][0] * m_matrix[2][1] - m_matrix[1][1] * m_matrix[2][0]);
+	}
+
+	//
+	// Returns the transpose of this matrix.
+	// 
+	// The transposed matrix is the one that has the matrix's columns exchanged with its rows.
+	//
+	[[nodiscard]]
+    inline Matrix3x3 Transpose() const {
+		return { {
+			{m_matrix[0][0], m_matrix[1][0], m_matrix[2][0]},
+			{m_matrix[0][1], m_matrix[1][1], m_matrix[2][1]},
+			{m_matrix[0][2], m_matrix[1][2], m_matrix[2][2]},
+		} };
+	}
+
+	//
+	// Returns the inverse of this matrix.
+	// 
+	// Inverted matrix is such that if multiplied by the original would result in identity matrix.
+	//
+	[[nodiscard]]
+    inline Matrix3x3 Inverse() const {
+		// The formula for calculating the inverse matrix can be found here:
+		// https://www.cuemath.com/algebra/inverse-of-a-matrix/
+
+		base_type determinant = Determinant();
+		if (determinant == 0) return Matrix3x3::zero;
+
+		Matrix3x3 adj = Adjugate();
+		Matrix3x3 inverse;
+		for (int i = 0; i < 3; i++) {
+			for (int j = 0; j < 3; j++) {
+				inverse[i][j] = adj[i][j] / determinant;
+			}
+		}
+		return inverse;
+	}
+
+private:
+	//
+	// Calculates the determinant of a minor 2x2 matrix.
+	//
+	[[nodiscard]]
+    inline base_type MinorDeterminant(base_type _minor[2][2]) const {
+		// We knows this function will only take in a 2x2 matrix since we are
+		// only calculating for minor of a 3x3 matrix.
+		return _minor[0][0] * _minor[1][1] - _minor[0][1] * _minor[1][0];
+	}
+
+	//
+	// Calculates the cofactor of an element in a matrix.
+	//
+	[[nodiscard]]
+    inline base_type Cofactor(size_t _row, size_t _col) const {
+		// The formula for calculating a cofactor matrix can be found here:
+		// https://www.cuemath.com/algebra/cofactor-matrix/
+
+		base_type minor[2][2];
+		size_t r = 0, c = 0;
+
+		for (size_t i = 0; i < 3; i++) {
+			if (i == _row) continue;
+			for (size_t j = 0; j < 3; j++) {
+				if (j == _col) continue;
+				minor[r][c] = m_matrix[i][j];
+				c++;
+			}
+			r++;
+			c = 0;
+		}
+
+		return MinorDeterminant(minor) * (((_row + _col) % 2 == 0) ? 1.0 : -1.0);
+	}
+
+	//
+	// Calculates the adjugate matrix of this matrix.
+	// 
+	// The adjugate matrix is the transpose of the matrix of cofactors.
+	// 
+	[[nodiscard]]
+    inline Matrix3x3 Adjugate() const {
+		Matrix3x3 adj;
+		for (size_t i = 0; i < 3; i++) {
+			for (size_t j = 0; j < 3; j++) {
+				// Assign the cofactor to the adjugate matrix.
+				adj[j][i] = Cofactor(i, j);
+			}
+		}
+		return adj;
 	}
 
 public: // Static Functions
@@ -2193,11 +2290,13 @@ public: // Static Functions
 	// @return 
 	//		The projection matrix.
 	//
-	_NODISCARD inline static Matrix3 Ortho(base_type _left, base_type _right, base_type _bottom, base_type _top) {
+	[[nodiscard]]
+    inline static Matrix3x3 Ortho(base_type _left, base_type _right, base_type _bottom, base_type _top) {
 		// The original formula for the construction of the projection matrix in 3D can be found here:
 		// https://learnwebgl.brown37.net/08_projections/projections_ortho.html
 		// 
-		// This is a simplified version used specifically for 2D projection that removes the .
+		// This is a simplified version used specifically for 2D projection.
+		// We simply remove the relevance of near and far clipping planes in the matrix.
 
 		// Calculating the elements of the matrix.
 		float A = 2 / (_right - _left);						// The scaling factor in the x direction.
@@ -2210,11 +2309,11 @@ public: // Static Functions
 			{A, 0, tx},
 			{0, B, ty},
 			{0, 0, 1}
-			} };
+		} };
 	}
 
 	//
-	// Creates a rotation matrix.
+	// Create a rotation matrix.
 	// 
 	// @param _rotation:
 	//		The rotation in degree.
@@ -2222,7 +2321,8 @@ public: // Static Functions
 	// @return
 	//		The rotation matrix.
 	//
-	_NODISCARD inline static Matrix3 Rotate(float _rotation) {
+	[[nodiscard]]
+    inline static Matrix3x3 Rotate(float _rotation) {
 		// Convert angle from degrees to radians.
 		float angle_rad = LMK_DtoR(_rotation);
 
@@ -2239,7 +2339,7 @@ public: // Static Functions
 	}
 
 	//
-	// Creates a scaling matrix.
+	// Create a scaling matrix.
 	// 
 	// @param _scale:
 	//		A vector represents the scale factor in x and y coordinate.
@@ -2247,7 +2347,8 @@ public: // Static Functions
 	// @return
 	//		The scaling matrix.
 	//
-	_NODISCARD inline static Matrix3 Scale(Vector2 _scale) {
+	[[nodiscard]]
+    inline static Matrix3x3 Scale(Vector2 _scale) {
 		return { {
 			{_scale.x, 0, 0},
 			{0, _scale.y, 0},
@@ -2256,7 +2357,7 @@ public: // Static Functions
 	}
 
 	//
-	// Creates a scaling matrix.
+	// Create a scaling matrix.
 	// 
 	// @param _scale:
 	//		A vector represents the scale factor in x and y coordinate.
@@ -2264,7 +2365,8 @@ public: // Static Functions
 	// @return
 	//		The scaling matrix.
 	//
-	_NODISCARD inline static Matrix3 Translate(Vector2 _translate) {
+	[[nodiscard]]
+    inline static Matrix3x3 Translate(Vector2 _translate) {
 		return { {
 			{1, 0, _translate.x},
 			{0, 1, _translate.y},
@@ -2273,9 +2375,9 @@ public: // Static Functions
 	}
 
 	//
-	// Creates a translation, rotation and scaling matrix.
+	// Create a translation, rotation and scaling matrix.
 	// 
-	// The returned matrix is such that it places objects at position _t, oriented in rotation _r and scaled by _s.
+	// The returned matrix is such that it places objects Get position _t, oriented in rotation _r and scaled by _s.
 	// 
 	// @param _t:
 	//		A Vector2 represents the 2D translation.
@@ -2284,14 +2386,45 @@ public: // Static Functions
 	// @param _s:
 	//		A Vector2 represents the 2D scale.
 	//
-	_NODISCARD inline static Matrix3 TRS(Vector2 _t, float _r, Vector2 _s) {
+	[[nodiscard]]
+    inline static Matrix3x3 TRS(Vector2 _t, float _r, Vector2 _s) {
 		return Translate(_t) * Rotate(_r) * Scale(_s);
 	}
 
+public: // Static Properties
+	// Returns the identity matrix.
+	// This is a matrix that effectively does nothing when applied. 
+	// It has 1s in the main diagonal and 0s in all other elements:
+	static Matrix3x3 identity;
+
+	// Returns a matrix with all elements set to zero.
+	static Matrix3x3 zero;
+
 private: // Properties
-	base_type matrix[3][3];
+	base_type m_matrix[3][3];
 };
 
+// Static Properties Initialization
+Matrix3x3 Matrix3x3::identity = { { {1, 0, 0}, {0, 1, 0}, {0, 0, 1} } };
+Matrix3x3 Matrix3x3::zero = { { {0, 0, 0}, {0, 0, 0}, {0, 0, 0} } };
+
+// Matrix3x3:
+// Non-member Operators Overloads
+[[nodiscard]]
+    inline Matrix3x3::vector_type operator*(const Matrix3x3& _left, const Matrix3x3::vector_type& _right) noexcept {
+	auto result = _right;
+	for (size_t i = 0; i < 3; i++) {
+		result[i] = Matrix3x3::vector_type::Dot(_left.GetRow(i), _right);
+	}
+	return result;
+}
+
+[[nodiscard]]
+    inline Matrix3x3::vector_type operator*(const Matrix3x3::vector_type& _left, const Matrix3x3& _right) noexcept {
+	return _right * _left;
+}
+
+IMPL_BEGIN
 // +--------------------------------------------------------------------------------+
 // |																				|
 // | RECTANGLE																		|
@@ -2333,7 +2466,6 @@ private: // Properties
 //		 yMax ---- *----------------*
 //
 
-IMPL_BEGIN
 //
 // Returns true when T is is any of the following:
 //	> Vector2
@@ -2361,7 +2493,7 @@ protected: // Typedef
 
 public: // Constructors & Destructors
 	//
-	// Creates a BaseRect<Type>.
+	// Create a BaseRect<Type>.
 	// 
 	// @param _x:
 	//		The minimum X value of the rectangle.
@@ -2376,7 +2508,7 @@ public: // Constructors & Destructors
 		: m_xMin(_x), m_yMin(_y), m_xMax(_x + _w), m_yMax(_y + _h), m_width(_w), m_height(_h) {}
 
 	//
-	// Creates a BaseRect<Type>.
+	// Create a BaseRect<Type>.
 	// 
 	// @param _pos:
 	//		The position (x, y) of the rectangle.
@@ -2393,12 +2525,14 @@ public: // Operators Overloads
 	// @return
 	//		A formatted string: {{xMin; yMin} : {xMax; yMax}}
 	// 
-	_NODISCARD inline operator std::string() const {
+	[[nodiscard]]
+    inline operator std::string() const {
 		return "{" + (std::string)vector_type(m_xMin, m_yMin) + " : " + (std::string)vector_type(m_xMax, m_yMax) + "}";
 	}
 
 	template <typename Right_Type>
-	_NODISCARD inline bool operator==(const BaseRect<Right_Type>& _right) const noexcept {
+	[[nodiscard]]
+    inline bool operator==(const BaseRect<Right_Type>& _right) const noexcept {
 		return (m_xMin == _right.m_xMin) && (m_yMin == _right.m_yMin) && (m_width == _right.m_width) && (m_height == _right.m_height);
 	}
 
@@ -2407,7 +2541,7 @@ public: // Functions
 	// Offset the position of the rectangle.
 	//
 	inline void Offset(vector_type _offset) noexcept {
-		setPosition(position() + _offset);
+		setPosition(GetPosition() + _offset);
 	}
 
 	//
@@ -2421,8 +2555,8 @@ public: // Functions
 	// Scale width and height of the rectangle.
 	//
 	inline void Scale(vector_type _scale) noexcept {
-		setWidth(m_width * _scale.x);
-		setHeight(m_height * _scale.y);
+		SetWidth(m_width * _scale.x);
+		SetHeight(m_height * _scale.y);
 	}
 
 	//
@@ -2448,18 +2582,19 @@ public: // Functions
 	// @param _point:
 	//		Point to test.
 	// @param _allowInverse:
-	//		Does the test allow the Rect's width and height to be negative?
+	//		Does the test allow the width and height of the rectangle to be negative?
 	// 
 	// @return
 	//		True if the point lies within the specified rectangle.
 	// 
-	_NODISCARD inline bool Contains(vector_type _point, bool _allowInverse = false) const noexcept {
+	[[nodiscard]]
+    inline bool Contains(vector_type _point, bool _allowInverse = false) const noexcept {
 		// If X and Y coordinate of _point falls within Min and Max range of Rect -> Contains.
-		bool cond = LMK_InRange(_point.x, xMin, xMax) && LMK_InRange(_point.y, yMin, yMax);
+		bool cond = LMK_InRange(_point.x, GetXMin, GetXMax) && LMK_InRange(_point.y, GetYMin, GetYMax);
 
 		// If _allowInverse is true -> we also check for LMK_InRange with the other way around (ie, Min becomes Max).
 		if (_allowInverse)
-			return cond || (LMK_InRange(_point.x, xMax, xMin) && LMK_InRange(_point.y, yMax, yMin));
+			return cond || (LMK_InRange(_point.x, GetXMax, GetXMin) && LMK_InRange(_point.y, GetYMax, GetYMin));
 		else
 			return cond;
 	}
@@ -2474,9 +2609,10 @@ public: // Functions
 	//		The <Type> of the other rectangle.
 	// 
 	template <typename Right_Type>
-	_NODISCARD inline bool Overlaps(const BaseRect<Right_Type>& _other) const noexcept {
+	[[nodiscard]]
+    inline bool Overlaps(const BaseRect<Right_Type>& _other) const noexcept {
 		// If either rectangle has area of 0 -> no overlap possible.
-		if (area() == 0 || _other.area() == 0)
+		if (GetArea() == 0 || _other.GetArea() == 0)
 			return false;
 
 		// If one rectangle is on left side of the other.
@@ -2492,80 +2628,91 @@ public: // Functions
 
 protected:
 	// Get the area of this Rect.
-	_NODISCARD inline base_type area() const noexcept {
+	[[nodiscard]]
+    inline base_type GetArea() const noexcept {
 		return m_width * m_height;
 		return m_width * m_height;
 	}
 
 public: // Accessors
 	// Returns the width of the rectangle, measured from the X position.
-	_NODISCARD inline base_type width() const noexcept {
+	[[nodiscard]]
+    inline base_type GetWidth() const noexcept {
 		return m_width;
 	}
 
 	// Returns the height of the rectangle, measured from the Y position.
-	_NODISCARD inline base_type height() const noexcept {
+	[[nodiscard]]
+    inline base_type GetHeight() const noexcept {
 		return m_height;
 	}
 
 	// Get the width and height of the rectangle.
-	_NODISCARD inline vector_type size() const noexcept {
+	[[nodiscard]]
+    inline vector_type GetSize() const noexcept {
 		return vector_type(m_width, m_height);
 	}
 
 	// Get the minimum X coordinate of the rectangle. 
-	_NODISCARD inline base_type xMin() const noexcept {
+	[[nodiscard]]
+    inline base_type GetXMin() const noexcept {
 		return m_xMin;
 	}
 
 	// Get the minimum Y coordinate of the rectangle. 
-	_NODISCARD inline base_type yMin() const noexcept {
+	[[nodiscard]]
+    inline base_type GetYMin() const noexcept {
 		return m_yMin;
 	}
 
 	// Get the position of the minimum corner of the rectangle.
-	_NODISCARD inline vector_type minPos() const noexcept {
+	[[nodiscard]]
+    inline vector_type GetMinPos() const noexcept {
 		return vector_type(m_xMin, m_yMin);
 	}
 
 	// Get the maximum X coordinate of the rectangle. 
-	_NODISCARD inline base_type xMax() const noexcept {
+	[[nodiscard]]
+    inline base_type GetXMax() const noexcept {
 		return m_xMax;
 	}
 
 	// Get the maximum Y coordinate of the rectangle. 
-	_NODISCARD inline base_type yMax() const noexcept {
+	[[nodiscard]]
+    inline base_type GetYMax() const noexcept {
 		return m_yMax;
 	}
 
 	// Get the position of the maximum corner of the rectangle.
-	_NODISCARD inline vector_type maxPos() const noexcept {
+	[[nodiscard]]
+    inline vector_type GetMaxPos() const noexcept {
 		return vector_type(m_xMax, m_yMax);
 	}
 
 	// Get the X and Y position of the rectangle.
-	_NODISCARD inline vector_type position() const noexcept {
+	[[nodiscard]]
+    inline vector_type GetPosition() const noexcept {
 		return vector_type(m_xMin, m_yMin);
 	}
 
 public: // Mutators
 	// Set the width of the rectangle, measured from the X position.
 	// Setting this property will preserve the Min coordinate but changes and Max coordinate.
-	inline void setWidth(base_type _width) noexcept {
+	inline void SetWidth(base_type _width) noexcept {
 		m_width = _width;
 		m_xMax = m_xMin + m_width;
 	}
 
 	// Set the height of the rectangle, measured from the Y position.
 	// Setting this property will preserve the Min coordinate but changes and Max coordinate.
-	inline void setHeight(base_type _height) noexcept {
+	inline void SetHeight(base_type _height) noexcept {
 		m_height = _height;
 		m_yMax = m_yMin + m_height;
 	}
 
 	// Set the width and height of the rectangle.
 	// Setting this property will preserve the Min coordinate but changes and Max coordinate.
-	inline void setSize(base_type _width, base_type _height) noexcept {
+	inline void SetSize(base_type _width, base_type _height) noexcept {
 		m_width = _width;
 		m_height = _height;
 		m_xMax = m_xMin + m_width;
@@ -2574,27 +2721,27 @@ public: // Mutators
 
 	// Set the width and height of the rectangle.
 	// Setting this property will preserve the Min coordinate but changes and Max coordinate.
-	inline void setSize(vector_type _size) noexcept {
+	inline void SetSize(vector_type _size) noexcept {
 		setSize(_size.x, _size.y);
 	}
 
 	// Set the minimum X coordinate of the rectangle. 
 	// Setting this property will resize the width of the rectangle.
-	inline void setXMin(base_type _xMin) noexcept {
+	inline void SetXMin(base_type _xMin) noexcept {
 		m_xMin = _xMin;
 		m_width = m_xMax - m_xMin;
 	}
 
 	// Set the minimum X coordinate of the rectangle. 
 	// Setting this property will resize the height of the rectangle.
-	inline void setYMin(base_type _yMin) noexcept {
+	inline void SetYMin(base_type _yMin) noexcept {
 		m_yMin = _yMin;
 		m_height = m_yMax - m_yMin;
 	}
 
 	// Set the position of the minimum corner of the rectangle.
 	// Setting this property will resize the rectangle and preserve the position of the Max coordinate.
-	inline void setMin(base_type _x, base_type _y) noexcept {
+	inline void SetMin(base_type _x, base_type _y) noexcept {
 		m_xMin = _x;
 		m_yMin = _y;
 		m_width = m_xMax - m_xMin;
@@ -2603,27 +2750,27 @@ public: // Mutators
 
 	// Set the position of the minimum corner of the rectangle.
 	// Setting this property will resize the rectangle and preserve the position of the Max coordinate.
-	inline void setMin(vector_type _minPos) noexcept {
+	inline void SetMin(vector_type _minPos) noexcept {
 		setMin(_minPos.x, _minPos.y);
 	}
 
 	// Set the maximum X coordinate of the rectangle. 
 	// Setting this property will resize the width of the rectangle.
-	inline void setXMax(base_type _xMax) noexcept {
+	inline void SetXMax(base_type _xMax) noexcept {
 		m_xMax = _xMax;
 		m_width = m_xMax - m_xMin;
 	}
 
 	// Set the maximum Y coordinate of the rectangle. 
 	// Setting this property will resize the height of the rectangle.
-	inline void setYMax(base_type _yMax) noexcept {
+	inline void SetYMax(base_type _yMax) noexcept {
 		m_yMax = _yMax;
 		m_height = m_yMax - m_yMin;
 	}
 
 	// Set the position of the maximum corner of the rectangle.
 	// Setting this property will resize the rectangle and preserve the position of the Min coordinate.
-	inline void setMax(base_type _x, base_type _y) noexcept {
+	inline void SetMax(base_type _x, base_type _y) noexcept {
 		m_xMax = _x;
 		m_yMax = _y;
 		m_width = m_xMax - m_xMin;
@@ -2632,13 +2779,13 @@ public: // Mutators
 
 	// Set the position of the maximum corner of the rectangle.
 	// Setting this property will resize the rectangle and preserve the position of the Min coordinate.
-	inline void setMax(vector_type _maxPos) noexcept {
+	inline void SetMax(vector_type _maxPos) noexcept {
 		setMax(_maxPos.x, _maxPos.y);
 	}
 
 	// Set the X and Y position of the rectangle. 
-	// Setting this property will preserve the size of the rectangle but changes the Min and Max coordinate.
-	inline void setPosition(base_type _x, base_type _y) noexcept {
+	// Setting this property will preserve the Count of the rectangle but changes the Min and Max coordinate.
+	inline void SetPosition(base_type _x, base_type _y) noexcept {
 		m_xMin = _x;
 		m_yMin = _y;
 		m_xMax = _x + m_width;
@@ -2646,16 +2793,14 @@ public: // Mutators
 	}
 
 	// Set the X and Y position of the rectangle.
-	// Setting this property will preserve the size of the rectangle but changes the Min and Max coordinate.
-	inline void setPosition(vector_type _pos) noexcept {
+	// Setting this property will preserve the Count of the rectangle but changes the Min and Max coordinate.
+	inline void SetPosition(vector_type _pos) noexcept {
 		setPosition(_pos.x, _pos.y);
 	}
 
 public: // Properties
-	//
-	// The vertial center of the rectangle.
+	// The vertical center of the rectangle.
 	// This property acts as a pivot for Rect-based components to perform scale and rotation functions.
-	//
 	Vector2 center = Vector2(0.5f, 0.5f);
 
 protected:
@@ -2674,7 +2819,7 @@ IMPL_END
 class Rect : public impl::BaseRect<Vector2> {
 public:	// Constructors & Destructors
 	//
-	// Creates a new Rect.
+	// Create a new Rect.
 	// 
 	// @param _x:
 	//		The minimum X value of the rectangle.
@@ -2689,7 +2834,7 @@ public:	// Constructors & Destructors
 		: BaseRect(_x, _y, _w, _h) {}
 
 	//
-	// Creates a new Rect.
+	// Create a new Rect.
 	// 
 	// @param _pos:
 	//		The position (x, y) of the rectangle.
@@ -2700,7 +2845,7 @@ public:	// Constructors & Destructors
 		: Rect(_position.x, _position.y, _size.x, _size.y) {}
 
 	//
-	// Creates a new Rect with position and size of (0, 0).
+	// Create a new Rect with position and Count of (0, 0).
 	//
 	inline Rect() 
 		: Rect(0, 0, 0, 0) {}
@@ -2710,8 +2855,17 @@ public: // Operators Overloads
 	//
 	// Convert a lmk::RectInt to SDL_Rect.
 	//
-	_NODISCARD inline operator SDL_FRect() {
+	[[nodiscard]]
+    inline operator SDL_FRect() const {
 		return SDL_FRect{ m_xMin, m_yMin, m_width, m_height };
+	}
+
+	//
+	// Convert a lmk::RectInt to SDL_Rect.
+	//
+	[[nodiscard]]
+    inline operator const SDL_FRect*() const {
+		return new SDL_FRect{ m_xMin, m_yMin, m_width, m_height };
 	}
 #endif
 
@@ -2724,30 +2878,31 @@ public: // Static Functions
 	// @param _normRectCoord:
 	//		Normalized coordinates to get a point for.
 	//
-	_NODISCARD inline static vector_type NormalizedToPoint(const Rect& _rect, vector_type _normRectCoord) {
-		return vector_type::Scale(_normRectCoord, _rect.size());
+	[[nodiscard]]
+    inline static vector_type NormalizedToPoint(const Rect& _rect, vector_type _normRectCoord) {
+		return vector_type::Scale(_normRectCoord, _rect.GetSize());
 	}
 
 	//
-	// Get the normalized coordinates cooresponding to the given point.
+	// Get the normalized coordinates corresponding to the given point.
 	// 
 	// @return
 	//		A Vector2 in the range 0 to 1 with values more 1 or less than zero clamped.
 	//
-	_NODISCARD inline static vector_type PointToNormalized(const Rect& _rect, vector_type _point) {
+	[[nodiscard]]
+    inline static vector_type PointToNormalized(const Rect& _rect, vector_type _point) {
 		return Vector2(
-			(_point.x - _rect.xMin()) / _rect.width(),
-			(_point.y - _rect.yMin()) / _rect.height()
+			(_point.x - _rect.GetXMin()) / _rect.GetWidth(),
+			(_point.y - _rect.GetYMin()) / _rect.GetHeight()
 		).Clamp01();
 	}
 
-	// 
-	// Shorthand for writing Rect(0, 0, 0, 0).
-	// 
-	_NODISCARD inline static Rect zero() {
-		return Rect(0, 0, 0, 0);
-	}
+public: // Static Properties
+	static Rect zero; // Shorthand for writing Rect(0, 0, 0, 0).
 };
+
+// Static Properties Initialization
+Rect Rect::zero = Rect{ 0, 0, 0, 0 };
 
 //
 // A 2D Rectangle defined by x, y, width, height with integers.
@@ -2755,7 +2910,7 @@ public: // Static Functions
 class RectInt : public impl::BaseRect<Vector2Int> {
 public:	// Constructors & Destructors
 	//
-	// Creates a new Rect.
+	// Create a new Rect.
 	// 
 	// @param _x:
 	//		The minimum X value of the RectInt.
@@ -2770,7 +2925,7 @@ public:	// Constructors & Destructors
 		: BaseRect(_x, _y, _w, _h) {}
 
 	//
-	// Creates a new Rect.
+	// Create a new Rect.
 	// 
 	// @param _pos:
 	//		The position (x, y) of the RectInt.
@@ -2781,7 +2936,7 @@ public:	// Constructors & Destructors
 		: RectInt(_position.x, _position.y, _size.x, _size.y) {}
 
 	//
-	// Creates a new RectInt with position and size of (0, 0).
+	// Create a new RectInt with position and Count of (0, 0).
 	//
 	inline RectInt() : RectInt(0, 0, 0, 0) {}
 
@@ -2790,30 +2945,39 @@ public: // Operators Overloads
 	//
 	// Convert a lmk::RectInt to SDL_Rect.
 	//
-	_NODISCARD inline operator SDL_Rect() {
+	[[nodiscard]]
+    inline operator SDL_Rect() const {
 		return SDL_Rect{ m_xMin, m_yMin, m_width, m_height };
+	}
+
+	//
+	// Convert a lmk::RectInt to SDL_Rect.
+	//
+	[[nodiscard]]
+    inline operator const SDL_Rect*() const {
+		return new SDL_Rect{ m_xMin, m_yMin, m_width, m_height };
 	}
 #endif
 
 public: // Functions
 	//
-	// Clamps the position and size of the RectInt to the given _bounds.
+	// Clamps the position and Count of the RectInt to the given _bounds.
 	// 
 	// @param _bounds:
 	//		Bounds to clamp the RectInt.
 	//
 	inline void ClampToBounds(const RectInt& _bounds) {
-		setMin(minPos().Clamp(_bounds.minPos(), _bounds.maxPos()));
-		setMax(maxPos().Clamp(_bounds.minPos(), _bounds.maxPos()));
+		SetMin(GetMinPos().Clamp(_bounds.GetMinPos(), _bounds.GetMaxPos()));
+		SetMax(GetMaxPos().Clamp(_bounds.GetMinPos(), _bounds.GetMaxPos()));
 	}
 
-	// 
-	// Shorthand for writing RectInt(0, 0, 0, 0).
-	// 
-	_NODISCARD inline static RectInt zero() {
-		return RectInt(0, 0, 0, 0);
-	}
+
+public: // Static Properties
+	static RectInt zero; // Shorthand for writing RectInt(0, 0, 0, 0).
 };
+
+// Static Properties Initialization
+RectInt RectInt::zero = RectInt{ 0, 0, 0, 0 };
 #pragma warning(default : 4244)
 
 // +--------------------------------------------------------------------------------+
@@ -2823,12 +2987,12 @@ public: // Functions
 // +--------------------------------------------------------------------------------+
 
 //
-// Representation of an infinite line starting at origin and going in some direction.
+// Representation of an infinite line starting Get origin and going in some direction.
 //
 struct Ray {
 public: // Constructors & Destructors
 	//
-	// Creates a new Ray.
+	// Create a new Ray.
 	// 
 	// @param _origin:
 	//		The origin point of the ray.
@@ -2836,17 +3000,17 @@ public: // Constructors & Destructors
 	//		The direction of the ray.
 	// 
 	inline Ray(Vector2 _origin, Vector2 _direction)
-		: origin(_origin), direction(_direction) {}
+		: origin(_origin), direction(_direction.GetNormalized()) {}
 
 	//
-	// Creates a new Ray with origin of (0, 0) and direction of (0, 1).
+	// Create a new Ray with origin of (0, 0) and direction of (0, 1).
 	//
 	inline Ray()
-		: Ray(Vector2::zero(), Vector2::up()) {}
+		: Ray(Vector2::zero, Vector2::up) {}
 
 public: // Functions
 	//
-	// Returns a point at distance units along the ray.
+	// Returns a point Get distance units along the ray.
 	//
 	inline Vector2 GetPoint(float _distance) {
 		return origin + direction * _distance;
@@ -2854,7 +3018,7 @@ public: // Functions
 
 public: // Properties
 	Vector2 origin;		// The origin point of the ray.
-	Vector2 direction;	// The direction of the ray.
+	Vector2 direction;	// A normalized vector represents the direction of the ray.
 };
 
 // +--------------------------------------------------------------------------------+
@@ -2871,9 +3035,9 @@ public: // Properties
 // just its center and extents, or alternatively by min and max points.
 //
 struct Bounds {
-public: // Constuctors & Destructors
+public: // Constructors & Destructors
 	//
-	// Creates a new Bound.
+	// Create a new Bound.
 	// 
 	// @param _center:
 	//		The location of the origin of the Bounds.
@@ -2884,28 +3048,28 @@ public: // Constuctors & Destructors
 		: m_center(_center), m_size(_size), m_extents(_size / 2), m_min(_center - m_extents), m_max(_center + m_extents) {}
 
 	//
-	// Creates a new Bounds with center and size of (0, 0).
+	// Create a new Bounds with center and Count of (0, 0).
 	//
 	inline Bounds() 
-		: Bounds(Vector2::zero(), Vector2::zero()) {}
+		: Bounds(Vector2::zero, Vector2::zero) {}
 
 public: // Functions
 	//
-	// Expand the bounds by increasing its size by _amount along each side.
+	// Expand the bounds by increasing its Count by _amount along each side.
 	// 
 	// This function will evenly changes its min and max point to preserve the center of the bounding box.
 	//
 	inline void Expand(float _amount) {
-		setSize(Vector2(m_size.x + _amount, m_size.y + _amount));
+		SetSize(Vector2(m_size.x + _amount, m_size.y + _amount));
 	}
 
 	//
-	// Expand the bounds by increasing its size by _amount along the corresponding axes.
+	// Expand the bounds by increasing its Count by _amount along the corresponding axes.
 	// 
 	// This function will evenly changes its min and max point to preserve the center of the bounding box.
 	//
 	inline void Expand(Vector2 _amount) {
-		setSize(m_size + _amount);
+		SetSize(m_size + _amount);
 	}
 
 	//
@@ -2914,7 +3078,7 @@ public: // Functions
 	// This function will find the minimum extents 
 	//
 	inline void Encapsulate(Vector2 _point) {
-		setMinMax(
+		SetMinMax(
 			Vector2::Min(_point, m_min),
 			Vector2::Max(_point, m_max)
 		);
@@ -2927,7 +3091,7 @@ public: // Functions
 	// to include the _bounds on the bounding box.
 	//
 	inline void Encapsulate(const Bounds& _bounds) {
-		setMinMax(
+		SetMinMax(
 			Vector2::Min(_bounds.m_min, m_min),
 			Vector2::Max(_bounds.m_max, m_max)
 		);
@@ -2943,7 +3107,8 @@ public: // Functions
 	// @return
 	//		A Vector2 represents the point on the bounding box or inside the bounding box.
 	//
-	_NODISCARD inline Vector2 ClosestPoint(Vector2 _point) const noexcept {
+	[[nodiscard]]
+    inline Vector2 ClosestPoint(Vector2 _point) const noexcept {
 		return Vector2(
 			LMK_Clamp(_point.x, m_min.x, m_max.x),
 			LMK_Clamp(_point.y, m_min.y, m_max.y)
@@ -2953,7 +3118,8 @@ public: // Functions
 	//
 	// Is _point contained in the bounding box?
 	//
-	_NODISCARD inline bool Contains(Vector2 _point) const noexcept {
+	[[nodiscard]]
+    inline bool Contains(Vector2 _point) const noexcept {
 		return (_point.x > m_min.x) && (_point.x < m_max.x) 
 			&& (_point.y > m_min.y) && (_point.y < m_max.y);
 	}
@@ -2961,7 +3127,8 @@ public: // Functions
 	//
 	// Does another bounding box intersect with this bounding box?
 	//
-	_NODISCARD inline bool Intersects(const Bounds& _bounds) const noexcept {
+	[[nodiscard]]
+    inline bool Intersects(const Bounds& _bounds) const noexcept {
 		return (m_min.x < _bounds.m_max.x) 
 			&& (m_max.x > _bounds.m_min.x)
 			&& (m_min.y < _bounds.m_max.y)
@@ -2971,14 +3138,15 @@ public: // Functions
 	//
 	// Does _ray intersect this bounding box?
 	//
-	_NODISCARD inline bool IntersectRay(Ray& _ray) noexcept {
+	[[nodiscard]]
+    inline bool IntersectRay(Ray& _ray) noexcept {
 		// For the original formula of box - ray intersection, see:
 		// https://tavianator.com/2022/ray_box_boundary.html
 
 		float tmin = 0.0f; 
 		float tmax = INFINITY;
 
-		// Loop through all dimentions of the bounding box and calculate the min and max
+		// Loop through all dimensions of the bounding box and calculate the min and max
 		// Overlapping point between the ray and the bounding box.
 		for (int d = 0; d < 2; d++) {
 			float t1 = (m_min[d] - _ray.origin[d]) * _ray.direction[d];
@@ -2993,48 +3161,53 @@ public: // Functions
 
 public: // Accessors
 	// Get the center of the bounding box.
-	_NODISCARD inline Vector2 center() const noexcept {
+	[[nodiscard]]
+    inline Vector2 GetCenter() const noexcept {
 		return m_center;
 	}
 
-	// Get the total size of the box. This is always twice as large as the extents.
-	_NODISCARD inline Vector2 size() const noexcept {
+	// Get the total Count of the box. This is always twice as large as the extents.
+	[[nodiscard]]
+    inline Vector2 GetSize() const noexcept {
 		return m_size;
 	}
 
-	// Gett the extents of the Bounding Box. This is always half of the size of the Bounds.
-	_NODISCARD inline Vector2 extents() const noexcept {
+	// Get the extents of the Bounding Box. This is always half of the Count of the Bounds.
+	[[nodiscard]]
+    inline Vector2 GetExtents() const noexcept {
 		return m_extents;
 	}
 
 	// Get the minimal point of the box. This is always equal to center - extents.
-	_NODISCARD inline Vector2 minPos() const noexcept {
+	[[nodiscard]]
+    inline Vector2 GetMinPos() const noexcept {
 		return m_min;
 	}
 
 	// Get the maximal point of the box. This is always equal to center + extents.
-	_NODISCARD inline Vector2 maxPos() const noexcept {
+	[[nodiscard]]
+    inline Vector2 GetMaxPos() const noexcept {
 		return m_max;
 	}
 
 public: // Mutators
 	// Set the center of the bounding box.
-	inline void setCenter(Vector2 _center) {
+	inline void SetCenter(Vector2 _center) {
 		m_center = _center;
 		m_min = m_center - m_extents;
 		m_max = m_center + m_extents;
 	}
 
 	// Set the center of the bounding box. This is always twice as large as the extents.
-	inline void setSize(Vector2 _size) {
+	inline void SetSize(Vector2 _size) {
 		m_size = _size;
 		m_extents = m_size / 2;
 		m_min = m_center - m_extents;
 		m_max = m_center + m_extents;
 	}
 
-	// Set the extents of the Bounding Box. This is always half of the size of the Bounds.
-	inline void setExtents(Vector2 _extents) {
+	// Set the extents of the Bounding Box. This is always half of the Count of the Bounds.
+	inline void SetExtents(Vector2 _extents) {
 		m_extents = _extents;
 		m_size = m_extents * 2;
 		m_min = m_center - m_extents;
@@ -3042,7 +3215,7 @@ public: // Mutators
 	}
 
 	// Set the minimal point of the box. This is always equal to center - extents.
-	inline void setMin(Vector2 _min) {
+	inline void SetMin(Vector2 _min) {
 		m_min = _min;
 		m_size = m_max - m_min;
 		m_extents = m_size / 2;
@@ -3050,7 +3223,7 @@ public: // Mutators
 	}
 
 	// Set the maximal point of the box. This is always equal to center + extents.
-	inline void setMax(Vector2 _max) {
+	inline void SetMax(Vector2 _max) {
 		m_max = _max;
 		m_size = m_max - m_min;
 		m_extents = m_size / 2;
@@ -3059,7 +3232,7 @@ public: // Mutators
 
 	// Sets the bounds to the min and max value of the box.
 	// Using this function is faster than assigning min and max separately.
-	inline void setMinMax(Vector2 _min, Vector2 _max) {
+	inline void SetMinMax(Vector2 _min, Vector2 _max) {
 		m_min = _min;
 		m_max = _max;
 		m_size = m_max - m_min;
@@ -3069,8 +3242,8 @@ public: // Mutators
 
 private: // Properties
 	Vector2 m_center;	// The center of the bounding box.
-	Vector2 m_size;		// The total size of the box. This is always twice as large as the extents.
-	Vector2 m_extents;	// The extents of the Bounding Box. This is always half of the size of the Bounds.
+	Vector2 m_size;		// The total Count of the box. This is always twice as large as the extents.
+	Vector2 m_extents;	// The extents of the Bounding Box. This is always half of the Count of the Bounds.
 	Vector2 m_min;		// The minimal point of the box. This is always equal to center - extents.
 	Vector2 m_max;		// The maximal point of the box. This is always equal to center + extents.
 };
@@ -3107,7 +3280,7 @@ public: // Constructors & Destructors
 		: r(_r), g(_g), b(_b), a(_a) {}
 
 	//
-	// Creates a completely transparent black Color (0, 0, 0, 0).
+	// Create a completely transparent black Color (0, 0, 0, 0).
 	//
 	inline Color() 
 		: Color(0, 0, 0, 0) {}
@@ -3117,7 +3290,8 @@ public: // Operators Overloads
 	//
 	// Converts a lmk::Color to SDL_Color
 	//
-	_NODISCARD inline operator SDL_Color() noexcept {
+	[[nodiscard]]
+    inline operator SDL_Color() noexcept {
 		return SDL_Color{ r, g, b, a };
 	}
 #endif
@@ -3125,7 +3299,8 @@ public: // Operators Overloads
 	//
 	// Access the r, g, b, a components using [0], [1], [2], [3] respectively.
 	//
-	_NODISCARD inline uint8_t& operator[](uint8_t _index) {
+	[[nodiscard]]
+    inline uint8_t& operator[](uint8_t _index) {
 		switch (_index) {
 		case 0: return r;
 		case 1: return g;
@@ -3133,6 +3308,7 @@ public: // Operators Overloads
 		case 3: return a;
 		}
 		LMK_CORE_ASSERT(false, "lmk::Color: index out of range for operator[] (index should be 0, 1, 2 or 3).");
+		return a; // Unreachable code.
 	}
 
 	inline Color& operator+=(const Color& _right) {
@@ -3166,25 +3342,29 @@ public: // Operators Overloads
 		return *this;
 	}
 
-	_NODISCARD inline Color operator+(const Color& _right) const {
+	[[nodiscard]]
+    inline Color operator+(const Color& _right) const {
 		Color temp = *this;
 		temp += _right;
 		return temp;
 	}
 
-	_NODISCARD inline Color operator-(const Color& _right) const {
+	[[nodiscard]]
+    inline Color operator-(const Color& _right) const {
 		Color temp = *this;
 		temp -= _right;
 		return temp;
 	}
 
-	_NODISCARD inline Color operator*(float _right) const {
+	[[nodiscard]]
+    inline Color operator*(float _right) const {
 		Color temp = *this;
 		temp *= _right;
 		return temp;
 	}
 
-	_NODISCARD inline Color operator/(float _right) const {
+	[[nodiscard]]
+    inline Color operator/(float _right) const {
 		Color temp = *this;
 		temp /= _right;
 		return temp;
@@ -3192,7 +3372,7 @@ public: // Operators Overloads
 
 public: // Static Functions
 	//
-	// Creates an RGB colour from HSV input.
+	// Create an RGB colour from HSV input.
 	// 
 	// @param _h:
 	//		Hue [0...1).
@@ -3204,7 +3384,8 @@ public: // Static Functions
 	// @returns:
 	//		Color An opaque colour with HSV matching the input.
 	//
-	_NODISCARD inline static Color HSVToRGB(float _h, float _s, float _v) {
+	[[nodiscard]]
+    inline static Color HSVToRGB(float _h, float _s, float _v) {
 		// For a reference to the original formula of this conversion, see: 
 		// https://web.archive.org/web/20090102212804/http://en.wikipedia.org/wiki/HSL_color_space
 
@@ -3245,24 +3426,25 @@ public: // Static Functions
 	// @returns:
 	//		The H, S, and V are output in the range 0 to 1.
 	//
-	_NODISCARD inline static void RGBToHSV(const Color& _rgb, float& _h, float& _s, float& _v) {
-		// For a reference to the original formula of this conversion, see: 
+	[[nodiscard]]
+    inline static void RGBToHSV(const Color& _rgb, float& _h, float& _s, float& _v) {
+		// The original formula of this conversion can be found here: 
 		// https://web.archive.org/web/20090102212804/http://en.wikipedia.org/wiki/HSL_color_space
 		
-		// normalize rgb value to [0...1].
+		// Normalize rgb value to [0...1].
 		float fr	= _rgb.r / UINT8_MAX;
 		float fg	= _rgb.g / UINT8_MAX;
 		float fb	= _rgb.b / UINT8_MAX;
-		// get the min and max value between r, g, and b.
+		// Get the min and max value between r, g, and b.
 		float min = (fr < fg && fr < fb) ? fr : (fg < fb) ? fg : fb;
 		float max	= (fr > fg && fr > fb) ? fr : (fg > fb) ? fg : fb;
 
-		// reset hsv value.
+		// Reset hsv value.
 		_h = _s = _v = 0.0f;
 		_v = (max + min) / 2.0f;
 								
-		if (max == min) {	// all values are the same -> 
-			_h = _s = 0.0f;	// achromatic color (gray).
+		if (max == min) {	// All values are the same -> 
+			_h = _s = 0.0f;	// Achromatic color (gray).
 		}
 		else {
 			float d = max - min;
@@ -3284,7 +3466,8 @@ public: // Static Functions
 	// When t is 0 returns a. 
 	// When t is 1 returns b.
 	//
-	_NODISCARD inline static Color Lerp(const Color& _a, const Color& _b, float _t) {
+	[[nodiscard]]
+    inline static Color Lerp(const Color& _a, const Color& _b, float _t) {
 		return LMK_Lerp(_a, _b, LMK_Clamp(_t, 0.0f, 1.0f));
 	}
 
@@ -3294,80 +3477,23 @@ public: // Static Functions
 	// When t is 0 returns a. 
 	// When t is 1 returns b.
 	//
-	_NODISCARD inline static Color LerpUnclamped(const Color& _a, const Color& _b, float _t) {
+	[[nodiscard]]
+    inline static Color LerpUnclamped(const Color& _a, const Color& _b, float _t) {
 		return LMK_Lerp(_a, _b, _t);
 	}
 #pragma warning (default : 4244)
 
-	//
-	// Completely transparent. RGBA is (0, 0, 0, 0).
-	//
-	_NODISCARD inline static Color clear() {
-		return Color(0, 0, 0, 0);
-	}
-
-	//
-	// Solid black. RGBA is (0, 0, 0, 255).
-	//
-	_NODISCARD inline static Color black() {
-		return Color(0, 0, 0, 255);
-	}
-
-	//
-	// Solid white. RGBA is (255, 255, 255, 255).
-	//
-	_NODISCARD inline static Color white() {
-		return Color(255, 255, 255, 255);
-	}
-
-	//
-	// Grey. RGBA is (128, 128, 128, 255).
-	//
-	_NODISCARD inline static Color grey() {
-		return Color(128, 128, 128, 255);
-	}
-
-	//
-	// Solid red. RGBA is (255, 0, 0, 255).
-	//
-	_NODISCARD inline static Color red() {
-		return Color(255, 0, 0, 255);
-	}
-
-	//
-	// Solid green. RGBA is (0, 255, 0, 255).
-	//
-	_NODISCARD inline static Color green() {
-		return Color(0, 255, 0, 255);
-	}
-
-	//
-	// Solid blue. RGBA is (0, 0, 255, 255).
-	//
-	_NODISCARD inline static Color blue() {
-		return Color(0, 0, 255, 255);
-	}
-
-	//
-	// Cyan. RGBA is (0, 255, 255, 255).
-	//
-	_NODISCARD inline static Color cyan() {
-		return Color(0, 255, 255, 255);
-	}
-
-	//
-	// Magenta. RGBA is (255, 0, 255, 255).
-	//
-	_NODISCARD inline static Color magenta() {
-		return Color(255, 0, 255, 255);
-	}
-
-	//
-	// Yellow. RGBA is (255, 235, 4, 255).
-	//
-	_NODISCARD inline static Color yellow() {
-		return Color(255, 255, 0, 255);
-	}
+public: // Static Properties
+	static Color clear;		// Completely transparent. RGBA is (0, 0, 0, 0).
+	static Color black;		// Solid black. RGBA is (0, 0, 0, 255).
+	static Color white;		// Solid white. RGBA is (255, 255, 255, 255).
+	static Color grey;		// Grey. RGBA is (128, 128, 128, 255).
+	static Color red;		// Solid red. RGBA is (255, 0, 0, 255).
+	static Color green;		// Solid green. RGBA is (0, 255, 0, 255).
+	static Color blue;		// Solid blue. RGBA is (0, 0, 255, 255).
+	static Color cyan;		// Cyan. RGBA is (0, 255, 255, 255).
+	static Color magenta;	// Magenta. RGBA is (255, 0, 255, 255).
+	static Color yellow;	// Yellow. RGBA is (255, 255, 0, 255).
 
 public: // Properties
 	uint8_t r;	// Red component of the color.
@@ -3375,6 +3501,18 @@ public: // Properties
 	uint8_t b;	// Blue component of the color.
 	uint8_t a;	// Alpha component of the color (0 is transparent, 1 is opaque).
 };
+
+// Static Properties Initialization
+Color Color::clear = {0, 0, 0, 0};
+Color Color::black = { 0, 0, 0, 255 };
+Color Color::white = { 255, 255, 255, 255 };
+Color Color::grey = { 128, 128, 128, 255 };
+Color Color::red = { 255, 0, 0, 255 };
+Color Color::green = { 0, 255, 0, 255 };
+Color Color::blue = { 0, 0, 255, 255 };
+Color Color::cyan = { 0, 255, 255, 255 };
+Color Color::magenta = { 255, 0, 255, 255 };
+Color Color::yellow = { 255, 255, 0, 255 };
 
 // +--------------------------------------------------------------------------------+
 // |					 															|
@@ -3395,7 +3533,8 @@ public: // Operators Overloads
 	//
 	// Does this object exist?
 	//
-	_NODISCARD inline operator bool() {
+	[[nodiscard]]
+    inline operator bool() {
 		return this != nullptr;
 	}
 
@@ -3422,10 +3561,30 @@ public: // Static Functions
 		destroy.join();
 	}
 
+	//
+	// Clones the object _original and returns the clone.
+	// 
+	// @param _original:
+	//		An existing object that you want to make a copy of.
+	// 
+	template <typename Type>
+	inline static Type* Instantiate(const Type& _original) {
+		LMK_CORE_ASSERT(IsLMKObject<Type>(), 
+			"lmk::Object: Instantiate() - Invalid object type. Type should derived from lmk::Object.");
+
+		return dynamic_cast<Type*>(_original->Clone());
+	}
+
 private:
 	inline static void DestroyDelay(Object* _obj, float _t = 0.0F) {
 		std::this_thread::sleep_for(std::chrono::duration<double>(_t));
 		delete _obj;
+	}
+
+	template <typename Type>
+	[[nodiscard]]
+    inline static bool IsLMKObject() {
+		return std::is_base_of<Object, Type>;
 	}
 
 public: // Properties
@@ -3435,7 +3594,7 @@ private:
 	// NOTE:
 	// Currently, this property serve no purpose in the functionality of the Object class.
 	// This is a placeholder for future implementation of file system and prefab.
-	int m_id;
+	int m_id = 0;
 };
 LMK_END
 

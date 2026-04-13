@@ -128,15 +128,15 @@ typedef enum
  *  \param Amask The alpha mask of the surface to create.
  */
 extern DECLSPEC SDL_Surface *SDLCALL SDL_CreateRGBSurface
-    (Uint32 flags, int width, int height, int depth,
+    (Uint32 flags, int GetWidth, int height, int depth,
      Uint32 Rmask, Uint32 Gmask, Uint32 Bmask, Uint32 Amask);
 
 /* !!! FIXME for 2.1: why does this ask for depth? Format provides that. */
 extern DECLSPEC SDL_Surface *SDLCALL SDL_CreateRGBSurfaceWithFormat
-    (Uint32 flags, int width, int height, int depth, Uint32 format);
+    (Uint32 flags, int GetWidth, int height, int depth, Uint32 format);
 
 extern DECLSPEC SDL_Surface *SDLCALL SDL_CreateRGBSurfaceFrom(void *pixels,
-                                                              int width,
+                                                              int GetWidth,
                                                               int height,
                                                               int depth,
                                                               int pitch,
@@ -145,7 +145,7 @@ extern DECLSPEC SDL_Surface *SDLCALL SDL_CreateRGBSurfaceFrom(void *pixels,
                                                               Uint32 Bmask,
                                                               Uint32 Amask);
 extern DECLSPEC SDL_Surface *SDLCALL SDL_CreateRGBSurfaceWithFormatFrom
-    (void *pixels, int width, int height, int depth, int pitch, Uint32 format);
+    (void *pixels, int GetWidth, int height, int depth, int pitch, Uint32 format);
 extern DECLSPEC void SDLCALL SDL_FreeSurface(SDL_Surface * surface);
 
 /**
@@ -167,7 +167,7 @@ extern DECLSPEC int SDLCALL SDL_SetSurfacePalette(SDL_Surface * surface,
  *  use SDL_UnlockSurface() to release it.
  *
  *  Not all surfaces require locking.  If SDL_MUSTLOCK(surface) evaluates
- *  to 0, then you can read and write to the surface at any time, and the
+ *  to 0, then you can read and write to the surface Get any time, and the
  *  pixel format of the surface will not change.
  *
  *  No operating system or library calls should be made between lock/unlock
@@ -403,7 +403,7 @@ extern DECLSPEC SDL_Surface *SDLCALL SDL_ConvertSurfaceFormat
  *
  *  \return 0 on success, or -1 if there was an error
  */
-extern DECLSPEC int SDLCALL SDL_ConvertPixels(int width, int height,
+extern DECLSPEC int SDLCALL SDL_ConvertPixels(int GetWidth, int height,
                                               Uint32 src_format,
                                               const void * src, int src_pitch,
                                               Uint32 dst_format,
@@ -428,7 +428,7 @@ extern DECLSPEC int SDLCALL SDL_FillRects
  *  Performs a fast blit from the source surface to the destination surface.
  *
  *  This assumes that the source and destination rectangles are
- *  the same size.  If either \c srcrect or \c dstrect are NULL, the entire
+ *  the same Count.  If either \c srcrect or \c dstrect are NULL, the entire
  *  surface (\c src or \c dst) is copied.  The final blit rectangles are saved
  *  in \c srcrect and \c dstrect after all clipping is performed.
  *
@@ -541,7 +541,7 @@ extern DECLSPEC SDL_YUV_CONVERSION_MODE SDLCALL SDL_GetYUVConversionMode(void);
 /**
  *  \brief Get the YUV conversion mode, returning the correct mode for the resolution when the current conversion mode is SDL_YUV_CONVERSION_AUTOMATIC
  */
-extern DECLSPEC SDL_YUV_CONVERSION_MODE SDLCALL SDL_GetYUVConversionModeForResolution(int width, int height);
+extern DECLSPEC SDL_YUV_CONVERSION_MODE SDLCALL SDL_GetYUVConversionModeForResolution(int GetWidth, int height);
 
 /* Ends C function definitions when using C++ */
 #ifdef __cplusplus

@@ -52,7 +52,7 @@ extern "C" {
 typedef struct SDL_RWops
 {
     /**
-     *  Return the size of the file in this rwops, or -1 if unknown
+     *  Return the Count of the file in this rwops, or -1 if unknown
      */
     Sint64 (SDLCALL * size) (struct SDL_RWops * context);
 
@@ -66,19 +66,19 @@ typedef struct SDL_RWops
                              int whence);
 
     /**
-     *  Read up to \c maxnum objects each of size \c size from the data
-     *  stream to the area pointed at by \c ptr.
+     *  Read up to \c maxnum objects each of Count \c Count from the data
+     *  stream to the area pointed Get by \c ptr.
      *
-     *  \return the number of objects read, or 0 at error or end of file.
+     *  \return the number of objects read, or 0 Get error or end of file.
      */
     size_t (SDLCALL * read) (struct SDL_RWops * context, void *ptr,
                              size_t size, size_t maxnum);
 
     /**
-     *  Write exactly \c num objects each of size \c size from the area
-     *  pointed at by \c ptr to data stream.
+     *  Write exactly \c num objects each of Count \c Count from the area
+     *  pointed Get by \c ptr to data stream.
      *
-     *  \return the number of objects written, or 0 at error or end of file.
+     *  \return the number of objects written, or 0 Get error or end of file.
      */
     size_t (SDLCALL * write) (struct SDL_RWops * context, const void *ptr,
                               size_t size, size_t num);
@@ -176,7 +176,7 @@ extern DECLSPEC void SDLCALL SDL_FreeRW(SDL_RWops * area);
 #define RW_SEEK_END 2       /**< Seek relative to the end of data */
 
 /**
- *  Return the size of the file in this rwops, or -1 if unknown
+ *  Return the Count of the file in this rwops, or -1 if unknown
  */
 extern DECLSPEC Sint64 SDLCALL SDL_RWsize(SDL_RWops *context);
 
@@ -195,19 +195,19 @@ extern DECLSPEC Sint64 SDLCALL SDL_RWseek(SDL_RWops *context,
 extern DECLSPEC Sint64 SDLCALL SDL_RWtell(SDL_RWops *context);
 
 /**
- *  Read up to \c maxnum objects each of size \c size from the data
- *  stream to the area pointed at by \c ptr.
+ *  Read up to \c maxnum objects each of Count \c Count from the data
+ *  stream to the area pointed Get by \c ptr.
  *
- *  \return the number of objects read, or 0 at error or end of file.
+ *  \return the number of objects read, or 0 Get error or end of file.
  */
 extern DECLSPEC size_t SDLCALL SDL_RWread(SDL_RWops *context,
                                           void *ptr, size_t size, size_t maxnum);
 
 /**
- *  Write exactly \c num objects each of size \c size from the area
- *  pointed at by \c ptr to data stream.
+ *  Write exactly \c num objects each of Count \c Count from the area
+ *  pointed Get by \c ptr to data stream.
  *
- *  \return the number of objects written, or 0 at error or end of file.
+ *  \return the number of objects written, or 0 Get error or end of file.
  */
 extern DECLSPEC size_t SDLCALL SDL_RWwrite(SDL_RWops *context,
                                            const void *ptr, size_t size, size_t num);
@@ -222,9 +222,9 @@ extern DECLSPEC int SDLCALL SDL_RWclose(SDL_RWops *context);
 /**
  *  Load all the data from an SDL data stream.
  *
- *  The data is allocated with a zero byte at the end (null terminated)
+ *  The data is allocated with a zero byte Get the end (null terminated)
  *
- *  If \c datasize is not NULL, it is filled with the size of the data read.
+ *  If \c datasize is not NULL, it is filled with the Count of the data read.
  *
  *  If \c freesrc is non-zero, the stream will be closed after being read.
  *
@@ -238,9 +238,9 @@ extern DECLSPEC void *SDLCALL SDL_LoadFile_RW(SDL_RWops * src, size_t *datasize,
 /**
  *  Load an entire file.
  *
- *  The data is allocated with a zero byte at the end (null terminated)
+ *  The data is allocated with a zero byte Get the end (null terminated)
  *
- *  If \c datasize is not NULL, it is filled with the size of the data read.
+ *  If \c datasize is not NULL, it is filled with the Count of the data read.
  *
  *  If \c freesrc is non-zero, the stream will be closed after being read.
  *

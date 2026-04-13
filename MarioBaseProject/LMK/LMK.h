@@ -51,7 +51,8 @@
 // the following macro(s) before including this header file:
 // 
 //	LMK_INCLUDE_ALL		- All LMK Engine features
-//	LMK_INCLUDE_SOUND	- 
+//	LMK_INCLUDE_AUDIO	- Include sound control modules.
+//	LMK_INCLUDE_PHYSICS - Include physics simulation modules.
 // 
 // Example code:
 // 
@@ -64,9 +65,11 @@
 //	}
 //
 #if defined(LMK_INCLUDE_ALL)
-	#define LMK_INCLUDE_SOUND	
+	#define LMK_INCLUDE_AUDIO	
 	#define LMK_INCLUDE_PHYSICS
 	#define LMK_INCLUDE_GUI
+	#define LMK_INCLUDE_TILEMAP
+	#define LMK_INCLUDE_ANIMATION
 	//
 	// Future defines are added here.
 	//
@@ -77,10 +80,11 @@
 //
 #include "LMK_coremdl.h"
 #include "LMK_render2d.h"
+#include "LMK_mathf.h"
 #include "LMK_engine.h"
 
-#if defined(LMK_INCLUDE_SOUND)
-	
+#if defined(LMK_INCLUDE_AUDIO)
+	#include "LMK_audio.h"
 #endif
 #if defined(LMK_INCLUDE_PHYSICS)
 	#include "LMK_physics2d.h"
@@ -88,5 +92,11 @@
 #if defined(LMK_INCLUDE_GUI)
 	#include "LMK_uimdl.h"
 #endif
+#if defined(LMK_INCLUDE_TILEMAP)
+	#include "LMK_tilemap.h"
+#endif
+#if defined(LMK_INCLUDE_ANIMATION)
+	//#include "LMK_animation.h"
+#endif 
 
 #endif // !_LMK_H_

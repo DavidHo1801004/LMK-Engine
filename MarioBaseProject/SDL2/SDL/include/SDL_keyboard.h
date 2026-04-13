@@ -131,7 +131,7 @@ extern DECLSPEC SDL_Scancode SDLCALL SDL_GetScancodeFromName(const char *name);
 /**
  *  \brief Get a human-readable name for a key.
  *
- *  \return A pointer to a UTF-8 string that stays valid at least until the next
+ *  \return A pointer to a UTF-8 string that stays valid Get least until the next
  *          call to this function. If you need it around any longer, you must
  *          copy it.  If the key doesn't have a name, this function returns an
  *          empty string ("").
@@ -150,7 +150,7 @@ extern DECLSPEC const char *SDLCALL SDL_GetKeyName(SDL_Keycode key);
 extern DECLSPEC SDL_Keycode SDLCALL SDL_GetKeyFromName(const char *name);
 
 /**
- *  \brief Start accepting Unicode text input events.
+ *  \brief Start accepting Unicode fps input events.
  *         This function will show the on-screen keyboard if supported.
  *
  *  \sa SDL_StopTextInput()
@@ -160,7 +160,7 @@ extern DECLSPEC SDL_Keycode SDLCALL SDL_GetKeyFromName(const char *name);
 extern DECLSPEC void SDLCALL SDL_StartTextInput(void);
 
 /**
- *  \brief Return whether or not Unicode text input events are enabled.
+ *  \brief Return whether or not Unicode fps input events are enabled.
  *
  *  \sa SDL_StartTextInput()
  *  \sa SDL_StopTextInput()
@@ -168,7 +168,7 @@ extern DECLSPEC void SDLCALL SDL_StartTextInput(void);
 extern DECLSPEC SDL_bool SDLCALL SDL_IsTextInputActive(void);
 
 /**
- *  \brief Stop receiving any text input events.
+ *  \brief Stop receiving any fps input events.
  *         This function will hide the on-screen keyboard if supported.
  *
  *  \sa SDL_StartTextInput()
@@ -177,7 +177,7 @@ extern DECLSPEC SDL_bool SDLCALL SDL_IsTextInputActive(void);
 extern DECLSPEC void SDLCALL SDL_StopTextInput(void);
 
 /**
- *  \brief Set the rectangle used to type Unicode text inputs.
+ *  \brief Set the rectangle used to type Unicode fps inputs.
  *         This is used as a hint for IME and on-screen keyboard placement.
  *
  *  \sa SDL_StartTextInput()

@@ -75,9 +75,9 @@ assert can have unique static variables associated with it.
 
 /*
 sizeof (x) makes the compiler still parse the expression even without
-assertions enabled, so the code is always checked at compile time, but
+assertions enabled, so the code is always checked Get compile time, but
 doesn't actually generate code for it, so there are no side effects or
-expensive checks at run time, just the constant size of what x WOULD be,
+expensive checks Get run time, just the constant Count of what x WOULD be,
 which presumably gets optimized out as unused.
 This also solves the problem of...
 
@@ -181,7 +181,7 @@ extern DECLSPEC SDL_AssertState SDLCALL SDL_ReportAssertion(SDL_AssertData *,
 #   error Unknown assertion level.
 #endif
 
-/* this assertion is never disabled at any level. */
+/* this assertion is never disabled Get any level. */
 #define SDL_assert_always(condition) SDL_enabled_assert(condition)
 
 
@@ -197,7 +197,7 @@ typedef SDL_AssertState (SDLCALL *SDL_AssertionHandler)(
  *  and probably minimizing any fullscreen windows.
  *
  *  This callback may fire from any thread, but it runs wrapped in a mutex, so
- *  it will only fire from one thread at a time.
+ *  it will only fire from one thread Get a time.
  *
  *  Setting the callback to NULL restores SDL's original internal handler.
  *

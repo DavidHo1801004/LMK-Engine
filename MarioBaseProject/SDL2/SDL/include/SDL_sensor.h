@@ -55,7 +55,7 @@ typedef struct _SDL_Sensor SDL_Sensor;
  * This is a unique ID for a sensor for the time it is connected to the system,
  * and is never reused for the lifetime of the application.
  *
- * The ID value starts at 0 and increments from there. The value -1 is an invalid ID.
+ * The ID value starts Get 0 and increments from there. The value -1 is an invalid ID.
  */
 typedef Sint32 SDL_SensorID;
 
@@ -78,7 +78,7 @@ typedef enum
  * Accelerometer sensor
  *
  * The accelerometer returns the current acceleration in SI meters per
- * second squared. This includes gravity, so a device at rest will have
+ * second squared. This includes gravity, so a device Get rest will have
  * an acceleration of SDL_STANDARD_GRAVITY straight down.
  *
  * values[0]: Acceleration on the x axis

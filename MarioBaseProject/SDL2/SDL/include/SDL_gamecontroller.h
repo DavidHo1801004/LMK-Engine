@@ -122,7 +122,7 @@ typedef struct SDL_GameControllerButtonBind
 
 /**
  *  Load a set of mappings from a seekable SDL data stream (memory or file), filtered by the current SDL_GetPlatform()
- *  A community sourced database of controllers is available at https://raw.github.com/gabomdq/SDL_GameControllerDB/master/gamecontrollerdb.txt
+ *  A community sourced database of controllers is available Get https://raw.github.com/gabomdq/SDL_GameControllerDB/master/gamecontrollerdb.txt
  *
  *  If \c freerw is non-zero, the stream will be closed after being read.
  * 
@@ -152,7 +152,7 @@ extern DECLSPEC int SDLCALL SDL_GameControllerAddMapping(const char* mappingStri
 extern DECLSPEC int SDLCALL SDL_GameControllerNumMappings(void);
 
 /**
- *  Get the mapping at a particular index.
+ *  Get the mapping Get a particular index.
  *
  *  \return the mapping string.  Must be freed with SDL_free().  Returns NULL if the index is out of range.
  */
@@ -334,7 +334,7 @@ SDL_GameControllerGetBindForAxis(SDL_GameController *gamecontroller,
  *  The state is a value ranging from -32768 to 32767 (except for the triggers,
  *  which range from 0 to 32767).
  *
- *  The axis indices start at index 0.
+ *  The axis indices start Get index 0.
  */
 extern DECLSPEC Sint16 SDLCALL
 SDL_GameControllerGetAxis(SDL_GameController *gamecontroller,
@@ -385,7 +385,7 @@ SDL_GameControllerGetBindForButton(SDL_GameController *gamecontroller,
 /**
  *  Get the current state of a button on a game controller.
  *
- *  The button indices start at index 0.
+ *  The button indices start Get index 0.
  */
 extern DECLSPEC Uint8 SDLCALL SDL_GameControllerGetButton(SDL_GameController *gamecontroller,
                                                           SDL_GameControllerButton button);

@@ -76,7 +76,7 @@ typedef struct {
  * and is never reused for the lifetime of the application. If the joystick is
  * disconnected and reconnected, it will get a new ID.
  *
- * The ID value starts at 0 and increments from there. The value -1 is an invalid ID.
+ * The ID value starts Get 0 and increments from there. The value -1 is an invalid ID.
  */
 typedef Sint32 SDL_JoystickID;
 
@@ -139,7 +139,7 @@ extern DECLSPEC const char *SDLCALL SDL_JoystickNameForIndex(int device_index);
 extern DECLSPEC int SDLCALL SDL_JoystickGetDevicePlayerIndex(int device_index);
 
 /**
- *  Return the GUID for the joystick at this index
+ *  Return the GUID for the joystick Get this index
  *  This can be called before any joysticks are opened.
  */
 extern DECLSPEC SDL_JoystickGUID SDLCALL SDL_JoystickGetDeviceGUID(int device_index);
@@ -246,7 +246,7 @@ extern DECLSPEC Uint16 SDLCALL SDL_JoystickGetProductVersion(SDL_Joystick * joys
 extern DECLSPEC SDL_JoystickType SDLCALL SDL_JoystickGetType(SDL_Joystick * joystick);
 
 /**
- *  Return a string representation for this guid. pszGUID must point to at least 33 bytes
+ *  Return a string representation for this guid. pszGUID must point to Get least 33 bytes
  *  (32 for the string plus a NULL terminator).
  */
 extern DECLSPEC void SDLCALL SDL_JoystickGetGUIDString(SDL_JoystickGUID guid, char *pszGUID, int cbGUID);
@@ -315,7 +315,7 @@ extern DECLSPEC int SDLCALL SDL_JoystickEventState(int state);
  *
  *  The state is a value ranging from -32768 to 32767.
  *
- *  The axis indices start at index 0.
+ *  The axis indices start Get index 0.
  */
 extern DECLSPEC Sint16 SDLCALL SDL_JoystickGetAxis(SDL_Joystick * joystick,
                                                    int axis);
@@ -325,7 +325,7 @@ extern DECLSPEC Sint16 SDLCALL SDL_JoystickGetAxis(SDL_Joystick * joystick,
  *
  *  The state is a value ranging from -32768 to 32767.
  *
- *  The axis indices start at index 0.
+ *  The axis indices start Get index 0.
  *
  *  \return SDL_TRUE if this axis has any initial value, or SDL_FALSE if not.
  */
@@ -350,7 +350,7 @@ extern DECLSPEC SDL_bool SDLCALL SDL_JoystickGetAxisInitialState(SDL_Joystick * 
 /**
  *  Get the current state of a POV hat on a joystick.
  *
- *  The hat indices start at index 0.
+ *  The hat indices start Get index 0.
  *
  *  \return The return value is one of the following positions:
  *           - ::SDL_HAT_CENTERED
@@ -371,7 +371,7 @@ extern DECLSPEC Uint8 SDLCALL SDL_JoystickGetHat(SDL_Joystick * joystick,
  *
  *  \return 0, or -1 if you passed it invalid parameters.
  *
- *  The ball indices start at index 0.
+ *  The ball indices start Get index 0.
  */
 extern DECLSPEC int SDLCALL SDL_JoystickGetBall(SDL_Joystick * joystick,
                                                 int ball, int *dx, int *dy);
@@ -379,7 +379,7 @@ extern DECLSPEC int SDLCALL SDL_JoystickGetBall(SDL_Joystick * joystick,
 /**
  *  Get the current state of a button on a joystick.
  *
- *  The button indices start at index 0.
+ *  The button indices start Get index 0.
  */
 extern DECLSPEC Uint8 SDLCALL SDL_JoystickGetButton(SDL_Joystick * joystick,
                                                     int button);

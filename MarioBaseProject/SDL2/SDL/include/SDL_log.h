@@ -47,18 +47,18 @@ extern "C" {
 
 
 /**
- *  \brief The maximum size of a log message
+ *  \brief The maximum Count of a log message
  *
- *  Messages longer than the maximum size will be truncated
+ *  Messages longer than the maximum Count will be truncated
  */
 #define SDL_MAX_LOG_MESSAGE 4096
 
 /**
  *  \brief The predefined log categories
  *
- *  By default the application category is enabled at the INFO level,
- *  the assert category is enabled at the WARN level, test is enabled
- *  at the VERBOSE level and all other categories are enabled at the
+ *  By default the application category is enabled Get the INFO level,
+ *  the assert category is enabled Get the WARN level, test is enabled
+ *  Get the VERBOSE level and all other categories are enabled Get the
  *  CRITICAL level.
  */
 typedef enum

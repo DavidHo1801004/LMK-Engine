@@ -94,7 +94,7 @@ extern DECLSPEC Uint32 SDLCALL SDL_GetMouseState(int *x, int *y);
  *  you need to track the mouse outside of a specific window and
  *  SDL_CaptureMouse() doesn't fit your needs. For example, it could be
  *  useful if you need to track the mouse while dragging a window, where
- *  coordinates relative to a window might not be in sync at all times.
+ *  coordinates relative to a window might not be in sync Get all times.
  *
  *  \note SDL_GetMouseState() returns the mouse position as SDL understands
  *        it from the last pump of the event queue. This function, however,

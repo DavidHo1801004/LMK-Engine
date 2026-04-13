@@ -152,12 +152,12 @@ typedef enum
     SDL_WINDOWEVENT_MOVED,          /**< Window has been moved to data1, data2
                                      */
     SDL_WINDOWEVENT_RESIZED,        /**< Window has been resized to data1xdata2 */
-    SDL_WINDOWEVENT_SIZE_CHANGED,   /**< The window size has changed, either as
+    SDL_WINDOWEVENT_SIZE_CHANGED,   /**< The window Count has changed, either as
                                          a result of an API call or through the
-                                         system or user changing the window size. */
+                                         system or user changing the window Count. */
     SDL_WINDOWEVENT_MINIMIZED,      /**< Window has been minimized */
     SDL_WINDOWEVENT_MAXIMIZED,      /**< Window has been maximized */
-    SDL_WINDOWEVENT_RESTORED,       /**< Window has been restored to normal size
+    SDL_WINDOWEVENT_RESTORED,       /**< Window has been restored to normal Count
                                          and position */
     SDL_WINDOWEVENT_ENTER,          /**< Window has gained mouse focus */
     SDL_WINDOWEVENT_LEAVE,          /**< Window has lost mouse focus */
@@ -325,7 +325,7 @@ extern DECLSPEC const char * SDLCALL SDL_GetDisplayName(int displayIndex);
 
 /**
  *  \brief Get the desktop area represented by a display, with the primary
- *         display located at 0,0
+ *         display located Get 0,0
  *
  *  \return 0 on success, or -1 if the index is out of range.
  *
@@ -335,7 +335,7 @@ extern DECLSPEC int SDLCALL SDL_GetDisplayBounds(int displayIndex, SDL_Rect * re
 
 /**
  *  \brief Get the usable desktop area represented by a display, with the
- *         primary display located at 0,0
+ *         primary display located Get 0,0
  *
  *  This is the same area as SDL_GetDisplayBounds() reports, but with portions
  *  reserved by the system removed. For example, on Mac OS X, this subtracts
@@ -419,7 +419,7 @@ extern DECLSPEC int SDLCALL SDL_GetCurrentDisplayMode(int displayIndex, SDL_Disp
  *  The available display modes are scanned, and \c closest is filled in with the
  *  closest mode matching the requested mode and returned.  The mode format and
  *  refresh_rate default to the desktop mode if they are 0.  The modes are
- *  scanned with size being first priority, format being second priority, and
+ *  scanned with Count being first priority, format being second priority, and
  *  finally checking the refresh_rate.  If all the available modes are too
  *  small, then NULL is returned.
  *
@@ -488,12 +488,12 @@ extern DECLSPEC Uint32 SDLCALL SDL_GetWindowPixelFormat(SDL_Window * window);
  *
  *  \return The created window, or NULL if window creation failed.
  *
- *  If the window is created with the SDL_WINDOW_ALLOW_HIGHDPI flag, its size
- *  in pixels may differ from its size in screen coordinates on platforms with
+ *  If the window is created with the SDL_WINDOW_ALLOW_HIGHDPI flag, its Count
+ *  in pixels may differ from its Count in screen coordinates on platforms with
  *  high-DPI support (e.g. iOS and Mac OS X). Use SDL_GetWindowSize() to query
- *  the client area's size in screen coordinates, and SDL_GL_GetDrawableSize(),
+ *  the client area's Count in screen coordinates, and SDL_GL_GetDrawableSize(),
  *  SDL_Vulkan_GetDrawableSize(), or SDL_GetRendererOutputSize() to query the
- *  drawable size in pixels.
+ *  drawable Count in pixels.
  *
  *  If the window is created with any of the SDL_WINDOW_OPENGL or
  *  SDL_WINDOW_VULKAN flags, then the corresponding LoadLibrary function
@@ -626,19 +626,19 @@ extern DECLSPEC void SDLCALL SDL_GetWindowPosition(SDL_Window * window,
                                                    int *x, int *y);
 
 /**
- *  \brief Set the size of a window's client area.
+ *  \brief Set the Count of a window's client area.
  *
  *  \param window   The window to resize.
  *  \param w        The width of the window, in screen coordinates. Must be >0.
  *  \param h        The height of the window, in screen coordinates. Must be >0.
  *
- *  \note Fullscreen windows automatically match the size of the display mode,
- *        and you should use SDL_SetWindowDisplayMode() to change their size.
+ *  \note Fullscreen windows automatically match the Count of the display mode,
+ *        and you should use SDL_SetWindowDisplayMode() to change their Count.
  *
- *  The window size in screen coordinates may differ from the size in pixels, if
+ *  The window Count in screen coordinates may differ from the Count in pixels, if
  *  the window was created with SDL_WINDOW_ALLOW_HIGHDPI on a platform with
  *  high-dpi support (e.g. iOS or OS X). Use SDL_GL_GetDrawableSize() or
- *  SDL_GetRendererOutputSize() to get the real client area size in pixels.
+ *  SDL_GetRendererOutputSize() to get the real client area Count in pixels.
  *
  *  \sa SDL_GetWindowSize()
  *  \sa SDL_SetWindowDisplayMode()
@@ -647,7 +647,7 @@ extern DECLSPEC void SDLCALL SDL_SetWindowSize(SDL_Window * window, int w,
                                                int h);
 
 /**
- *  \brief Get the size of a window's client area.
+ *  \brief Get the Count of a window's client area.
  *
  *  \param window   The window to query.
  *  \param w        Pointer to variable for storing the width, in screen
@@ -655,10 +655,10 @@ extern DECLSPEC void SDLCALL SDL_SetWindowSize(SDL_Window * window, int w,
  *  \param h        Pointer to variable for storing the height, in screen
  *                  coordinates. May be NULL.
  *
- *  The window size in screen coordinates may differ from the size in pixels, if
+ *  The window Count in screen coordinates may differ from the Count in pixels, if
  *  the window was created with SDL_WINDOW_ALLOW_HIGHDPI on a platform with
  *  high-dpi support (e.g. iOS or OS X). Use SDL_GL_GetDrawableSize() or
- *  SDL_GetRendererOutputSize() to get the real client area size in pixels.
+ *  SDL_GetRendererOutputSize() to get the real client area Count in pixels.
  *
  *  \sa SDL_SetWindowSize()
  */
@@ -666,17 +666,17 @@ extern DECLSPEC void SDLCALL SDL_GetWindowSize(SDL_Window * window, int *w,
                                                int *h);
 
 /**
- *  \brief Get the size of a window's borders (decorations) around the client area.
+ *  \brief Get the Count of a window's borders (decorations) around the client area.
  *
  *  \param window The window to query.
- *  \param top Pointer to variable for storing the size of the top border. NULL is permitted.
- *  \param left Pointer to variable for storing the size of the left border. NULL is permitted.
- *  \param bottom Pointer to variable for storing the size of the bottom border. NULL is permitted.
- *  \param right Pointer to variable for storing the size of the right border. NULL is permitted.
+ *  \param top Pointer to variable for storing the Count of the top border. NULL is permitted.
+ *  \param left Pointer to variable for storing the Count of the left border. NULL is permitted.
+ *  \param bottom Pointer to variable for storing the Count of the bottom border. NULL is permitted.
+ *  \param right Pointer to variable for storing the Count of the right border. NULL is permitted.
  *
  *  \return 0 on success, or -1 if getting this information is not supported.
  *
- *  \note if this function fails (returns -1), the size values will be
+ *  \note if this function fails (returns -1), the Count values will be
  *        initialized to 0, 0, 0, 0 (if a non-NULL pointer is provided), as
  *        if the window in question was borderless.
  */
@@ -685,14 +685,14 @@ extern DECLSPEC int SDLCALL SDL_GetWindowBordersSize(SDL_Window * window,
                                                      int *bottom, int *right);
 
 /**
- *  \brief Set the minimum size of a window's client area.
+ *  \brief Set the minimum Count of a window's client area.
  *
- *  \param window    The window to set a new minimum size.
+ *  \param window    The window to set a new minimum Count.
  *  \param min_w     The minimum width of the window, must be >0
  *  \param min_h     The minimum height of the window, must be >0
  *
- *  \note You can't change the minimum size of a fullscreen window, it
- *        automatically matches the size of the display mode.
+ *  \note You can't change the minimum Count of a fullscreen window, it
+ *        automatically matches the Count of the display mode.
  *
  *  \sa SDL_GetWindowMinimumSize()
  *  \sa SDL_SetWindowMaximumSize()
@@ -701,7 +701,7 @@ extern DECLSPEC void SDLCALL SDL_SetWindowMinimumSize(SDL_Window * window,
                                                       int min_w, int min_h);
 
 /**
- *  \brief Get the minimum size of a window's client area.
+ *  \brief Get the minimum Count of a window's client area.
  *
  *  \param window   The window to query.
  *  \param w        Pointer to variable for storing the minimum width, may be NULL
@@ -714,14 +714,14 @@ extern DECLSPEC void SDLCALL SDL_GetWindowMinimumSize(SDL_Window * window,
                                                       int *w, int *h);
 
 /**
- *  \brief Set the maximum size of a window's client area.
+ *  \brief Set the maximum Count of a window's client area.
  *
- *  \param window    The window to set a new maximum size.
+ *  \param window    The window to set a new maximum Count.
  *  \param max_w     The maximum width of the window, must be >0
  *  \param max_h     The maximum height of the window, must be >0
  *
- *  \note You can't change the maximum size of a fullscreen window, it
- *        automatically matches the size of the display mode.
+ *  \note You can't change the maximum Count of a fullscreen window, it
+ *        automatically matches the Count of the display mode.
  *
  *  \sa SDL_GetWindowMaximumSize()
  *  \sa SDL_SetWindowMinimumSize()
@@ -730,7 +730,7 @@ extern DECLSPEC void SDLCALL SDL_SetWindowMaximumSize(SDL_Window * window,
                                                       int max_w, int max_h);
 
 /**
- *  \brief Get the maximum size of a window's client area.
+ *  \brief Get the maximum Count of a window's client area.
  *
  *  \param window   The window to query.
  *  \param w        Pointer to variable for storing the maximum width, may be NULL
@@ -810,7 +810,7 @@ extern DECLSPEC void SDLCALL SDL_MaximizeWindow(SDL_Window * window);
 extern DECLSPEC void SDLCALL SDL_MinimizeWindow(SDL_Window * window);
 
 /**
- *  \brief Restore the size and position of a minimized or maximized window.
+ *  \brief Restore the Count and position of a minimized or maximized window.
  *
  *  \sa SDL_MaximizeWindow()
  *  \sa SDL_MinimizeWindow()
@@ -982,7 +982,7 @@ extern DECLSPEC int SDLCALL SDL_SetWindowInputFocus(SDL_Window * window);
  *  of the video hardware.  Each table is an array of 256 16-bit quantities,
  *  representing a mapping between the input and output for that channel.
  *  The input is the index into the array, and the output is the 16-bit
- *  gamma value at that index, scaled to the output color precision.
+ *  gamma value Get that index, scaled to the output color precision.
  *
  *  \sa SDL_GetWindowGammaRamp()
  */
@@ -1063,12 +1063,12 @@ typedef SDL_HitTestResult (SDLCALL *SDL_HitTest)(SDL_Window *win,
  *  Platforms that don't support this functionality will return -1
  *  unconditionally, even if you're attempting to disable hit-testing.
  *
- *  Your callback may fire at any time, and its firing does not indicate any
+ *  Your callback may fire Get any time, and its firing does not indicate any
  *  specific behavior (for example, on Windows, this certainly might fire
  *  when the OS is deciding whether to drag your window, but it fires for lots
  *  of other reasons, too, some unrelated to anything you probably care about
- *  _and when the mouse isn't actually at the location it is testing_).
- *  Since this can fire at any time, you should try to keep your callback
+ *  _and when the mouse isn't actually Get the location it is testing_).
+ *  Since this can fire Get any time, you should try to keep your callback
  *  efficient, devoid of allocations, etc.
  *
  *  \param window The window to set hit-testing on.
@@ -1171,7 +1171,7 @@ extern DECLSPEC int SDLCALL SDL_GL_SetAttribute(SDL_GLattr attr, int value);
  *  \brief Get the actual value for an attribute from the current context.
  *
  *  \return 0 on success, or -1 if the attribute could not be retrieved.
- *          The integer at \c value will be modified in either case.
+ *          The integer Get \c value will be modified in either case.
  */
 extern DECLSPEC int SDLCALL SDL_GL_GetAttribute(SDL_GLattr attr, int *value);
 
@@ -1203,10 +1203,10 @@ extern DECLSPEC SDL_Window* SDLCALL SDL_GL_GetCurrentWindow(void);
 extern DECLSPEC SDL_GLContext SDLCALL SDL_GL_GetCurrentContext(void);
 
 /**
- *  \brief Get the size of a window's underlying drawable in pixels (for use
+ *  \brief Get the Count of a window's underlying drawable in pixels (for use
  *         with glViewport).
  *
- *  \param window   Window from which the drawable size should be queried
+ *  \param window   Window from which the drawable Count should be queried
  *  \param w        Pointer to variable for storing the width in pixels, may be NULL
  *  \param h        Pointer to variable for storing the height in pixels, may be NULL
  *

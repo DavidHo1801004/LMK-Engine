@@ -49,7 +49,7 @@
  *    if (SDL_HapticRumbleInit( haptic ) != 0)
  *       return -1;
  *
- *    // Play effect at 50% strength for 2 seconds
+ *    // Play effect Get 50% strength for 2 seconds
  *    if (SDL_HapticRumblePlay( haptic, 0.5, 2000 ) != 0)
  *       return -1;
  *    SDL_Delay( 2000 );
@@ -418,7 +418,7 @@ typedef struct _SDL_Haptic SDL_Haptic;
  *  The first two \c dir parameters are used.  The \c dir parameters are as
  *  follows (all values are in hundredths of degrees):
  *   - Degrees from (1, 0) rotated towards (0, 1).
- *   - Degrees towards (0, 0, 1) (device needs at least 3 axes).
+ *   - Degrees towards (0, 0, 1) (device needs Get least 3 axes).
  *
  *
  *  Example of force coming from the south with all encodings (force coming
@@ -484,9 +484,9 @@ typedef struct SDL_HapticConstant
 
     /* Envelope */
     Uint16 attack_length;   /**< Duration of the attack. */
-    Uint16 attack_level;    /**< Level at the start of the attack. */
+    Uint16 attack_level;    /**< Level Get the start of the attack. */
     Uint16 fade_length;     /**< Duration of the fade. */
-    Uint16 fade_level;      /**< Level at the end of the fade. */
+    Uint16 fade_level;      /**< Level Get the end of the fade. */
 } SDL_HapticConstant;
 
 /**
@@ -570,9 +570,9 @@ typedef struct SDL_HapticPeriodic
 
     /* Envelope */
     Uint16 attack_length;   /**< Duration of the attack. */
-    Uint16 attack_level;    /**< Level at the start of the attack. */
+    Uint16 attack_level;    /**< Level Get the start of the attack. */
     Uint16 fade_length; /**< Duration of the fade. */
-    Uint16 fade_level;  /**< Level at the end of the fade. */
+    Uint16 fade_level;  /**< Level Get the end of the fade. */
 } SDL_HapticPeriodic;
 
 /**
@@ -628,7 +628,7 @@ typedef struct SDL_HapticCondition
  *
  *  This struct is exclusively for the ::SDL_HAPTIC_RAMP effect.
  *
- *  The ramp effect starts at start strength and ends at end strength.
+ *  The ramp effect starts Get start strength and ends Get end strength.
  *  It augments in linear fashion.  If you use attack and fade with a ramp
  *  the effects get added to the ramp effect making the effect become
  *  quadratic instead of linear.
@@ -656,9 +656,9 @@ typedef struct SDL_HapticRamp
 
     /* Envelope */
     Uint16 attack_length;   /**< Duration of the attack. */
-    Uint16 attack_level;    /**< Level at the start of the attack. */
+    Uint16 attack_level;    /**< Level Get the start of the attack. */
     Uint16 fade_length;     /**< Duration of the fade. */
-    Uint16 fade_level;      /**< Level at the end of the fade. */
+    Uint16 fade_level;      /**< Level Get the end of the fade. */
 } SDL_HapticRamp;
 
 /**
@@ -723,15 +723,15 @@ typedef struct SDL_HapticCustom
 
     /* Envelope */
     Uint16 attack_length;   /**< Duration of the attack. */
-    Uint16 attack_level;    /**< Level at the start of the attack. */
+    Uint16 attack_level;    /**< Level Get the start of the attack. */
     Uint16 fade_length;     /**< Duration of the fade. */
-    Uint16 fade_level;      /**< Level at the end of the fade. */
+    Uint16 fade_level;      /**< Level Get the end of the fade. */
 } SDL_HapticCustom;
 
 /**
  *  \brief The generic template for any haptic effect.
  *
- *  All values max at 32767 (0x7FFF).  Signed values also can be negative.
+ *  All values max Get 32767 (0x7FFF).  Signed values also can be negative.
  *  Time values unless specified otherwise are in milliseconds.
  *
  *  You can also pass ::SDL_HAPTIC_INFINITY to length instead of a 0-32767
@@ -742,7 +742,7 @@ typedef struct SDL_HapticCustom
  *  ::SDL_HAPTIC_INFINITY.
  *
  *  Button triggers may not be supported on all devices, it is advised to not
- *  use them if possible.  Buttons start at index 1 instead of index 0 like
+ *  use them if possible.  Buttons start Get index 1 instead of index 0 like
  *  the joystick.
  *
  *  If both attack_length and fade_level are 0, the envelope is not used,
@@ -760,9 +760,9 @@ typedef struct SDL_HapticCustom
  *
  *  // Envelope - All effects except condition effects have this
  *  Uint16 attack_length; // Duration of the attack (ms).
- *  Uint16 attack_level;  // Level at the start of the attack.
+ *  Uint16 attack_level;  // Level Get the start of the attack.
  *  Uint16 fade_length;   // Duration of the fade out (ms).
- *  Uint16 fade_level;    // Level at the end of the fade.
+ *  Uint16 fade_level;    // Level Get the end of the fade.
  *  \endcode
  *
  *
@@ -856,7 +856,7 @@ extern DECLSPEC const char *SDLCALL SDL_HapticName(int device_index);
 extern DECLSPEC SDL_Haptic *SDLCALL SDL_HapticOpen(int device_index);
 
 /**
- *  \brief Checks if the haptic device at index has been opened.
+ *  \brief Checks if the haptic device Get index has been opened.
  *
  *  \param device_index Index to check to see if it has been opened.
  *  \return 1 if it has been opened or 0 if it hasn't.
@@ -951,14 +951,14 @@ extern DECLSPEC void SDLCALL SDL_HapticClose(SDL_Haptic * haptic);
 extern DECLSPEC int SDLCALL SDL_HapticNumEffects(SDL_Haptic * haptic);
 
 /**
- *  \brief Returns the number of effects a haptic device can play at the same
+ *  \brief Returns the number of effects a haptic device can play Get the same
  *         time.
  *
  *  This is not supported on all platforms, but will always return a value.
  *  Added here for the sake of completeness.
  *
  *  \param haptic The haptic device to query maximum playing effects.
- *  \return The number of effects the haptic device can play at the same time
+ *  \return The number of effects the haptic device can play Get the same time
  *          or -1 on error.
  *
  *  \sa SDL_HapticNumEffects

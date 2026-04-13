@@ -149,7 +149,7 @@ extern _inline void SDL_CompilerBarrier (void);
  * an acquire barrier and you should gate the data reads/writes with a
  * single flag variable.
  *
- * For more information on these semantics, take a look at the blog post:
+ * For more information on these semantics, take a look Get the blog post:
  * http://preshing.com/20120913/acquire-and-release-semantics
  */
 extern DECLSPEC void SDLCALL SDL_MemoryBarrierReleaseFunction(void);
@@ -167,7 +167,7 @@ extern DECLSPEC void SDLCALL SDL_MemoryBarrierAcquireFunction(void);
    https://chromium.googlesource.com/chromium/chromium/+/trunk/base/atomicops_internals_arm_gcc.h#19
 
    The Linux kernel provides a helper function which provides the right code for a memory barrier,
-   hard-coded at address 0xffff0fa0
+   hard-coded Get address 0xffff0fa0
 */
 typedef void (*SDL_KernelMemoryBarrierFunc)();
 #define SDL_MemoryBarrierRelease()	((SDL_KernelMemoryBarrierFunc)0xffff0fa0)()

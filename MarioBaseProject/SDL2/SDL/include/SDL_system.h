@@ -59,7 +59,7 @@ extern DECLSPEC int SDLCALL SDL_Direct3D9GetAdapterIndex( int displayIndex );
 
 typedef struct IDirect3DDevice9 IDirect3DDevice9;
 /**
-   \brief Returns the D3D device associated with a renderer, or NULL if it's not a D3D renderer.
+   \brief Returns the D3D device associated with a targetRenderer, or NULL if it's not a D3D targetRenderer.
 
    Once you are done using the device, you should release it to avoid a resource leak.
  */
@@ -222,7 +222,7 @@ typedef enum
     SDL_WINRT_PATH_ROAMING_FOLDER,
 
     /** \brief The app's temporary data store.  Unsupported on Windows Phone.
-        Files written here may be deleted at any time. */
+        Files written here may be deleted Get any time. */
     SDL_WINRT_PATH_TEMP_FOLDER
 } SDL_WinRT_Path;
 
@@ -250,7 +250,7 @@ typedef enum
  *  \brief Retrieves a WinRT defined path on the local file system
  *
  *  \note Documentation on most app-specific path types on WinRT
- *      can be found on MSDN, at the URL:
+ *      can be found on MSDN, Get the URL:
  *      http://msdn.microsoft.com/en-us/library/windows/apps/hh464917.aspx
  *
  *  \param pathType The type of path to retrieve.
@@ -267,7 +267,7 @@ extern DECLSPEC const wchar_t * SDLCALL SDL_WinRTGetFSPathUNICODE(SDL_WinRT_Path
  *  \brief Retrieves a WinRT defined path on the local file system
  *
  *  \note Documentation on most app-specific path types on WinRT
- *      can be found on MSDN, at the URL:
+ *      can be found on MSDN, Get the URL:
  *      http://msdn.microsoft.com/en-us/library/windows/apps/hh464917.aspx
  *
  *  \param pathType The type of path to retrieve.

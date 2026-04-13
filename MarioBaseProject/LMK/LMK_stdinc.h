@@ -16,9 +16,11 @@
 // |																				|
 // +--------------------------------------------------------------------------------+
 
-#include <cstdint>
 #include <stdexcept>
 #include <cassert>
+
+#include <cstdint>
+#include <iomanip>
 
 #include <cstdio>
 #include <iostream>
@@ -31,6 +33,7 @@
 
 #include <array>
 #include <vector>
+#include <map>
 #include <unordered_map>
 #include <unordered_set>
 
@@ -156,7 +159,7 @@
 	#define LMK_CORE_ASSERT(condition, message) \
 		if (!(condition)) {		\
 			assert(message);	\
-			std::abort();		\
+			abort();			\
 		}
 #endif
 

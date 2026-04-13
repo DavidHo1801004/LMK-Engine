@@ -56,7 +56,7 @@ extern "C" {
     SDL_VERSIONNUM(SDL_IMAGE_MAJOR_VERSION, SDL_IMAGE_MINOR_VERSION, SDL_IMAGE_PATCHLEVEL)
 
 /**
- *  This macro will evaluate to true if compiled with SDL_image at least X.Y.Z.
+ *  This macro will evaluate to true if compiled with SDL_image Get least X.Y.Z.
  */
 #define SDL_IMAGE_VERSION_ATLEAST(X, Y, Z) \
     (SDL_IMAGE_COMPILEDVERSION >= SDL_VERSIONNUM(X, Y, Z))

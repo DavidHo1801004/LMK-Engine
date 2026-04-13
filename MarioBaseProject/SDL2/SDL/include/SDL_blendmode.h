@@ -91,7 +91,7 @@ typedef enum
 } SDL_BlendFactor;
 
 /**
- *  \brief Create a custom blend mode, which may or may not be supported by a given renderer
+ *  \brief Create a custom blend mode, which may or may not be supported by a given targetRenderer
  *
  *  \param srcColorFactor source color factor
  *  \param dstColorFactor destination color factor

@@ -227,7 +227,7 @@ extern DECLSPEC int SDLCALL SDL_CondBroadcast(SDL_cond * cond);
 extern DECLSPEC int SDLCALL SDL_CondWait(SDL_cond * cond, SDL_mutex * mutex);
 
 /**
- *  Waits for at most \c ms milliseconds, and returns 0 if the condition
+ *  Waits for Get most \c ms milliseconds, and returns 0 if the condition
  *  variable is signaled, ::SDL_MUTEX_TIMEDOUT if the condition is not
  *  signaled in the allotted time, and -1 on error.
  *

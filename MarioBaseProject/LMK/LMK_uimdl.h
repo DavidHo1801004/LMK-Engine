@@ -18,6 +18,24 @@
 #include "LMK_coremdl.h"
 
 LMK_BEGIN
+// +--------------------------------------------------------------------------------+
+// |																				|
+// | RECT TRANSFORM																	|
+// |																				|
+// +--------------------------------------------------------------------------------+
+
+//
+// Position, Count, anchor and pivot information for a rectangle.
+// 
+// This is used to store and manipulate the position, Count, and anchoring of a rectangle 
+// and supports various forms of scaling based on a parent RectTransform, which is mainly
+// used in UI transformation and layout.
+//
+class RectTransform final : public Transform {
+public:
+
+};
+
 #if LMK_HAVE_SDL_TTF
 // +--------------------------------------------------------------------------------+
 // |																				|
@@ -32,18 +50,23 @@ class TTFont {
 public: // Typedef
 	using underlying_type = TTF_Font;
 
-public: // Constructors & Destructors
+public: // Constructors & Destructor
 	inline ~TTFont() {
 		TTF_CloseFont(m_font);
+		m_font = nullptr;
 	}
 
 public: // Operators Overloads
-	_NODISCARD inline operator TTF_Font* () const {
+	[[nodiscard]] inline operator underlying_type*() const {
 		return m_font;
 	}
 
-	_NODISCARD inline operator bool() {
+	[[nodiscard]] inline operator bool() const {
 		return m_font != nullptr;
+	}
+
+	inline void operator=(const TTFont& _right) {
+		LoadFont(_right.m_fontPath, _right.m_fontSize);
 	}
 
 public: // Functions
@@ -59,7 +82,7 @@ public: // Functions
 	}
 
 	//
-	// Set a new font size.
+	// Set a new font Count.
 	//
 	inline bool SetFontSize(uint32_t _size) {
 		m_fontSize = _size;
@@ -84,12 +107,12 @@ private: // Properties
 //
 // 
 //
-class Text {
+class TextGUI {
 public:
 	//
 	// 
 	// 
-	inline void Display(SDL_Renderer* _renderer, Vector2Int _position, Color _color) {
+	inline void Display(SDL_Renderer* _renderer, Vector2 _position, Color _color) {
 		if (!font) return;
 
 		SDL_Surface* surface = TTF_RenderText_Blended(font, text.c_str(), _color);
@@ -98,8 +121,8 @@ public:
 		SDL_Texture* texture = SDL_CreateTextureFromSurface(_renderer, surface);
 		if (!texture) return;
 
-		SDL_Rect rect = RectInt(_position, Vector2Int(surface->w, surface->h));
-		SDL_RenderCopy(_renderer, texture, NULL, &rect);
+		SDL_FRect rect = Rect{ Screen::LMKToSDLSpace(_position), Vector2Int(surface->w, surface->h) };
+		SDL_RenderCopyF(_renderer, texture, NULL, &rect);
 
 		SDL_FreeSurface(surface);
 		SDL_DestroyTexture(texture);

@@ -6,151 +6,234 @@
 
 using namespace lmk;
 
+#if false
 #pragma warning(disable : 4244)
-class CollisionTest : public LMKEngine {
+class TileMapTest : public LMKEngine {
+private:
+	TTFont font;
+	TextGUI text;
+
+	// Camera 
+	Camera2D camera{ 10 };
+	bool lockRotation = true;
+	bool panning;
+	bool rotating;
+	Vector2 moveDirection;
+	float targetAngle;
+	float zoomSpeed = 300;
+
+	// Tilemap
+	TileMapPalette palette;
+	TileMap tilemap;
+
+	// Controls
+	Vector2 lastMousePos;
+
+public:
+	inline void OnUserStart() override {
+		font.LoadFont("Assets/Fonts/visitor2.ttf", 30);
+		text.font = font;
+		text.text = "Tile Map Test";
+
+		// Setup camera
+		camera.transform = new Transform();
+		camera.RecalculateAspect();
+
+		// Tile map setup
+		tilemap.GenerateTileMap("Assets/Tilemaps/Level1.txt");
+	}
+
+	inline void OnUserUpdate() override {
+		if (Input::GetKeyDown(KeyCode::F11)) {
+			std::cout << Screen::width() << " : " << Screen::height() << "\n";
+
+			if (Screen::fullScreen()) {
+				Screen::SetFullScreenMode(FullScreenMode::Windowed);
+			}
+			else {
+				Screen::SetFullScreenMode(FullScreenMode::FullScreen);
+			}
+		}
+
+		// Camera controls
+		if (Input::GetKeyDown(KeyCode::P)) {
+			camera.transform->setLocalPosition(Vector2::zero);
+			camera.transform->setLocalRotation(0);
+		}
+
+		if (Input::GetKeyDown(KeyCode::O)) {
+			camera.transform->setParent(nullptr);
+		}
+
+		if (Input::GetMouseButtonDown(MouseButton::Middle)) {
+			lastMousePos = Input::mousePosition();
+			panning = true;
+		}
+		else if (Input::GetMouseButtonUp(MouseButton::Middle)) {
+			panning = false;
+		}
+
+		if (Input::GetMouseButtonDown(MouseButton::Right)) {
+			lastMousePos = Input::mousePosition();
+			rotating = true;
+		}
+		else if (Input::GetMouseButtonUp(MouseButton::Right)) {
+			rotating = false;
+		}
+
+		// Update camera properties
+		if (panning) {
+			moveDirection = camera.transform->InverseTransformDirection(lastMousePos - Input::mousePosition()) / camera.pixelsPerUnit();
+			lastMousePos = Input::mousePosition();
+		}
+		if (rotating) {
+			targetAngle = Vector2::SignedAngle(Input::mousePosition().normalized(), lastMousePos.normalized());
+			lastMousePos = Input::mousePosition();
+		}
+
+		camera.setSize(camera.size() - Input::mouseScroll().y * Time::deltaTime() * zoomSpeed);
+		camera.transform->setLocalPosition(camera.transform->localPosition() + moveDirection);
+		camera.transform->setLocalRotation(camera.transform->localRotation() + targetAngle * 2);
+		camera.RecalculateViewMatrix();
+	}
+
+	inline void OnDrawGizmos() override {
+		Gizmos::DrawWorldGrid(camera);
+
+		text.Display(m_renderer, Vector2Int(30, 30), Color::yellow);
+	}
+};
+
+
+
+class RigidbodyTest : public LMKEngine {
 private: // Properties
 	TTFont font;
-	Text text;
+	TextGUI text;
 	std::thread updateFPS;
 
-	bool updated = false;
-	bool overlapping = false;
-	std::vector<uint32_t> overlappingBounds;
+	// Camera 
+	Camera2D camera{10};
+	bool lockRotation = true;
+	bool panning;
+	bool rotating;
+	Vector2 lastMousePos;
+	Vector2 moveDirection;
+	float targetAngle;
+	float zoomSpeed = 30.0f;
 
-	Vector2 offset = Vector2::one() * 200;
-	float rotation = 0;
-	Vector2 scale = Vector2::one();
-
-	PolygonCollider2D* playerCollider = nullptr;
-	std::vector<BaseCollider2D*> staticColliders;
-
-	Vector2 targetPos;
-	float targetRotation;
-	Vector2 forward;
-
-	const float moveSpeed = 400;		// Unit of pixels per seconds
-	const float rotationSpeed = 720;	// Unit of degrees per seconds
-	const Vector2 scaleSpeed = Vector2(1.5f, 1.5f);
+	// Colliders
+	std::vector<PolygonCollider2D*> staticBodies;
+	std::vector<PolygonCollider2D*> dynamicBodies;
+	std::vector<bool> overlap;
 
 public: // Functions
 	inline void OnUserStart() override {
-		updateFPS = std::thread(&CollisionTest::UpdateText, this);
+		updateFPS = std::thread(&RigidbodyTest::UpdateText, this);
 
 		font.LoadFont("Assets/Fonts/visitor2.ttf", 40);
 		text.font = font;
 
-		auto CreatePolygon = [&](uint8_t _corners, float _radius) {
-			float rotationIter = 360.0f / _corners;
-			std::vector<Vector2> vertices = { Vector2(0, _radius) };
-			for (uint8_t i = 1; i < _corners; i++) {
-				vertices.push_back(Vector2(
-					-1 * _radius * std::sinf(LMK_DtoR(rotationIter * i)),
-					_radius * std::cosf(LMK_DtoR(rotationIter * i)))
-				);
-			}
-			return vertices;
-		};
-
-		playerCollider = new PolygonCollider2D(CreatePolygon(5, 30));
-		playerCollider->Transform(offset, rotation, scale);
-		forward = Vector2::up();
-
-		for (int i = 0; i < 50; i++) {
-			staticColliders.push_back(new BoxCollider2D(Vector2(30, 30), 0));
-			staticColliders[i]->Transform(
-				Vector2(
-					Random::Range<float>(30, Screen::resolution().x - 30), 
-					Random::Range<float>(30, Screen::resolution().y - 30)
-				),
-				Random::Range<float>(0, 359),
-				Vector2(
-					Random::Range<float>(0.5f, 5.0f), 
-					Random::Range<float>(0.5f, 5.0f)
-				)
-			);
-
-			overlappingBounds.push_back(false);
-		}
+		camera.transform = new Transform();
 	}
 
 	inline void OnUserUpdate() override {
-		// Transform player's collider.
-		if (Input::GetMouseButton(MouseButton::Left)) {
-			targetPos = Input::mousePosition();
-			targetRotation = Vector2::SignedAngle(forward, targetPos - offset);
-
-			if (std::abs(targetRotation - rotation) < rotationSpeed * Time::deltaTime()) {
-				rotation = targetRotation;
-			}
-			else {
-				rotation += rotationSpeed * Time::deltaTime() * ((targetRotation - rotation < 0) ? -1 : 1);
-			}
-
-			offset = Vector2::MoveTowards(offset, targetPos, moveSpeed * Time::deltaTime());
+		// Camera controls
+		if (Input::GetKeyDown(KeyCode::P)) {
+			camera.transform->setPosition(Vector2::zero);
+			camera.transform->setRotation(0);
 		}
 
-		if (Input::GetKey(KeyCode::R)) {
-			scale += scaleSpeed * Time::deltaTime();
-		}
-		else if (Input::GetKey(KeyCode::F)) {
-			scale -= scaleSpeed * Time::deltaTime();
+		if (Input::GetKeyDown(KeyCode::O)) {
+			camera.transform->setParent(nullptr);
 		}
 
-		playerCollider->Transform(offset, rotation, scale);
+		if (Input::GetMouseButtonDown(MouseButton::Middle)) {
+			lastMousePos = Input::mousePosition();
+			panning = true;
+		}
+		else if (Input::GetMouseButtonUp(MouseButton::Middle)) {
+			panning = false;
+		}
 
-		// Check collision.
-		overlapping = false;
+		if (Input::GetMouseButtonDown(MouseButton::Right)) {
+			lastMousePos = Input::mousePosition();
+			rotating = true;
+		}
+		else if (Input::GetMouseButtonUp(MouseButton::Right)) {
+			rotating = false;
+		}
 
-		for (size_t i = 0; i < staticColliders.size(); i++) {
-			if (playerCollider->OverlapWith(*staticColliders[i])) {
-				overlapping = true;
-			}
+		// Update camera properties
+		if (panning) {
+			moveDirection = camera.transform->InverseTransformDirection(lastMousePos - Input::mousePosition()) / camera.pixelsPerUnit();
+			lastMousePos = Input::mousePosition();
+		}
+		if (rotating && !lockRotation) {
+			targetAngle = Vector2::SignedAngle(Input::mousePosition().normalized(), lastMousePos.normalized());
+			lastMousePos = Input::mousePosition();
+		}
 
-			if (playerCollider->bounds().Intersects(staticColliders[i]->bounds())) {
-				overlappingBounds[i] = true;
-			}
-			else {
-				overlappingBounds[i] = false;
+		camera.setSize(camera.size() - (camera.size() * Input::mouseScroll().y * Time::deltaTime() * zoomSpeed));
+
+		camera.transform->setLocalPosition(camera.transform->localPosition() + moveDirection);
+		camera.transform->setLocalRotation(camera.transform->localRotation() + targetAngle * 2);
+		camera.RecalculateViewMatrix();
+
+		if (Input::GetMouseButtonDown(MouseButton::Left)) {
+			staticBodies.push_back(CreateCollider(
+				camera.ScreenToWorldPoint(Input::mousePosition()), 
+				Random::Range(0.0f, 360.0f),
+				Vector2::one,
+				Random::Range(3, 6)));
+		}
+
+		if (Input::GetMouseButtonDown(MouseButton::Right)) {
+			dynamicBodies.push_back(CreateCollider(
+				camera.ScreenToWorldPoint(Input::mousePosition()),
+				Random::Range(0.0f, 360.0f),
+				Vector2::one,
+				Random::Range(3, 6)));
+
+			overlap.emplace_back();
+		}
+
+		for (size_t i = 0; i < dynamicBodies.size(); i++) {
+			for (auto staticBody : staticBodies) {
+				overlap[i] = dynamicBodies[i]->OverlapCollider(*staticBody);
 			}
 		}
 	}
 
 	inline void OnDrawGizmos() override {
-		// Draw player's collider.
-		Gizmos::SetColor(Color::green() / 2.0f);
-		Gizmos::DrawRect(playerCollider->bounds());
+		Gizmos::DrawWorldGrid(camera);
 
-		if (overlapping) {
-			Gizmos::SetColor(Color::red());
-		}
-		else {
-			Gizmos::SetColor(Color::white());
-		}
-
-		Gizmos::DrawPolygon(playerCollider->vertices());
-		Gizmos::DrawLine(offset, playerCollider->vertex(0));
-
-		if (scale.x < 0 || scale.y < 0) {
-			Gizmos::SetColor(Color::red());
-			Gizmos::DrawLine(playerCollider->vertex(0), playerCollider->vertex(2));
-			Gizmos::DrawLine(playerCollider->vertex(1), playerCollider->vertex(3));
-		}
-
-		// Draw static colliders.
-		for (size_t i = 0; i < staticColliders.size(); i++) {
-			Gizmos::SetColor(Color::green() / 2.0f);
-			Gizmos::DrawRect(staticColliders[i]->bounds());
-
-			if (overlappingBounds[i]) {
-				Gizmos::SetColor(Color::yellow());
+		// Display colliders
+		for (size_t i = 0; i < dynamicBodies.size(); i++) {
+			if (overlap[i]) {
+				Gizmos::setColor(Color::red);
 			}
 			else {
-				Gizmos::SetColor(Color::yellow() / 2.0f);
+				Gizmos::setColor(Color::white);
 			}
-			Gizmos::DrawPolygon(staticColliders[i]->vertices());
+			std::vector<Vector2> transformedVertices;
+			for (auto vertex : dynamicBodies[i]->vertices()) {
+				transformedVertices.push_back(camera.WorldToScreenPoint(vertex));
+			}
+			Gizmos::DrawPolygon(transformedVertices);
 		}
 
-		text.Display(m_renderer, Vector2Int(30, 30), Color::yellow() * 0.7f);
+		Gizmos::setColor(Color::yellow);
+		for (auto body : staticBodies) {
+			std::vector<Vector2> transformedVertices;
+			for (auto vertex : body->vertices()) {
+				transformedVertices.push_back(camera.WorldToScreenPoint(vertex));
+			}
+			Gizmos::DrawPolygon(transformedVertices);
+		}
+
+		// Display UI
+		text.Display(m_renderer, Vector2Int(30, 30), Color::yellow * 0.7f);
 	}
 
 	inline void OnUserExit() override {
@@ -158,13 +241,730 @@ public: // Functions
 	}
 
 private:
+	[[nodiscard]] inline PolygonCollider2D* CreateCollider(Vector2 _position, float _rotation, Vector2 _scale, size_t _edges) const {
+		auto collider = new PolygonCollider2D(CreatePolygon(_edges, 2));
+		collider->transform = new Transform(_position, _rotation, _scale);
+		collider->RecalculateVertices();
+		return collider;
+	}
+
+	inline std::vector<Vector2> CreatePolygon(size_t _corners, float _radius) const {
+		float rotationIter = 360.0f / _corners;
+		std::vector<Vector2> vertices = { Vector2(0, _radius) };
+		for (size_t i = 1; i < _corners; i++) {
+			vertices.push_back(Vector2(
+				-1 * _radius * std::sinf(LMK_DtoR(rotationIter * i)),
+				_radius * std::cosf(LMK_DtoR(rotationIter * i)))
+			);
+		}
+		return vertices;
+	}
+
 	inline void UpdateText() {
 		using namespace std::literals::chrono_literals;
 
 		while (isRunning())
 		{
 			text.text = "FPS: " + std::to_string(Time::frameRate());
-			std::this_thread::sleep_for(0.25s);
+			std::this_thread::sleep_for(0.15s);
+		}
+	}
+};
+
+
+
+class TriangulationTest : public LMKEngine {
+private:
+	TTFont font;
+
+	TextGUI fpsText;
+
+	Scene scene;
+
+	Camera2D* camera;
+	PolygonCollider2D* orgPolygon;
+
+	bool polyChanged;
+
+protected: // Functions
+	inline void OnUserStart() override {
+		ResourceLoad();
+
+		fpsText.font = font;
+
+		auto& cameraObject = scene.CreateGameObject("Camera");
+		auto& colliderObject = scene.CreateGameObject("Collider");
+
+		camera = cameraObject.AddComponent<Camera2D>();
+		camera->setSize(10);
+		camera->backgroundColor = Color(50, 50, 50, 255);
+
+		orgPolygon = colliderObject.AddComponent<PolygonCollider2D>();
+	}
+
+	inline void OnUserUpdate() override {
+
+	}
+
+	inline void OnUserFixedUpdate() override {
+		static int count = 0;
+		count++;
+		if (count == 10) {
+			count = 0;
+			std::stringstream ss;
+			ss << std::fixed << std::setprecision(2) << Time::frameRate();
+			fpsText.text = "FPS: " + ss.str();
+		}
+	}
+
+	inline void OnDrawGizmos() override {
+		Gizmos::DrawWorldGrid(*camera, 0.8f);
+
+		Gizmos::setColor(Color::green);
+
+		fpsText.Display(m_renderer, Vector2(20, 40), Color::white);
+	}
+
+private:
+	inline void ResourceLoad() {
+		font.LoadFont("Assets/Fonts/visitor2.ttf", 40);
+	}
+};
+
+
+
+#define TEST_CLOSEST 0
+#define TEST_PROJECTION 0
+#define TEST_DISTANCE 1
+#define TEST_MOVEMENT 0
+class ColliderTest : public LMKEngine {
+private: // Properties
+	// UI
+	TTFont font;
+	TextGUI fps;
+	TextGUI cameraLockState;
+	std::thread updateFPS;
+
+	// Camera 
+	Camera2D camera{ 15 };
+	bool lockRotation = true;
+	bool panning;
+	bool rotating;
+	Vector2 lastMousePos;
+	Vector2 moveDirection;
+	float targetAngle;
+	float zoomSpeed = 50.0f;
+
+	// Colliders
+	std::unique_ptr<PolygonCollider2D> centerCollider;
+	std::vector<std::unique_ptr<PolygonCollider2D>> staticBodies;
+	std::vector<std::vector<Vector2>> movementTrace;
+	std::vector<bool> overlapMouse;
+	std::vector<Vector2> closest;
+	std::vector<Collider2D::ProjectionResult> projections;
+	std::vector<ColliderDistance2D> distances;
+
+	// Project axis
+	Vector2 mouseWorldPos;
+	Vector2 projAxis;
+	float rotateSpeed = 45;
+
+public: // Functions
+	inline void OnUserStart() override {
+		updateFPS = std::thread(&ColliderTest::UpdateText, this);
+
+		font.LoadFont("Assets/Fonts/ARCADE.TTF", 30);
+		fps.font = font;
+		cameraLockState.font = font;
+
+		camera.transform = new Transform();
+
+		centerCollider = CreateCollider(Vector2::zero, 0, Vector2::one, 6);
+	}
+
+	inline void OnUserUpdate() override {
+		// Camera controls
+		if (Input::GetKeyDown(KeyCode::P)) {
+			camera.transform->setPosition(Vector2::zero);
+			camera.transform->setRotation(0);
+		}
+
+		if (Input::GetKeyDown(KeyCode::O)) {
+			camera.transform->setParent(nullptr);
+		}
+
+		if (Input::GetMouseButtonDown(MouseButton::Middle)) {
+			lastMousePos = Input::mousePosition();
+			panning = true;
+		}
+		else if (Input::GetMouseButtonUp(MouseButton::Middle)) {
+			panning = false;
+		}
+
+		if (Input::GetMouseButtonDown(MouseButton::Right)) {
+			lastMousePos = Input::mousePosition();
+			rotating = true;
+		}
+		else if (Input::GetMouseButtonUp(MouseButton::Right)) {
+			rotating = false;
+		}
+
+		if (Input::GetKeyDown(KeyCode::L)) {
+			lockRotation = !lockRotation;
+		}
+
+		// Update camera properties
+		if (panning) {
+			moveDirection = camera.transform->InverseTransformDirection(lastMousePos - Input::mousePosition()) / camera.pixelsPerUnit();
+			lastMousePos = Input::mousePosition();
+		}
+		if (rotating && !lockRotation) {
+			targetAngle = Vector2::SignedAngle(Input::mousePosition().normalized(), lastMousePos.normalized());
+			lastMousePos = Input::mousePosition();
+		}
+
+		camera.setSize(camera.size() - (camera.size() * Input::mouseScroll().y * Time::deltaTime() * zoomSpeed));
+
+		camera.transform->Translate(moveDirection);
+		camera.transform->Rotate(targetAngle * 2);
+		camera.RecalculateViewMatrix();
+
+		// Get mouse world position
+		mouseWorldPos = camera.ScreenToWorldPoint(Input::mousePosition());
+		projAxis = (mouseWorldPos - Vector2::zero).normalized();
+
+		// Generate colliders
+		if (Input::GetMouseButtonDown(MouseButton::Left)) {
+			staticBodies.push_back(CreateCollider(
+				camera.ScreenToWorldPoint(Input::mousePosition()),
+				Random::Range(0.0f, 360.0f),
+				Vector2::one,
+				Random::Range(3, 6)));
+
+			overlapMouse.emplace_back();
+			closest.emplace_back();
+			projections.emplace_back();
+			distances.emplace_back();
+			movementTrace.emplace_back();
+		}
+
+		// Remove colliders
+		if (Input::GetMouseButtonDown(MouseButton::Right)) {
+			auto iter = std::remove_if(staticBodies.begin(), staticBodies.end(),
+				[&](auto& _body) { return _body->OverlapPoint(mouseWorldPos); });
+
+			staticBodies.erase(iter, staticBodies.end());
+		}
+
+		if (Input::GetKeyDown(KeyCode::C)) {
+			staticBodies.clear();
+			overlapMouse.clear();
+			closest.clear();
+			projections.clear();
+			distances.clear();
+			movementTrace.clear();
+		}
+
+		// Update test properties
+		for (size_t i = 0; i < staticBodies.size(); i++) {
+			closest[i] = staticBodies[i]->ClosetPoint(mouseWorldPos);
+			projections[i] = staticBodies[i]->ProjectPolygon(*staticBodies[i], projAxis);
+			distances[i] = staticBodies[i]->Distance(*centerCollider);
+			overlapMouse[i] = distances[i].isOverlapped;
+
+			// Overlap resolve
+			if (std::abs(distances[i].distance) < Physics2D::contactOffset()) continue;
+
+			if (distances[i].isOverlapped) {
+				staticBodies[i]->transform->Translate(distances[i].distance * distances[i].normal);
+				staticBodies[i]->RecalculateVertices();
+			}
+			else {
+				movementTrace[i].push_back(staticBodies[i]->transform->position());
+				staticBodies[i]->transform->Translate(distances[i].distance * distances[i].normal * Time::deltaTime());
+				staticBodies[i]->RecalculateVertices();
+			}
+		}
+	}
+
+	inline void OnDrawGizmos() override {
+		Gizmos::DrawWorldGrid(camera);
+
+#if TEST_DISTANCE
+		// Display center collider
+		Gizmos::setColor(Color::yellow);
+		Gizmos::DrawPolygonWorld(camera, centerCollider->vertices());
+#endif
+
+		// Display colliders
+		for (size_t i = 0; i < staticBodies.size(); i++) {
+			if (overlapMouse[i]) {
+				Gizmos::setColor(Color::red);
+			}
+			else {
+				Gizmos::setColor(Color::white);
+			}
+			Gizmos::DrawPolygonWorld(camera, staticBodies[i]->vertices());
+
+#if TEST_CLOSEST
+			Gizmos::setColor(Color::white);
+			Gizmos::DrawLineWorld(camera, mouseWorldPos, closest[i]);
+			Gizmos::setColor(Color::cyan);
+			Gizmos::DrawRectWorld(camera, closest[i], Vector2(0.1f, 0.1f));
+#endif
+#if TEST_PROJECTION
+			// Display polygon projection
+			Vector2 minProj = projections[i].minDis * projAxis;
+			Vector2 maxProj = projections[i].maxDis * projAxis;
+			Gizmos::setColor(Color::cyan);
+			Gizmos::DrawLineWorld(camera, projections[i].minPoint, minProj);
+			Gizmos::DrawLineWorld(camera, projections[i].maxPoint, maxProj);
+			Gizmos::setColor(Color::magenta);
+			Gizmos::DrawRectWorld(camera, projections[i].minPoint, Vector2(0.1f, 0.1f));
+			Gizmos::DrawRectWorld(camera, projections[i].maxPoint, Vector2(0.1f, 0.1f));
+			Gizmos::DrawRectWorld(camera, minProj, Vector2(0.1f, 0.1f));
+			Gizmos::DrawRectWorld(camera, maxProj, Vector2(0.1f, 0.1f));
+#endif
+#if TEST_DISTANCE
+			if (distances[i].isOverlapped) {
+				Gizmos::setColor(Color::red);
+			}
+			else {
+				Gizmos::setColor(Color::green);
+			}
+			Gizmos::DrawLineWorld(camera, distances[i].pointA, distances[i].pointB);
+			Gizmos::setColor(Color::cyan);
+			Gizmos::DrawRectWorld(camera, distances[i].pointA, Vector2(0.1f, 0.1f));
+			Gizmos::setColor(Color::magenta);
+			Gizmos::DrawRectWorld(camera, distances[i].pointB, Vector2(0.15f, 0.15f));
+#endif
+#if TEST_MOVEMENT
+			Gizmos::setColor(Color::white);
+			for (auto point : movementTrace[i]) {
+				Gizmos::DrawRect(camera.WorldToScreenPoint(point), Vector2(2, 2));
+			}
+#endif
+		}
+
+		// Display projecting axis
+#if TEST_PROJECTION
+		Gizmos::setColor(Color::yellow);
+		Gizmos::DrawLineWorld(camera, projAxis * -100, projAxis * 100);
+#endif
+
+		// Display UI
+		fps.Display(m_renderer, Vector2Int(30, 30), Color::yellow * 0.7f);
+		cameraLockState.text = (std::string)"Camera Rotation Lock [L]: " + (lockRotation ? "True" : "False");
+		cameraLockState.Display(m_renderer, Vector2Int(30, 50), Color::white);
+	}
+
+	inline void OnUserExit() override {
+		updateFPS.join();
+	}
+
+private:
+	[[nodiscard]] inline std::unique_ptr<PolygonCollider2D> CreateCollider(Vector2 _position, float _rotation, Vector2 _scale, size_t _edges) const {
+		auto collider = std::make_unique<PolygonCollider2D>(CreatePolygon(_edges, 2));
+		collider->transform = new Transform(_position, _rotation, _scale);
+		collider->RecalculateVertices();
+		return collider;
+	}
+
+	inline std::vector<Vector2> CreatePolygon(size_t _corners, float _radius) const {
+		float rotationIter = 360.0f / _corners;
+		std::vector<Vector2> vertices = { Vector2(0, _radius) };
+		for (size_t i = 1; i < _corners; i++) {
+			vertices.push_back(Vector2(
+				-1 * _radius * std::sinf(LMK_DtoR(rotationIter * i)),
+				_radius * std::cosf(LMK_DtoR(rotationIter * i)))
+			);
+		}
+		return vertices;
+	}
+
+	inline void UpdateText() {
+		using namespace std::literals::chrono_literals;
+
+		while (isRunning())
+		{
+			fps.text = "FPS: " + std::to_string(Time::frameRate());
+			std::this_thread::sleep_for(0.15s);
+		}
+	}
+};
+
+
+
+#define TEST_MINKOWSKI 0
+#define TEST_BOUND 0
+class GJKTest : public LMKEngine {
+private: // Properties
+	// UI
+	TTFont font;
+	TextGUI fps;
+	TextGUI cameraLockState;
+	std::thread updateFPS;
+
+	// Camera 
+	Camera2D camera{ 6 };
+	bool lockRotation = true;
+	bool panning;
+	bool rotating;
+	Vector2 lastMousePos;
+	Vector2 moveDirection;
+	float targetAngle;
+	float zoomSpeed = 50.0f;
+
+	// Colliders
+	std::unique_ptr<BoxCollider2D> controllerCollider;
+	std::unique_ptr<PolygonCollider2D> polyCollider;
+	bool resolving;
+
+	ColliderDistance2D gjkResult;
+
+	// GJK
+	std::vector<Vector2> supports;
+	Vector2 direction;
+	size_t iterations = 360;
+
+	// Collider movement
+	float rotateDirection;
+	float rotationSpeed = 45;
+
+public: // Functions
+	inline void OnUserStart() override {
+		updateFPS = std::thread(&GJKTest::UpdateText, this);
+
+		font.LoadFont("Assets/Fonts/ARCADE.TTF", 30);
+		fps.font = font;
+		cameraLockState.font = font;
+
+		camera.transform = new Transform();
+
+		controllerCollider = std::make_unique<BoxCollider2D>();
+		controllerCollider->transform = new Transform();
+		controllerCollider->transform->name = "Box Collider";
+		controllerCollider->transform->setPosition(Vector2(0.5f, 1.5f));
+		controllerCollider->RecalculateVertices();
+
+		polyCollider = CreateCollider(Vector2(1.5f, 0.5f), 0, Vector2::one, 5);
+		polyCollider->transform->name = "Poly Collider";
+		polyCollider->RecalculateVertices();
+	}
+
+	inline void OnUserUpdate() override {
+		// Camera controls
+		if (Input::GetKeyDown(KeyCode::P)) {
+			camera.transform->setPosition(Vector2::zero);
+			camera.transform->setRotation(0);
+		}
+
+		if (Input::GetKeyDown(KeyCode::O)) {
+			camera.transform->setParent(nullptr);
+		}
+
+		if (Input::GetMouseButtonDown(MouseButton::Middle)) {
+			lastMousePos = Input::mousePosition();
+			panning = true;
+		}
+		else if (Input::GetMouseButtonUp(MouseButton::Middle)) {
+			panning = false;
+		}
+
+		if (Input::GetMouseButtonDown(MouseButton::Right)) {
+			lastMousePos = Input::mousePosition();
+			rotating = true;
+		}
+		else if (Input::GetMouseButtonUp(MouseButton::Right)) {
+			rotating = false;
+		}
+
+		if (Input::GetKeyDown(KeyCode::L)) {
+			lockRotation = !lockRotation;
+		}
+
+		// Update camera properties
+		if (panning) {
+			moveDirection = camera.transform->InverseTransformDirection(lastMousePos - Input::mousePosition()) / camera.pixelsPerUnit();
+			lastMousePos = Input::mousePosition();
+		}
+		if (rotating && !lockRotation) {
+			targetAngle = Vector2::SignedAngle(Input::mousePosition().normalized(), lastMousePos.normalized());
+			lastMousePos = Input::mousePosition();
+		}
+
+		camera.setSize(camera.size() - (camera.size() * Input::mouseScroll().y * Time::deltaTime() * zoomSpeed));
+
+		camera.transform->setLocalPosition(camera.transform->localPosition() + moveDirection);
+		camera.transform->setLocalRotation(camera.transform->localRotation() + targetAngle * 2);
+		camera.RecalculateViewMatrix();
+
+		// Update box transform
+		rotateDirection = 0;
+		if (Input::GetKey(KeyCode::E)) {
+			rotateDirection += -1;
+		}
+		if (Input::GetKey(KeyCode::Q)) {
+			rotateDirection += 1;
+		}
+
+		if (Input::GetKeyDown(KeyCode::R)) {
+			resolving = !resolving;
+		}
+
+		controllerCollider->transform->setPosition(camera.ScreenToWorldPoint(Input::mousePosition()));
+		controllerCollider->transform->Rotate(rotateDirection * rotationSpeed * Time::deltaTime());
+		controllerCollider->RecalculateVertices();
+
+		// GJK result
+		gjkResult = polyCollider->Distance(*controllerCollider);
+
+		if (resolving) {
+			polyCollider->transform->Translate((gjkResult.distance + Physics2D::contactOffset()) * gjkResult.normal);
+			polyCollider->RecalculateVertices();
+		}
+
+#if TEST_MINKOWSKI
+		// Get minkowski difference.
+		supports.clear();
+		float rotationIter = 360.0f / iterations;
+		for (size_t i = 0; i < iterations; i++) {
+			direction = Vector2(
+				-1 * std::sinf(LMK_DtoR(rotationIter * i)),
+				std::cosf(LMK_DtoR(rotationIter * i))
+			);
+
+			Vector2 support = Collider2D::Support(*polyCollider, *controllerCollider, direction);
+			if (std::find(supports.begin(), supports.end(), support) == supports.end()) {
+				supports.push_back(support);
+			}
+		}
+#endif
+	}
+
+	inline void OnDrawGizmos() override {
+		Gizmos::DrawWorldGrid(camera);
+
+		// Display colliders
+		Gizmos::setColor(Color::yellow);
+		Gizmos::DrawPolygonWorld(camera, polyCollider->vertices());
+
+		if (gjkResult.isOverlapped) {
+			Gizmos::setColor(Color::red);
+		}
+		else {
+			Gizmos::setColor(Color::white);
+		}
+		Gizmos::DrawPolygonWorld(camera, controllerCollider->vertices());
+#if TEST_BOUND
+		Gizmos::setColor(Color::green / 2);
+		Gizmos::DrawRectWorld(camera, controllerCollider->bounds().center(), controllerCollider->bounds().extents());
+#endif
+#if TEST_MINKOWSKI
+		// Display minkowski difference
+		Gizmos::setColor(Color::cyan);
+		size_t n = supports.size();
+		for (size_t i = 0, j = n - 1; i < n; j = i++) {
+			Gizmos::DrawLineWorld(camera, supports[j], supports[i]);
+		}
+#endif
+
+		Gizmos::DrawCameraOrigin(camera);
+
+		// Display UI
+		fps.Display(m_renderer, Vector2Int(30, 30), Color::yellow * 0.7f);
+		cameraLockState.text = (std::string)"Camera Rotation Lock [L]: " + (lockRotation ? "True" : "False");
+		cameraLockState.Display(m_renderer, Vector2Int(30, 50), Color::white);
+	}
+
+	inline void OnUserExit() override {
+		updateFPS.join();
+	}
+
+private:
+	[[nodiscard]] inline std::unique_ptr<PolygonCollider2D> CreateCollider(Vector2 _position, float _rotation, Vector2 _scale, size_t _edges) const {
+		auto collider = std::make_unique<PolygonCollider2D>(CreatePolygon(_edges, 0.5));
+		collider->transform = new Transform(_position, _rotation, _scale);
+		collider->RecalculateVertices();
+		return collider;
+	}
+
+	inline std::vector<Vector2> CreatePolygon(size_t _corners, float _radius) const {
+		float rotationIter = 360.0f / _corners;
+		std::vector<Vector2> vertices = { Vector2(0, _radius) };
+		for (size_t i = 1; i < _corners; i++) {
+			vertices.push_back(Vector2(
+				-1 * _radius * std::sinf(LMK_DtoR(rotationIter * i)),
+				_radius * std::cosf(LMK_DtoR(rotationIter * i)))
+			);
+		}
+		return vertices;
+	}
+
+	inline void UpdateText() {
+		using namespace std::literals::chrono_literals;
+
+		while (isRunning())
+		{
+			fps.text = "FPS: " + std::to_string(Time::frameRate());
+			std::this_thread::sleep_for(0.15s);
+		}
+	}
+};
+
+
+
+class CameraTest : public LMKEngine {
+private:
+	TTFont font;
+	TextGUI text;
+	std::thread updateFPS;
+
+	// Sprite Renderer
+	Texture2D texture;
+	Sprite spriteA;
+	SpriteRenderer rendererA;
+	Vector2 rendererScaleValue;
+	float scaleSpeed = 5;
+	Vector2 rendererMoveDirection;
+	float moveSpeed = 10;
+
+	// Camera 
+	Camera2D camera{ 10 };
+	Vector2 moveDirection;
+	float targetAngle;
+	float zoomSpeed = 400; // Pixels
+	Vector2 lastMousePos;
+
+	bool panning;
+	bool rotating;
+
+public:
+	inline void OnUserStart() override {
+		updateFPS = std::thread(&CameraTest::UpdateFPSText, this);
+
+		font.LoadFont("Assets/Fonts/visitor2.ttf", 40);
+		text.font = font;
+
+		// Setup camera
+		camera.transform = new Transform();
+		camera.RecalculateAspect();
+
+		// Setup renderer
+		texture.LoadRawTextureData("Assets/Images/Koopa.png");
+
+		spriteA.InitSprite(texture, RectInt{ Vector2Int::zero(), Vector2Int(32, 30) });
+		spriteA.setPixelsPerUnit(30);
+
+		rendererA.transform = new Transform();
+		rendererA.transform->setPosition(Vector2(1, 1));
+		rendererA.setSprite(spriteA);
+
+		camera.transform->setParent(rendererA.transform);
+	}
+
+	inline void OnUserUpdate() override {
+		// Screen controls
+		if (Input::GetKeyDown(KeyCode::F11)) {
+			if (Screen::fullScreen()) {
+				Screen::SetFullScreenMode(FullScreenMode::Windowed);
+			}
+			else {
+				Screen::SetFullScreenMode(FullScreenMode::FullScreen);
+			}
+		}
+
+		// Renderer controls
+		rendererMoveDirection = Vector2::zero;
+		if (Input::GetKey(KeyCode::W)) {
+			rendererMoveDirection.y += 1;
+		}
+		if (Input::GetKey(KeyCode::S)) {
+			rendererMoveDirection.y -= 1;
+		}
+		if (Input::GetKey(KeyCode::D)) {
+			rendererMoveDirection.x += 1;
+		}
+		if (Input::GetKey(KeyCode::A)) {
+			rendererMoveDirection.x -= 1;
+		}
+
+		rendererScaleValue = Vector2::zero;
+		if (Input::GetKey(KeyCode::R)) {
+			rendererScaleValue += Vector2::one;
+		}
+		if (Input::GetKey(KeyCode::F)) {
+			rendererScaleValue -= Vector2::one;
+		}
+
+		// Camera controls
+		if (Input::GetKeyDown(KeyCode::P)) {
+			camera.transform->setLocalPosition(Vector2::zero);
+			camera.transform->setLocalRotation(0);
+		}
+
+		if (Input::GetKeyDown(KeyCode::O)) {
+			camera.transform->setParent(nullptr);
+		}
+
+		if (Input::GetMouseButtonDown(MouseButton::Left)) {
+			lastMousePos = Input::mousePosition();
+			panning = true;
+		}
+		else if (Input::GetMouseButtonUp(MouseButton::Left)) {
+			panning = false;
+		}
+
+		if (Input::GetMouseButtonDown(MouseButton::Right)) {
+			lastMousePos = Input::mousePosition();
+			rotating = true;
+		}
+		else if (Input::GetMouseButtonUp(MouseButton::Right)) {
+			rotating = false;
+		}
+
+		// Update camera properties
+		if (panning) {
+			moveDirection = camera.transform->InverseTransformDirection(lastMousePos - Input::mousePosition()) / camera.pixelsPerUnit();
+			lastMousePos = Input::mousePosition();
+		}
+		if (rotating) {
+			targetAngle = Vector2::SignedAngle(Input::mousePosition().normalized(), lastMousePos.normalized());
+			lastMousePos = Input::mousePosition();
+		}
+
+		camera.setSize(camera.size() - Input::mouseScroll().y * Time::deltaTime() * zoomSpeed);
+		camera.transform->Translate(moveDirection);
+		camera.transform->Rotate(targetAngle * 2);
+		camera.RecalculateViewMatrix();
+
+		// Update renderers transforms
+		rendererA.transform->Translate(rendererMoveDirection.normalized() * moveSpeed * Time::deltaTime());
+		rendererA.transform->AddScale(rendererScaleValue * scaleSpeed * Time::deltaTime());
+	}
+
+	inline void OnDrawGizmos() override {
+		Gizmos::DrawWorldGrid(camera);
+
+		// Render sprites
+		Gizmos::setColor(Color::green);
+		Gizmos::DrawRectWorld(camera,rendererA.transform->position(), Vector2(0.05f, 0.05f));
+
+		// Render UI
+		text.Display(m_renderer, Vector2Int(50, 50), Color::yellow);
+	}
+
+	inline void OnUserExit() override {
+		updateFPS.join();
+	}
+
+private:
+	inline void UpdateFPSText() {
+		using namespace std::literals::chrono_literals;
+
+		while (isRunning()) {
+			text.text = std::to_string(Time::frameRate());
+			std::this_thread::sleep_for(0.1s);
 		}
 	}
 };
@@ -173,121 +973,392 @@ private:
 
 class RenderTest : public LMKEngine {
 private:
+	Scene scene;
+
 	TTFont font;
-	Text text;
-	std::thread updateFPS;
+	TextGUI text;
 
-	//Texture2D texture;
-	//Sprite sprite;
-
-	Camera2D camera{6};
-	std::array<Vector2, 6> worldPoints {
-		Vector2{0, 0},
-		Vector2{1, 1},
-		Vector2{1, 2},
-		Vector2{0, 1},
-		Vector2{-1, 0},
-		Vector2{1, 0},
-	};
-	std::array<Vector2, 6> screenPoints { };
-
+	// Camera 
+	Camera2D camera{ 10 };
+	bool lockRotation = true;
+	bool panning;
+	bool rotating;
 	Vector2 moveDirection;
-	float rotateDirection;
-	float moveSpeed = 100;
-	float rotateSpeed = 45; // Degree
+	float targetAngle;
+	float zoomSpeed = 300;
 
-	float pixelsPerUnit;
+	// Sprite Renderer
+	Texture2D texture;
+	Sprite spriteA;
+	Sprite spriteB;
+	SpriteRenderer* rendererA;
+	SpriteRenderer* rendererB;
+
+	// Controls
+	Vector2 lastMousePos;
+
+	bool usingSpriteA = true;
+
+	float scaleSpeed = 5;
+	float moveSpeed = 10;
+	float rotateSpeed = 45;
 
 public:
 	inline void OnUserStart() override {
-		//texture.LoadRawTextureData("Assets/Images/Koopa.png");
-		//sprite.setTexture(texture);
-
-		updateFPS = std::thread(&RenderTest::UpdateText, this);
-
-		//Screen::SetFullScreenMode(FullScreenMode::Windowed);
-
-		camera.transform = new Transform(Vector2::zero(), 0, Vector2::one());
-		camera.ResetAspect();
-
 		font.LoadFont("Assets/Fonts/visitor2.ttf", 40);
-		text.font = font;
+		text.font = font;	
+		text.text = "What?";
+
+		// Setup camera
+		camera.transform = new Transform();
+		camera.RecalculateAspect();
+
+		// Setup texture
+		texture.LoadRawTextureData("Assets/Images/NES - Mario Bros - General Sprites.png");
+
+		spriteA.InitSprite(texture, RectInt{ Vector2Int(4, 603), Vector2Int(16, 21)});
+		spriteA.setPivot(Vector2(0.1f, 0.0f));
+		spriteA.setPixelsPerUnit(21);
+		spriteB.InitSprite(texture, RectInt{ Vector2Int(23, 603), Vector2Int(12, 21) });
+		spriteB.setPixelsPerUnit(21);
+
+		// Setup renderers
+		auto& objectA = scene.CreateGameObject("Renderer A");
+		auto& objectB = scene.CreateGameObject("Renderer B");
+
+		objectA.transform->setPosition(Vector2(1, 1));
+		rendererA = objectA.AddComponent<SpriteRenderer>();
+		rendererA->setSprite(spriteA);
+
+		objectB.transform->setPosition(Vector2(2, 1));
+		rendererB = objectB.AddComponent<SpriteRenderer>();
+		rendererB->setSprite(spriteB);
+
+		camera.transform->setParent(rendererA->transform);
 	}
 
 	inline void OnUserUpdate() override {
 		if (Input::GetKeyDown(KeyCode::F11)) {
+			std::cout << Screen::width() << " : " << Screen::height() << "\n";
+
 			if (Screen::fullScreen()) {
 				Screen::SetFullScreenMode(FullScreenMode::Windowed);
 			}
 			else {
-				Screen::SetFullScreenMode(FullScreenMode::Borderless);
+				Screen::SetFullScreenMode(FullScreenMode::FullScreen);
 			}
 		}
 
-		moveDirection = Vector2::zero();
-		if (Input::GetKey(KeyCode::W)) {
-			moveDirection.y += 1;
+		// Camera controls
+		if (Input::GetKeyDown(KeyCode::P)) {
+			camera.transform->setLocalPosition(Vector2::zero);
+			camera.transform->setLocalRotation(0);
 		}
-		if (Input::GetKey(KeyCode::S)) {
-			moveDirection.y -= 1;
+
+		if (Input::GetKeyDown(KeyCode::O)) {
+			camera.transform->setParent(nullptr);
 		}
+
+		if (Input::GetMouseButtonDown(MouseButton::Left)) {
+			lastMousePos = Input::mousePosition();
+			panning = true;
+		}
+		else if (Input::GetMouseButtonUp(MouseButton::Left)) {
+			panning = false;
+		}
+
+		if (Input::GetMouseButtonDown(MouseButton::Right)) {
+			lastMousePos = Input::mousePosition();
+			rotating = true;
+		}
+		else if (Input::GetMouseButtonUp(MouseButton::Right)) {
+			rotating = false;
+		}
+
+		// Update camera properties
+		if (panning) {
+			moveDirection = camera.transform->InverseTransformDirection(lastMousePos - Input::mousePosition()) / camera.pixelsPerUnit();
+			lastMousePos = Input::mousePosition();
+		}
+		if (rotating) {
+			targetAngle = Vector2::SignedAngle(Input::mousePosition().normalized(), lastMousePos.normalized());
+			lastMousePos = Input::mousePosition();
+		}
+
+		camera.setSize(camera.size() - Input::mouseScroll().y * Time::deltaTime() * zoomSpeed);
+		camera.transform->Translate(moveDirection);
+		camera.transform->Rotate(targetAngle * 2);
+		camera.RecalculateViewMatrix();
+
+		// Renderers controls
+		if (Input::GetKey(KeyCode::E)) {
+			rendererA->transform->Rotate(-rotateSpeed * Time::deltaTime());
+		}
+		if (Input::GetKey(KeyCode::Q)) {
+			rendererA->transform->Rotate(rotateSpeed * Time::deltaTime());
+		}
+
 		if (Input::GetKey(KeyCode::D)) {
-			moveDirection.x += 1;
+			rendererA->transform->AddScale(Vector2::right * Time::deltaTime());
 		}
 		if (Input::GetKey(KeyCode::A)) {
-			moveDirection.x -= 1;
+			rendererA->transform->AddScale(Vector2::left * Time::deltaTime());
 		}
 
-		rotateDirection = 0;
-		if (Input::GetKey(KeyCode::Q)) {
-			rotateDirection += 1;
+		if (Input::GetKey(KeyCode::W)) {
+			rendererA->transform->AddScale(Vector2::up * Time::deltaTime());
 		}
-		if (Input::GetKey(KeyCode::E)) {
-			rotateDirection -= 1;
-		}
-
-		if (Input::GetMouseButtonDown(MouseButton::Middle)) {
-			std::cout << "Start panning...\n";
-		}
-		else if (Input::GetMouseButtonUp(MouseButton::Middle)) {
-			std::cout << "Stop panning...\n";
+		if (Input::GetKey(KeyCode::S)) {
+			rendererA->transform->AddScale(Vector2::down * Time::deltaTime());
 		}
 
-		// Update camera properties.
-		camera.size -= Input::mouseScrollDelta().y * 200.0f;
-		camera.transform->setPosition(camera.transform->position() + moveDirection.normalized() * moveSpeed * Time::deltaTime());
-		camera.transform->setRotation(camera.transform->rotation() + rotateDirection * rotateSpeed * Time::deltaTime());
+		if (Input::GetKeyDown(KeyCode::R)) {
+			rendererA->setSprite(usingSpriteA ? spriteB : spriteA);
+			usingSpriteA = !usingSpriteA;
+		}
 
-		// Update pixel per unit. 
-		pixelsPerUnit = Screen::height() / (camera.size * 2);
+		if (Input::GetKeyDown(KeyCode::T)) {
+			rendererA->setSortingLayerID(rendererA->sortingLayerID() + 1);
+		}
+		if (Input::GetKeyDown(KeyCode::Y)) {
+			rendererB->setSortingLayerID(rendererB->sortingLayerID() + 1);
+		}
 
-		// Transform world points to screen points.
-		for (size_t i = 0; i < 6; i++) {
-			screenPoints[i] = camera.WorldToScreenPoint(worldPoints[i]);
+		if (Input::GetKeyDown(KeyCode::LeftArrow) || Input::GetKeyDown(KeyCode::RightArrow)) {
+			rendererA->flipX = !rendererA->flipX;
+		}
+		if (Input::GetKeyDown(KeyCode::DownArrow) || Input::GetKeyDown(KeyCode::UpArrow)) {
+			rendererA->flipY = !rendererA->flipY;
 		}
 	}
 
 	inline void OnDrawGizmos() override {
-		Gizmos::SetColor(Color::green());
-		for (auto screenPoint : screenPoints) {
-			Gizmos::DrawRect(screenPoint, Vector2(pixelsPerUnit, pixelsPerUnit) / 2);
-		}
+		Gizmos::DrawWorldGrid(camera);
 
-		text.Display(m_renderer, Vector2Int(50, 50), Color::yellow());
+		Gizmos::setColor(Color::green);
+		Gizmos::DrawRectWorld(camera, rendererA->transform->position(), Vector2(0.05f, 0.05f));
+		Gizmos::DrawLineWorld(camera, rendererA->transform->position(), rendererA->transform->position() + rendererA->transform->up());
+
+		Gizmos::DrawCameraOrigin(camera);
+
+		text.Display(m_renderer, Vector2Int(50, 50), Color::yellow);
+	}
+};
+
+
+
+class TransformTest : public LMKEngine {
+private:
+	TTFont worldFont;
+	TTFont font;
+	TextGUI worldText;
+	TextGUI text;
+
+	// Camera 
+	Camera2D camera{ 10 };
+	Vector2 lastMousePos;
+	bool lockRotation = true;
+	bool panning;
+	bool rotating;
+	Vector2 moveDirection;
+	float targetAngle;
+	float zoomSpeed = 300;
+
+	// Game Objects
+	Scene firstScene;
+	GameObject root{ &firstScene, "Root" };
+	GameObject branchA{ &firstScene, "Branch A" };
+	GameObject branchB{ &firstScene, "Branch B" };
+	GameObject leafA1{ &firstScene, "Leaf A 1" };
+	GameObject leafA2{ &firstScene, "Leaf A 2" };
+	Transform* currTransform;
+	int curTransformSiblingIndex;
+
+	// Controls
+	float rotateSpeed = 45;
+	float moveSpeed = 2;
+	float scaleSpeed = 1;
+
+public:
+	inline void OnUserStart() override {
+		font.LoadFont("Assets/Fonts/joystix monospace.otf", 15);
+		worldFont.LoadFont("Assets/Fonts/visitor2.ttf", 24);
+		text.font = font;
+		worldText.font = worldFont;
+
+		// Setup camera
+		camera.transform = new Transform();
+		camera.RecalculateAspect();
+		camera.backgroundColor = Color{30, 30, 30, 255};
+
+		// Setup hierarchy
+		branchA.transform->setParent(root.transform);
+		branchB.transform->setParent(root.transform);
+		leafA1.transform->setParent(branchA.transform);
+		leafA2.transform->setParent(branchA.transform);
+
+		currTransform = root.transform;
 	}
 
-	inline void OnUserExit() override {
-		updateFPS.join();
+	inline void OnUserUpdate() override {
+		UpdateCameraControl(camera);
+
+		if (Input::GetKeyDown(KeyCode::F11)) {
+			std::cout << Screen::width() << " : " << Screen::height() << "\n";
+
+			if (Screen::fullScreen()) {
+				Screen::SetFullScreenMode(FullScreenMode::Windowed);
+			}
+			else {
+				Screen::SetFullScreenMode(FullScreenMode::FullScreen);
+			}
+		}
+
+		// Transform controls
+		if (Input::GetKey(KeyCode::Q)) {
+			currTransform->Rotate(rotateSpeed * Time::deltaTime());
+		}
+		if (Input::GetKey(KeyCode::E)) {
+			currTransform->Rotate(-rotateSpeed * Time::deltaTime());
+		}
+
+		if (Input::GetKey(KeyCode::W)) {
+			currTransform->Translate(Vector2::up * moveSpeed * Time::deltaTime());
+		}
+		if (Input::GetKey(KeyCode::S)) {
+			currTransform->Translate(Vector2::down * moveSpeed * Time::deltaTime());
+		}
+		if (Input::GetKey(KeyCode::D)) {
+			currTransform->Translate(Vector2::right * moveSpeed * Time::deltaTime());
+		}
+		if (Input::GetKey(KeyCode::A)) {
+			currTransform->Translate(Vector2::left * moveSpeed * Time::deltaTime());
+		}
+
+		if (Input::GetKey(KeyCode::R)) {
+			currTransform->AddScale(Vector2::one * scaleSpeed * Time::deltaTime());
+		}
+		if (Input::GetKey(KeyCode::F)) {
+			currTransform->AddScale(Vector2::one * -scaleSpeed * Time::deltaTime());
+		}
+
+		if (Input::GetKeyDown(KeyCode::T)) {
+			currTransform->setLocalPosition(Vector2::zero);
+			currTransform->setLocalRotation(0);
+			currTransform->setLocalScale(Vector2::one);
+		}
+
+		if (Input::GetKeyDown(KeyCode::UpArrow)) {
+			if (currTransform->parent() != nullptr) {
+				currTransform = currTransform->parent();
+			}
+		}
+		if (Input::GetKeyDown(KeyCode::DownArrow)) {
+			if (currTransform->childCount() > 0) {
+				currTransform = currTransform->GetChild(0);
+				curTransformSiblingIndex = 0;
+			}
+		}
+		if (Input::GetKeyDown(KeyCode::RightArrow)) {
+			if (currTransform->parent() != nullptr) {
+				curTransformSiblingIndex = (curTransformSiblingIndex + 1) % currTransform->parent()->childCount();
+				currTransform = currTransform->parent()->GetChild(curTransformSiblingIndex);
+			}
+		}
+		if (Input::GetKeyDown(KeyCode::LeftArrow)) {
+			if (currTransform->parent() != nullptr) {
+				curTransformSiblingIndex = (curTransformSiblingIndex + 1) % currTransform->parent()->childCount();
+				currTransform = currTransform->parent()->GetChild(curTransformSiblingIndex);
+			}
+		}
+	}
+
+	inline void OnDrawGizmos() override {
+		Gizmos::DrawWorldGrid(camera);
+
+		// Display transform
+		DrawTransform(camera, *root.transform, Color::white);
+		DrawTransform(camera, *branchA.transform, Color::green);
+		DrawTransform(camera, *branchB.transform, Color::yellow);
+		DrawTransform(camera, *leafA1.transform, Color::cyan);
+		DrawTransform(camera, *leafA2.transform, Color::magenta);
+
+		// Display current transform indicator
+		Gizmos::setColor(Color::grey);
+		Vector2 oneWorldPoint = currTransform->TransformPoint(Vector2::one);
+		Gizmos::DrawLineWorld(camera, currTransform->position(), oneWorldPoint);
+		Gizmos::DrawRectWorld(camera, oneWorldPoint, Vector2(0.1f, 0.1f));
+		worldText.text = currTransform->gameObject->name;
+		worldText.Display(m_renderer, camera.WorldToScreenPoint(oneWorldPoint), Color::white);
+
+		// Display UI
+		Gizmos::DrawCameraOrigin(camera);
+
+		// Display transform info
+		text.text = "Name:  " + currTransform->gameObject->name;
+		text.Display(m_renderer, Vector2Int(20, 40), Color::yellow);
+		text.text = "World Position:  " + std::string(currTransform->position());
+		text.Display(m_renderer, Vector2Int(20, 90), Color::white);
+		text.text = "Position:  " + std::string(currTransform->localPosition());
+		text.Display(m_renderer, Vector2Int(20, 120), Color::white);
+		text.text = "Rotation:  " + std::to_string(currTransform->localRotation());
+		text.Display(m_renderer, Vector2Int(20, 140), Color::white);
+		text.text = "Scale:  " + std::string(currTransform->localScale());
+		text.Display(m_renderer, Vector2Int(20, 160), Color::white);
 	}
 
 private:
-	inline void UpdateText() {
-		using namespace std::literals::chrono_literals;
+	inline void DrawTransform(const Camera2D& _camera, const Transform& _transform, Color _color) {
+		// World
+		Gizmos::setColor(_color);
+		Gizmos::DrawLineWorld(_camera, _transform.position(), _transform.position() + _transform.up());
+		Gizmos::DrawRectWorld(_camera, _transform.position(), Vector2::Scale(Vector2(0.1f, 0.1f), _transform.lossyScale()));
+		// Local
+		Gizmos::setColor(_color / 2);
+		Gizmos::DrawRectWorld(_camera, _transform.position(), Vector2::Scale(Vector2(0.1f, 0.1f), _transform.localScale()));
+	}
 
-		while (isRunning()) {
-			text.text = std::to_string(Time::frameRate());
-			std::this_thread::sleep_for(0.1s);
+	inline void UpdateCameraControl(Camera2D& _camera) {
+		// Camera controls
+		if (Input::GetKeyDown(KeyCode::P)) {
+			_camera.transform->setPosition(currTransform->position());
+			_camera.transform->setRotation(0);
 		}
+
+		if (Input::GetKeyDown(KeyCode::O)) {
+			_camera.transform->setParent(nullptr);
+		}
+
+		if (Input::GetMouseButtonDown(MouseButton::Left)) {
+			lastMousePos = Input::mousePosition();
+			panning = true;
+		}
+		else if (Input::GetMouseButtonUp(MouseButton::Left)) {
+			panning = false;
+		}
+
+		if (Input::GetMouseButtonDown(MouseButton::Right)) {
+			lastMousePos = Input::mousePosition();
+			rotating = true;
+		}
+		else if (Input::GetMouseButtonUp(MouseButton::Right)) {
+			rotating = false;
+		}
+
+		// Update camera properties
+		if (panning) {
+			moveDirection = _camera.transform->InverseTransformDirection((lastMousePos - Input::mousePosition()) / _camera.pixelsPerUnit());
+			lastMousePos = Input::mousePosition();
+		}
+		if (rotating) {
+			targetAngle = Vector2::SignedAngle(Input::mousePosition().normalized(), lastMousePos.normalized());
+			lastMousePos = Input::mousePosition();
+		}
+
+		_camera.setSize(_camera.size() - Input::mouseScroll().y * Time::deltaTime() * zoomSpeed);
+		_camera.transform->Translate(_camera.transform->TransformDirection(moveDirection));
+		_camera.transform->Rotate(targetAngle * 2);
+		_camera.RecalculateViewMatrix();
 	}
 };
 
@@ -327,14 +1398,367 @@ public:
 	}
 
 	inline void OnDrawGizmos() override {
-		Gizmos::SetColor(Color::green());
-		Gizmos::DrawRect(Bounds(playerObject.transform->position(), Vector2(10, 10)));
+		Gizmos::setColor(Color::green);
 	}
 
 	inline void OnUserExit() override {
 
 	}
 };
+
+
+
+class NativeMemoryTest : public LMKEngine {
+
+};
+
+
+
+class SceneTest : public LMKEngine {
+private:
+
+
+private:
+
+};
+
+
+
+class SoundTest : public LMKEngine {
+private:
+	AudioClip clip;
+
+public:
+	inline void OnUserStart() override {
+		clip.LoadAudioData("Assets/Audio/SFX/Jump.mp3");
+	}
+
+	inline void OnUserUpdate() override {
+		if (Input::GetKeyDown(KeyCode::Space))
+			AudioManager::PlayOneShot(clip);
+	}
+};
+
+
+
+#define DEBUG_GIZMOS 0
+class MarioTest : public LMKEngine {
+public:
+	~MarioTest() = default;
+
+private:
+	// Resource Setup
+	std::thread updateFPS;
+	TTFont font;
+	TextGUI text;
+
+	AudioClip jumpClip;
+	AudioClip backgroundMusic;
+
+	// Scene Setup
+	Scene level1{ "Scene 1" };
+
+	// Components
+	Camera2D* camera;
+	SpriteRenderer* playerRenderer;
+	BoxCollider2D* playerColldier;
+	SpriteRenderer* groundRenderer;
+	BoxCollider2D* groundColldier;
+	SpriteRenderer* groundRenderer2;
+	BoxCollider2D* groundColldier2;
+	BoxCollider2D* groundCheckCollider;
+
+	// Textures
+	Texture2D texture;
+	Sprite playerSprite;
+	Sprite groundSprite;
+
+	// Player controls
+	bool jumped;
+	bool wasInAir;
+	int horizontalDirection = 1;
+	Vector2 velocity;
+	float moveSpeedAccel = 10;
+	float maxMoveSpeed = 7;
+	float jumpPower = 12;
+	float maxFallSpeed = -10;
+
+	// Camera controls
+	bool panning;
+	bool rotating;
+	Vector2 moveDirection;
+	float targetAngle;
+	float zoomSpeed = 300;
+	Vector2 lastMousePos;
+
+public:
+	inline void OnUserStart() override {
+		updateFPS = std::thread(&MarioTest::UpdateFPSText, this);
+
+		font.LoadFont("Assets/Fonts/visitor2.ttf", 40);
+		text.font = font;
+
+		jumpClip.LoadAudioData("Assets/Audio/SFX/Jump.mp3");
+		backgroundMusic.LoadAudioData("Assets/Audio/Music/Mario.mp3");
+
+		// Setup textures.
+		texture.LoadRawTextureData("Assets/Images/NES - Mario Bros - General Sprites.png");
+
+		playerSprite.InitSprite(texture, RectInt{ Vector2Int(4, 603), Vector2Int(16, 21) });
+		playerSprite.setPivot(Vector2(0.5f, 0.0f));
+		playerSprite.setPixelsPerUnit(21);
+
+		groundSprite.InitSprite(texture, RectInt{ Vector2Int(5, 293), Vector2Int(256, 15) });
+		groundSprite.setPivot(Vector2(0.5f, 1.0f));
+		groundSprite.setPixelsPerUnit(15);
+
+		// Setup scene.
+		auto& mainCamera = level1.CreateGameObject("MainCamera");
+		auto& player = level1.CreateGameObject("Player");
+		auto& ground = level1.CreateGameObject("Ground");
+		auto& ground2 = level1.CreateGameObject("Ground");
+		auto& groundCheck = level1.CreateGameObject("GroundCheck");
+
+		// Setup camera object.
+		camera = mainCamera.AddComponent<Camera2D>();
+
+		mainCamera.transform->setParent(player.transform);
+		mainCamera.transform->setLocalPosition(Vector2(0, 4));
+
+		camera->setSize(8);
+#if DEBUG_GIZMOS
+		camera->backgroundColor = Color(23, 23, 23, 255);
+#else
+		camera->backgroundColor = Color(173, 208, 249, 255);
+#endif
+
+		// Setup player object.
+		playerRenderer = player.AddComponent<SpriteRenderer>();
+		playerColldier = player.AddComponent<BoxCollider2D>();
+
+		player.transform->setPosition(Vector2(0, 2));
+		playerRenderer->setSprite(playerSprite);
+
+		playerColldier->offset = Vector2(0.0f, 0.5f);
+		playerColldier->scale = Vector2(0.8f, 1.0f);
+		playerColldier->RecalculateVertices();
+
+		// Setup ground object.
+		groundRenderer = ground.AddComponent<SpriteRenderer>();
+		groundColldier = ground.AddComponent<BoxCollider2D>();
+
+		groundRenderer->setSprite(groundSprite);
+
+		groundColldier->offset = Vector2(0.0f, -0.5f);
+		groundColldier->scale = Vector2(17, 1);
+		groundColldier->RecalculateVertices();
+
+		// Setup ground2 object.
+		groundRenderer2 = ground2.AddComponent<SpriteRenderer>();
+		groundColldier2 = ground2.AddComponent<BoxCollider2D>();
+
+		ground2.transform->setPosition(Vector2(10, 3));
+
+		groundRenderer2->setSprite(groundSprite);
+
+		groundColldier2->offset = Vector2(0.0f, -0.5f);
+		groundColldier2->scale = Vector2(17, 1);
+		groundColldier2->RecalculateVertices();
+
+		// Setup groundCheck object.
+		groundCheckCollider = groundCheck.AddComponent<BoxCollider2D>();
+
+		groundCheck.transform->setParent(player.transform);
+		groundCheck.transform->setLocalPosition(Vector2::zero);
+
+		groundCheckCollider->scale = Vector2(0.8f, 0.15f);
+		groundCheckCollider->RecalculateVertices();
+
+		// Audio setup
+		AudioManager::PlayLooped(backgroundMusic);
+	}
+
+	inline void OnUserUpdate() override {
+		CameraControls(*camera);
+
+		// Player controls
+		horizontalDirection = 0;
+		if (Input::GetKey(KeyCode::A) || Input::GetKey(KeyCode::LeftArrow)) {
+			horizontalDirection += -1;
+		}
+		if (Input::GetKey(KeyCode::D) || Input::GetKey(KeyCode::RightArrow)) {
+			horizontalDirection += 1;
+		}
+
+		jumped = false;
+		if (Input::GetKeyDown(KeyCode::W) || Input::GetKey(KeyCode::UpArrow)) {
+			if (IsGrounded()) jumped = true;
+		}
+
+		// Update velocity
+		float targetSpeed = horizontalDirection * maxMoveSpeed;
+		velocity.x = Mathf::MoveTowards(velocity.x, targetSpeed, moveSpeedAccel * Time::deltaTime());
+		if (jumped) {
+			velocity.y = jumpPower;
+			AudioManager::PlayOneShot(jumpClip, 0.7f);
+		}
+
+		if (horizontalDirection < 0) {
+			playerRenderer->flipX = false;
+		}
+		else if (horizontalDirection > 0) {
+			playerRenderer->flipX = true;
+		}
+
+		playerColldier->transform->Translate(velocity * Time::deltaTime());
+		playerColldier->RecalculateVertices();
+		groundCheckCollider->RecalculateVertices();
+
+		// Collision resolve
+		auto result = playerColldier->Distance(*groundColldier);
+		if (result.isOverlapped) {
+			playerColldier->transform->Translate(result.distance * result.normal);
+		}
+
+		result = playerColldier->Distance(*groundColldier2);
+		if (result.isOverlapped) {
+			playerColldier->transform->Translate(result.distance * result.normal);
+		}
+
+		if (!IsGrounded()) {
+			UpdateGravity();
+			wasInAir = true;
+		}
+		else if (wasInAir) {
+			wasInAir = false;
+			velocity.y = -1.5f;
+		}
+	}
+
+	inline void OnDrawGizmos() override {
+#if DEBUG_GIZMOS
+		Gizmos::DrawWorldGrid(*camera);
+#endif
+
+#if DEBUG_GIZMOS
+		Gizmos::setColor(Color::green * 0.75f);
+		Gizmos::DrawPolygonWorld(*camera, playerColldier->vertices());
+		Gizmos::DrawPolygonWorld(*camera, groundColldier->vertices());
+		Gizmos::DrawPolygonWorld(*camera, groundColldier2->vertices());
+		Gizmos::DrawPolygonWorld(*camera, groundCheckCollider->vertices());
+#endif
+
+		text.Display(m_renderer, Vector2(20, Screen::height() - 20), Color::white);
+	}
+
+	inline void OnUserExit() override {
+		updateFPS.join();
+	}
+
+private:
+	inline void UpdateGravity() {
+		velocity.y += Physics2D::gravity().y * Time::deltaTime();
+	}
+
+	inline bool IsGrounded() {
+		bool result = groundCheckCollider->OverlapCollider(*groundColldier);
+		result |= groundCheckCollider->OverlapCollider(*groundColldier2);
+		return result;
+	}
+
+	inline void UpdateFPSText() {
+		using namespace std::literals::chrono_literals;
+
+		while (isRunning()) {
+			text.text = std::to_string(Time::frameRate());
+			std::this_thread::sleep_for(0.1s);
+		}
+	}
+
+	inline void CreatePlatform() {
+
+	}
+
+	inline void CameraControls(Camera2D& _camera) {
+		// Screen controls
+		if (Input::GetKeyDown(KeyCode::F11)) {
+			if (Screen::fullScreen()) {
+				Screen::SetFullScreenMode(FullScreenMode::Windowed);
+			}
+			else {
+				Screen::SetFullScreenMode(FullScreenMode::FullScreen);
+			}
+		}
+
+		// Camera controls
+		if (Input::GetKeyDown(KeyCode::P)) {
+			_camera.transform->setLocalPosition(Vector2::zero);
+			_camera.transform->setLocalRotation(0);
+		}
+
+		if (Input::GetKeyDown(KeyCode::O)) {
+			_camera.transform->setParent(nullptr);
+		}
+
+		if (Input::GetMouseButtonDown(MouseButton::Left)) {
+			lastMousePos = Input::mousePosition();
+			panning = true;
+		}
+		else if (Input::GetMouseButtonUp(MouseButton::Left)) {
+			panning = false;
+		}
+
+		if (Input::GetMouseButtonDown(MouseButton::Right)) {
+			lastMousePos = Input::mousePosition();
+			rotating = true;
+		}
+		else if (Input::GetMouseButtonUp(MouseButton::Right)) {
+			rotating = false;
+		}
+
+		// Update camera properties
+		if (panning) {
+			moveDirection = _camera.transform->InverseTransformDirection(lastMousePos - Input::mousePosition()) / _camera.pixelsPerUnit();
+			lastMousePos = Input::mousePosition();
+		}
+		if (rotating) {
+			targetAngle = Vector2::SignedAngle(Input::mousePosition().normalized(), lastMousePos.normalized());
+			lastMousePos = Input::mousePosition();
+		}
+
+		_camera.transform->Translate(moveDirection);
+		_camera.transform->Rotate(targetAngle * 2);
+		_camera.setSize(camera->size() - Input::mouseScroll().y * Time::deltaTime() * zoomSpeed);
+		_camera.RecalculateViewMatrix();
+	}
+};
 #pragma warning(default : 4244)
+#endif
+
+class PolygonDecompositionTest : public LMKEngine {
+private:
+	Scene scene1;
+
+	PolygonCollider2D* collider;
+
+public:
+	inline void OnUserStart() override {
+		auto& go = scene1.CreateGameObject("Object");
+
+		collider = go.AddComponent<PolygonCollider2D>();
+	}
+
+	inline void OnUserUpdate() override {
+
+	}
+
+	inline void OnUserFixedUpdate() override {
+		
+	}
+
+	inline void OnDrawGizmos() override {
+
+	}
+};
 
 #endif // !_TEST_ENGINES_H_

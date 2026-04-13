@@ -18,7 +18,7 @@
     </Filter>
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="Source.cpp">
+    <ClCompile Include="Main.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
@@ -59,7 +59,22 @@
     <ClInclude Include="LMK\LMK_uimdl.h">
       <Filter>Header Files\LMK</Filter>
     </ClInclude>
-    <ClInclude Include="LMK\LMK_observer.h">
+    <ClInclude Include="LMK\LMK_delegate.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="LMK\LMK_tilemap.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="LMK\LMK_layout.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="LMK\LMK_audio.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="LMK\LMK_animation.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="LMK\LMK_mathf.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

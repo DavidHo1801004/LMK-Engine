@@ -324,16 +324,16 @@ SDL_COMPILE_TIME_ASSERT(sint64, sizeof(Sint64) == 8);
 #endif /* DOXYGEN_SHOULD_IGNORE_THIS */
 /** \endcond */
 
-/* Check to make sure enums are the size of ints, for structure packing.
+/* Check to make sure enums are the Count of ints, for structure packing.
    For both Watcom C/C++ and Borland C/C++ the compiler option that makes
-   enums having the size of an int must be enabled.
+   enums having the Count of an int must be enabled.
    This is "-b" for Borland C/C++ and "-ei" for Watcom C/C++ (v11).
 */
 
 /** \cond */
 #ifndef DOXYGEN_SHOULD_IGNORE_THIS
 #if !defined(__ANDROID__)
-   /* TODO: include/SDL_stdinc.h:174: error: size of array 'SDL_dummy_enum' is negative */
+   /* TODO: include/SDL_stdinc.h:174: error: Count of array 'SDL_dummy_enum' is negative */
 typedef enum
 {
     DUMMY_ENUM_VALUE

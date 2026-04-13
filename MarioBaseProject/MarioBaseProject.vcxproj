@@ -164,20 +164,25 @@
     </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClCompile Include="Source.cpp" />
+    <ClCompile Include="Main.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="LMK\LMK.h" />
+    <ClInclude Include="LMK\LMK_animation.h" />
+    <ClInclude Include="LMK\LMK_audio.h" />
     <ClInclude Include="LMK\LMK_coremdl.h" />
     <ClInclude Include="LMK\LMK_engine.h" />
     <ClInclude Include="LMK\LMK_gameobj.h" />
     <ClInclude Include="LMK\LMK_input.h" />
-    <ClInclude Include="LMK\LMK_observer.h" />
+    <ClInclude Include="LMK\LMK_delegate.h" />
+    <ClInclude Include="LMK\LMK_layout.h" />
+    <ClInclude Include="LMK\LMK_mathf.h" />
     <ClInclude Include="LMK\LMK_physics2d.h" />
     <ClInclude Include="LMK\LMK_render2d.h" />
     <ClInclude Include="LMK\LMK_root.h" />
     <ClInclude Include="LMK\LMK_stdinc.h" />
     <ClInclude Include="LMK\LMK_systems.h" />
+    <ClInclude Include="LMK\LMK_tilemap.h" />
     <ClInclude Include="LMK\LMK_uimdl.h" />
     <ClInclude Include="TestEngines.h" />
   </ItemGroup>

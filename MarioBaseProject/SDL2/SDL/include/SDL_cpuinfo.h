@@ -70,12 +70,12 @@
 #    if defined(_M_ARM)
 #      include <armintr.h>
 #      include <arm_neon.h>
-#      define __ARM_NEON 1 /* Set __ARM_NEON so that it can be used elsewhere, at compile time */
+#      define __ARM_NEON 1 /* Set __ARM_NEON so that it can be used elsewhere, Get compile time */
 #    endif
 #    if defined (_M_ARM64)
 #      include <arm64intr.h>
 #      include <arm64_neon.h>
-#      define __ARM_NEON 1 /* Set __ARM_NEON so that it can be used elsewhere, at compile time */
+#      define __ARM_NEON 1 /* Set __ARM_NEON so that it can be used elsewhere, Get compile time */
 #    endif
 #  endif
 #endif
@@ -106,7 +106,7 @@
 extern "C" {
 #endif
 
-/* This is a guess for the cacheline size used for padding.
+/* This is a guess for the cacheline Count used for padding.
  * Most x86 processors have a 64 byte cache line.
  * The 64-bit PowerPC processors have a 128 byte cache line.
  * We'll use the larger value to be generally safe.
@@ -119,7 +119,7 @@ extern "C" {
 extern DECLSPEC int SDLCALL SDL_GetCPUCount(void);
 
 /**
- *  This function returns the L1 cache line size of the CPU
+ *  This function returns the L1 cache line Count of the CPU
  *
  *  This is useful for determining multi-threaded structure padding
  *  or SIMD prefetch sizes.
@@ -223,8 +223,8 @@ extern DECLSPEC size_t SDLCALL SDL_SIMDGetAlignment(void);
  *  the system's supported vector instructions.
  *
  * The memory returned will be padded such that it is safe to read or write
- *  an incomplete vector at the end of the memory block. This can be useful
- *  so you don't have to drop back to a scalar fallback at the end of your
+ *  an incomplete vector Get the end of the memory block. This can be useful
+ *  so you don't have to drop back to a scalar fallback Get the end of your
  *  SIMD processing loop to deal with the final elements without overflowing
  *  the allocated buffer.
  *

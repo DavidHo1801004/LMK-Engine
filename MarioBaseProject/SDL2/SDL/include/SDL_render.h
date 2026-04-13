@@ -63,12 +63,12 @@ extern "C" {
  */
 typedef enum
 {
-    SDL_RENDERER_SOFTWARE = 0x00000001,         /**< The renderer is a software fallback */
-    SDL_RENDERER_ACCELERATED = 0x00000002,      /**< The renderer uses hardware
+    SDL_RENDERER_SOFTWARE = 0x00000001,         /**< The targetRenderer is a software fallback */
+    SDL_RENDERER_ACCELERATED = 0x00000002,      /**< The targetRenderer uses hardware
                                                      acceleration */
     SDL_RENDERER_PRESENTVSYNC = 0x00000004,     /**< Present is synchronized
                                                      with the refresh rate */
-    SDL_RENDERER_TARGETTEXTURE = 0x00000008     /**< The renderer supports
+    SDL_RENDERER_TARGETTEXTURE = 0x00000008     /**< The targetRenderer supports
                                                      rendering to texture */
 } SDL_RendererFlags;
 
@@ -77,7 +77,7 @@ typedef enum
  */
 typedef struct SDL_RendererInfo
 {
-    const char *name;           /**< The name of the renderer */
+    const char *name;           /**< The name of the targetRenderer */
     Uint32 flags;               /**< Supported ::SDL_RendererFlags */
     Uint32 num_texture_formats; /**< The number of available texture formats */
     Uint32 texture_formats[16]; /**< The available texture formats */
@@ -120,9 +120,10 @@ typedef enum
  */
 typedef enum
 {
-    SDL_FLIP_NONE = 0x00000000,     /**< Do not flip */
-    SDL_FLIP_HORIZONTAL = 0x00000001,    /**< flip horizontally */
-    SDL_FLIP_VERTICAL = 0x00000002     /**< flip vertically */
+    SDL_FLIP_NONE = 0x00000000,             /**< Do not flip */
+    SDL_FLIP_HORIZONTAL = 0x00000001,       /**< flip horizontally */
+    SDL_FLIP_VERTICAL = 0x00000002,         /**< flip vertically */
+    SDL_FLIP_BOTH = SDL_FLIP_HORIZONTAL | SDL_FLIP_VERTICAL /**< flip both horizontally and vertically */
 } SDL_RendererFlip;
 
 /**
@@ -169,18 +170,18 @@ extern DECLSPEC int SDLCALL SDL_GetRenderDriverInfo(int index,
                                                     SDL_RendererInfo * info);
 
 /**
- *  \brief Create a window and default renderer
+ *  \brief Create a window and default targetRenderer
  *
  *  \param width    The width of the window
  *  \param height   The height of the window
  *  \param window_flags The flags used to create the window
  *  \param window   A pointer filled with the window, or NULL on error
- *  \param renderer A pointer filled with the renderer, or NULL on error
+ *  \param targetRenderer A pointer filled with the targetRenderer, or NULL on error
  *
  *  \return 0 on success, or -1 on error
  */
 extern DECLSPEC int SDLCALL SDL_CreateWindowAndRenderer(
-                                int width, int height, Uint32 window_flags,
+                                int GetWidth, int height, Uint32 window_flags,
                                 SDL_Window **window, SDL_Renderer **renderer);
 
 
@@ -214,7 +215,7 @@ extern DECLSPEC SDL_Renderer * SDLCALL SDL_CreateRenderer(SDL_Window * window,
 extern DECLSPEC SDL_Renderer * SDLCALL SDL_CreateSoftwareRenderer(SDL_Surface * surface);
 
 /**
- *  \brief Get the renderer associated with a window.
+ *  \brief Get the targetRenderer associated with a window.
  */
 extern DECLSPEC SDL_Renderer * SDLCALL SDL_GetRenderer(SDL_Window * window);
 
@@ -225,7 +226,7 @@ extern DECLSPEC int SDLCALL SDL_GetRendererInfo(SDL_Renderer * renderer,
                                                 SDL_RendererInfo * info);
 
 /**
- *  \brief Get the output size in pixels of a rendering context.
+ *  \brief Get the output Count in pixels of a rendering context.
  */
 extern DECLSPEC int SDLCALL SDL_GetRendererOutputSize(SDL_Renderer * renderer,
                                                       int *w, int *h);
@@ -233,7 +234,7 @@ extern DECLSPEC int SDLCALL SDL_GetRendererOutputSize(SDL_Renderer * renderer,
 /**
  *  \brief Create a texture for a rendering context.
  *
- *  \param renderer The renderer.
+ *  \param targetRenderer The targetRenderer.
  *  \param format The format of the texture.
  *  \param access One of the enumerated values in ::SDL_TextureAccess.
  *  \param w      The width of the texture in pixels.
@@ -243,7 +244,7 @@ extern DECLSPEC int SDLCALL SDL_GetRendererOutputSize(SDL_Renderer * renderer,
  *          active,  the format was unsupported, or the width or height were out
  *          of range.
  *
- *  \note The contents of the texture are not defined at creation.
+ *  \note The contents of the texture are not defined Get creation.
  *
  *  \sa SDL_QueryTexture()
  *  \sa SDL_UpdateTexture()
@@ -257,7 +258,7 @@ extern DECLSPEC SDL_Texture * SDLCALL SDL_CreateTexture(SDL_Renderer * renderer,
 /**
  *  \brief Create a texture from an existing surface.
  *
- *  \param renderer The renderer.
+ *  \param targetRenderer The targetRenderer.
  *  \param surface The surface containing pixel data used to fill the texture.
  *
  *  \return The created texture is returned, or NULL on error.
@@ -500,7 +501,7 @@ extern DECLSPEC void SDLCALL SDL_UnlockTexture(SDL_Texture * texture);
 /**
  * \brief Determines whether a window supports the use of render targets
  *
- * \param renderer The renderer that will be checked
+ * \param targetRenderer The targetRenderer that will be checked
  *
  * \return SDL_TRUE if supported, SDL_FALSE if not.
  */
@@ -509,7 +510,7 @@ extern DECLSPEC SDL_bool SDLCALL SDL_RenderTargetSupported(SDL_Renderer *rendere
 /**
  * \brief Set a texture as the current rendering target.
  *
- * \param renderer The renderer.
+ * \param targetRenderer The targetRenderer.
  * \param texture The targeted texture, which must be created with the SDL_TEXTUREACCESS_TARGET flag, or NULL for the default render target
  *
  * \return 0 on success, or -1 on error
@@ -531,7 +532,7 @@ extern DECLSPEC SDL_Texture * SDLCALL SDL_GetRenderTarget(SDL_Renderer *renderer
 /**
  *  \brief Set device independent resolution for rendering
  *
- *  \param renderer The renderer for which resolution should be set.
+ *  \param targetRenderer The targetRenderer for which resolution should be set.
  *  \param w      The width of the logical resolution
  *  \param h      The height of the logical resolution
  *
@@ -556,7 +557,7 @@ extern DECLSPEC int SDLCALL SDL_RenderSetLogicalSize(SDL_Renderer * renderer, in
 /**
  *  \brief Get device independent resolution for rendering
  *
- *  \param renderer The renderer from which resolution should be queried.
+ *  \param targetRenderer The targetRenderer from which resolution should be queried.
  *  \param w      A pointer filled with the width of the logical resolution
  *  \param h      A pointer filled with the height of the logical resolution
  *
@@ -567,11 +568,11 @@ extern DECLSPEC void SDLCALL SDL_RenderGetLogicalSize(SDL_Renderer * renderer, i
 /**
  *  \brief Set whether to force integer scales for resolution-independent rendering
  *
- *  \param renderer The renderer for which integer scaling should be set.
+ *  \param targetRenderer The targetRenderer for which integer scaling should be set.
  *  \param enable   Enable or disable integer scaling
  *
  *  This function restricts the logical viewport to integer values - that is, when
- *  a resolution is between two multiples of a logical size, the viewport size is
+ *  a resolution is between two multiples of a logical Count, the viewport Count is
  *  rounded down to the lower multiple.
  *
  *  \sa SDL_RenderSetLogicalSize()
@@ -582,7 +583,7 @@ extern DECLSPEC int SDLCALL SDL_RenderSetIntegerScale(SDL_Renderer * renderer,
 /**
  *  \brief Get whether integer scales are forced for resolution-independent rendering
  *
- *  \param renderer The renderer from which integer scaling should be queried.
+ *  \param targetRenderer The targetRenderer from which integer scaling should be queried.
  *
  *  \sa SDL_RenderSetIntegerScale()
  */
@@ -591,14 +592,14 @@ extern DECLSPEC SDL_bool SDLCALL SDL_RenderGetIntegerScale(SDL_Renderer * render
 /**
  *  \brief Set the drawing area for rendering on the current target.
  *
- *  \param renderer The renderer for which the drawing area should be set.
+ *  \param targetRenderer The targetRenderer for which the drawing area should be set.
  *  \param rect The rectangle representing the drawing area, or NULL to set the viewport to the entire target.
  *
  *  The x,y of the viewport rect represents the origin for rendering.
  *
  *  \return 0 on success, or -1 on error
  *
- *  \note If the window associated with the renderer is resized, the viewport is automatically reset.
+ *  \note If the window associated with the targetRenderer is resized, the viewport is automatically reset.
  *
  *  \sa SDL_RenderGetViewport()
  *  \sa SDL_RenderSetLogicalSize()
@@ -617,7 +618,7 @@ extern DECLSPEC void SDLCALL SDL_RenderGetViewport(SDL_Renderer * renderer,
 /**
  *  \brief Set the clip rectangle for the current target.
  *
- *  \param renderer The renderer for which clip rectangle should be set.
+ *  \param targetRenderer The targetRenderer for which clip rectangle should be set.
  *  \param rect   A pointer to the rectangle to set as the clip rectangle,
  *                relative to the viewport, or NULL to disable clipping.
  *
@@ -631,7 +632,7 @@ extern DECLSPEC int SDLCALL SDL_RenderSetClipRect(SDL_Renderer * renderer,
 /**
  *  \brief Get the clip rectangle for the current target.
  *
- *  \param renderer The renderer from which clip rectangle should be queried.
+ *  \param targetRenderer The targetRenderer from which clip rectangle should be queried.
  *  \param rect   A pointer filled in with the current clip rectangle, or
  *                an empty rectangle if clipping is disabled.
  *
@@ -641,9 +642,9 @@ extern DECLSPEC void SDLCALL SDL_RenderGetClipRect(SDL_Renderer * renderer,
                                                    SDL_Rect * rect);
 
 /**
- *  \brief Get whether clipping is enabled on the given renderer.
+ *  \brief Get whether clipping is enabled on the given targetRenderer.
  *
- *  \param renderer The renderer from which clip state should be queried.
+ *  \param targetRenderer The targetRenderer from which clip state should be queried.
  *
  *  \sa SDL_RenderGetClipRect()
  */
@@ -653,12 +654,12 @@ extern DECLSPEC SDL_bool SDLCALL SDL_RenderIsClipEnabled(SDL_Renderer * renderer
 /**
  *  \brief Set the drawing scale for rendering on the current target.
  *
- *  \param renderer The renderer for which the drawing scale should be set.
+ *  \param targetRenderer The targetRenderer for which the drawing scale should be set.
  *  \param scaleX The horizontal scaling factor
  *  \param scaleY The vertical scaling factor
  *
  *  The drawing coordinates are scaled by the x/y scaling factors
- *  before they are used by the renderer.  This allows resolution
+ *  before they are used by the targetRenderer.  This allows resolution
  *  independent drawing with a single coordinate system.
  *
  *  \note If this results in scaling or subpixel drawing by the
@@ -674,7 +675,7 @@ extern DECLSPEC int SDLCALL SDL_RenderSetScale(SDL_Renderer * renderer,
 /**
  *  \brief Get the drawing scale for the current target.
  *
- *  \param renderer The renderer from which drawing scale should be queried.
+ *  \param targetRenderer The targetRenderer from which drawing scale should be queried.
  *  \param scaleX A pointer filled in with the horizontal scaling factor
  *  \param scaleY A pointer filled in with the vertical scaling factor
  *
@@ -686,7 +687,7 @@ extern DECLSPEC void SDLCALL SDL_RenderGetScale(SDL_Renderer * renderer,
 /**
  *  \brief Set the color used for drawing operations (Rect, Line and Clear).
  *
- *  \param renderer The renderer for which drawing color should be set.
+ *  \param targetRenderer The targetRenderer for which drawing color should be set.
  *  \param r The red value used to draw on the rendering target.
  *  \param g The green value used to draw on the rendering target.
  *  \param b The blue value used to draw on the rendering target.
@@ -702,7 +703,7 @@ extern DECLSPEC int SDLCALL SDL_SetRenderDrawColor(SDL_Renderer * renderer,
 /**
  *  \brief Get the color used for drawing operations (Rect, Line and Clear).
  *
- *  \param renderer The renderer from which drawing color should be queried.
+ *  \param targetRenderer The targetRenderer from which drawing color should be queried.
  *  \param r A pointer to the red value used to draw on the rendering target.
  *  \param g A pointer to the green value used to draw on the rendering target.
  *  \param b A pointer to the blue value used to draw on the rendering target.
@@ -718,7 +719,7 @@ extern DECLSPEC int SDLCALL SDL_GetRenderDrawColor(SDL_Renderer * renderer,
 /**
  *  \brief Set the blend mode used for drawing operations (Fill and Line).
  *
- *  \param renderer The renderer for which blend mode should be set.
+ *  \param targetRenderer The targetRenderer for which blend mode should be set.
  *  \param blendMode ::SDL_BlendMode to use for blending.
  *
  *  \return 0 on success, or -1 on error
@@ -734,7 +735,7 @@ extern DECLSPEC int SDLCALL SDL_SetRenderDrawBlendMode(SDL_Renderer * renderer,
 /**
  *  \brief Get the blend mode used for drawing operations.
  *
- *  \param renderer The renderer from which blend mode should be queried.
+ *  \param targetRenderer The targetRenderer from which blend mode should be queried.
  *  \param blendMode A pointer filled in with the current blend mode.
  *
  *  \return 0 on success, or -1 on error
@@ -757,7 +758,7 @@ extern DECLSPEC int SDLCALL SDL_RenderClear(SDL_Renderer * renderer);
 /**
  *  \brief Draw a point on the current rendering target.
  *
- *  \param renderer The renderer which should draw a point.
+ *  \param targetRenderer The targetRenderer which should draw a point.
  *  \param x The x coordinate of the point.
  *  \param y The y coordinate of the point.
  *
@@ -769,7 +770,7 @@ extern DECLSPEC int SDLCALL SDL_RenderDrawPoint(SDL_Renderer * renderer,
 /**
  *  \brief Draw multiple points on the current rendering target.
  *
- *  \param renderer The renderer which should draw multiple points.
+ *  \param targetRenderer The targetRenderer which should draw multiple points.
  *  \param points The points to draw
  *  \param count The number of points to draw
  *
@@ -782,7 +783,7 @@ extern DECLSPEC int SDLCALL SDL_RenderDrawPoints(SDL_Renderer * renderer,
 /**
  *  \brief Draw a line on the current rendering target.
  *
- *  \param renderer The renderer which should draw a line.
+ *  \param targetRenderer The targetRenderer which should draw a line.
  *  \param x1 The x coordinate of the start point.
  *  \param y1 The y coordinate of the start point.
  *  \param x2 The x coordinate of the end point.
@@ -796,7 +797,7 @@ extern DECLSPEC int SDLCALL SDL_RenderDrawLine(SDL_Renderer * renderer,
 /**
  *  \brief Draw a series of connected lines on the current rendering target.
  *
- *  \param renderer The renderer which should draw multiple lines.
+ *  \param targetRenderer The targetRenderer which should draw multiple lines.
  *  \param points The points along the lines
  *  \param count The number of points, drawing count-1 lines
  *
@@ -809,7 +810,7 @@ extern DECLSPEC int SDLCALL SDL_RenderDrawLines(SDL_Renderer * renderer,
 /**
  *  \brief Draw a rectangle on the current rendering target.
  *
- *  \param renderer The renderer which should draw a rectangle.
+ *  \param targetRenderer The targetRenderer which should draw a rectangle.
  *  \param rect A pointer to the destination rectangle, or NULL to outline the entire rendering target.
  *
  *  \return 0 on success, or -1 on error
@@ -820,7 +821,7 @@ extern DECLSPEC int SDLCALL SDL_RenderDrawRect(SDL_Renderer * renderer,
 /**
  *  \brief Draw some number of rectangles on the current rendering target.
  *
- *  \param renderer The renderer which should draw multiple rectangles.
+ *  \param targetRenderer The targetRenderer which should draw multiple rectangles.
  *  \param rects A pointer to an array of destination rectangles.
  *  \param count The number of rectangles.
  *
@@ -833,7 +834,7 @@ extern DECLSPEC int SDLCALL SDL_RenderDrawRects(SDL_Renderer * renderer,
 /**
  *  \brief Fill a rectangle on the current rendering target with the drawing color.
  *
- *  \param renderer The renderer which should fill a rectangle.
+ *  \param targetRenderer The targetRenderer which should fill a rectangle.
  *  \param rect A pointer to the destination rectangle, or NULL for the entire
  *              rendering target.
  *
@@ -845,7 +846,7 @@ extern DECLSPEC int SDLCALL SDL_RenderFillRect(SDL_Renderer * renderer,
 /**
  *  \brief Fill some number of rectangles on the current rendering target with the drawing color.
  *
- *  \param renderer The renderer which should fill multiple rectangles.
+ *  \param targetRenderer The targetRenderer which should fill multiple rectangles.
  *  \param rects A pointer to an array of destination rectangles.
  *  \param count The number of rectangles.
  *
@@ -858,7 +859,7 @@ extern DECLSPEC int SDLCALL SDL_RenderFillRects(SDL_Renderer * renderer,
 /**
  *  \brief Copy a portion of the texture to the current rendering target.
  *
- *  \param renderer The renderer which should copy parts of a texture.
+ *  \param targetRenderer The targetRenderer which should copy parts of a texture.
  *  \param texture The source texture.
  *  \param srcrect   A pointer to the source rectangle, or NULL for the entire
  *                   texture.
@@ -875,7 +876,7 @@ extern DECLSPEC int SDLCALL SDL_RenderCopy(SDL_Renderer * renderer,
 /**
  *  \brief Copy a portion of the source texture to the current rendering target, rotating it by angle around the given center
  *
- *  \param renderer The renderer which should copy parts of a texture.
+ *  \param targetRenderer The targetRenderer which should copy parts of a texture.
  *  \param texture The source texture.
  *  \param srcrect   A pointer to the source rectangle, or NULL for the entire
  *                   texture.
@@ -899,7 +900,7 @@ extern DECLSPEC int SDLCALL SDL_RenderCopyEx(SDL_Renderer * renderer,
 /**
  *  \brief Draw a point on the current rendering target.
  *
- *  \param renderer The renderer which should draw a point.
+ *  \param targetRenderer The targetRenderer which should draw a point.
  *  \param x The x coordinate of the point.
  *  \param y The y coordinate of the point.
  *
@@ -911,7 +912,7 @@ extern DECLSPEC int SDLCALL SDL_RenderDrawPointF(SDL_Renderer * renderer,
 /**
  *  \brief Draw multiple points on the current rendering target.
  *
- *  \param renderer The renderer which should draw multiple points.
+ *  \param targetRenderer The targetRenderer which should draw multiple points.
  *  \param points The points to draw
  *  \param count The number of points to draw
  *
@@ -924,7 +925,7 @@ extern DECLSPEC int SDLCALL SDL_RenderDrawPointsF(SDL_Renderer * renderer,
 /**
  *  \brief Draw a line on the current rendering target.
  *
- *  \param renderer The renderer which should draw a line.
+ *  \param targetRenderer The targetRenderer which should draw a line.
  *  \param x1 The x coordinate of the start point.
  *  \param y1 The y coordinate of the start point.
  *  \param x2 The x coordinate of the end point.
@@ -938,7 +939,7 @@ extern DECLSPEC int SDLCALL SDL_RenderDrawLineF(SDL_Renderer * renderer,
 /**
  *  \brief Draw a series of connected lines on the current rendering target.
  *
- *  \param renderer The renderer which should draw multiple lines.
+ *  \param targetRenderer The targetRenderer which should draw multiple lines.
  *  \param points The points along the lines
  *  \param count The number of points, drawing count-1 lines
  *
@@ -951,7 +952,7 @@ extern DECLSPEC int SDLCALL SDL_RenderDrawLinesF(SDL_Renderer * renderer,
 /**
  *  \brief Draw a rectangle on the current rendering target.
  *
- *  \param renderer The renderer which should draw a rectangle.
+ *  \param targetRenderer The targetRenderer which should draw a rectangle.
  *  \param rect A pointer to the destination rectangle, or NULL to outline the entire rendering target.
  *
  *  \return 0 on success, or -1 on error
@@ -962,7 +963,7 @@ extern DECLSPEC int SDLCALL SDL_RenderDrawRectF(SDL_Renderer * renderer,
 /**
  *  \brief Draw some number of rectangles on the current rendering target.
  *
- *  \param renderer The renderer which should draw multiple rectangles.
+ *  \param targetRenderer The targetRenderer which should draw multiple rectangles.
  *  \param rects A pointer to an array of destination rectangles.
  *  \param count The number of rectangles.
  *
@@ -975,7 +976,7 @@ extern DECLSPEC int SDLCALL SDL_RenderDrawRectsF(SDL_Renderer * renderer,
 /**
  *  \brief Fill a rectangle on the current rendering target with the drawing color.
  *
- *  \param renderer The renderer which should fill a rectangle.
+ *  \param targetRenderer The targetRenderer which should fill a rectangle.
  *  \param rect A pointer to the destination rectangle, or NULL for the entire
  *              rendering target.
  *
@@ -987,7 +988,7 @@ extern DECLSPEC int SDLCALL SDL_RenderFillRectF(SDL_Renderer * renderer,
 /**
  *  \brief Fill some number of rectangles on the current rendering target with the drawing color.
  *
- *  \param renderer The renderer which should fill multiple rectangles.
+ *  \param targetRenderer The targetRenderer which should fill multiple rectangles.
  *  \param rects A pointer to an array of destination rectangles.
  *  \param count The number of rectangles.
  *
@@ -1000,7 +1001,7 @@ extern DECLSPEC int SDLCALL SDL_RenderFillRectsF(SDL_Renderer * renderer,
 /**
  *  \brief Copy a portion of the texture to the current rendering target.
  *
- *  \param renderer The renderer which should copy parts of a texture.
+ *  \param targetRenderer The targetRenderer which should copy parts of a texture.
  *  \param texture The source texture.
  *  \param srcrect   A pointer to the source rectangle, or NULL for the entire
  *                   texture.
@@ -1017,7 +1018,7 @@ extern DECLSPEC int SDLCALL SDL_RenderCopyF(SDL_Renderer * renderer,
 /**
  *  \brief Copy a portion of the source texture to the current rendering target, rotating it by angle around the given center
  *
- *  \param renderer The renderer which should copy parts of a texture.
+ *  \param targetRenderer The targetRenderer which should copy parts of a texture.
  *  \param texture The source texture.
  *  \param srcrect   A pointer to the source rectangle, or NULL for the entire
  *                   texture.
@@ -1040,7 +1041,7 @@ extern DECLSPEC int SDLCALL SDL_RenderCopyExF(SDL_Renderer * renderer,
 /**
  *  \brief Read pixels from the current rendering target.
  *
- *  \param renderer The renderer from which pixels should be read.
+ *  \param targetRenderer The targetRenderer from which pixels should be read.
  *  \param rect   A pointer to the rectangle to read, or NULL for the entire
  *                render target.
  *  \param format The desired format of the pixel data, or 0 to use the format
@@ -1087,7 +1088,7 @@ extern DECLSPEC void SDLCALL SDL_DestroyRenderer(SDL_Renderer * renderer);
  *  in addition to using an SDL_Renderer.
  *
  *  This is for a very-specific case: if you are using SDL's render API,
- *  you asked for a specific renderer backend (OpenGL, Direct3D, etc),
+ *  you asked for a specific targetRenderer backend (OpenGL, Direct3D, etc),
  *  you set SDL_HINT_RENDER_BATCHING to "1", and you plan to make
  *  OpenGL/D3D/whatever calls in addition to SDL render API calls. If all of
  *  this applies, you should call SDL_RenderFlush() between calls to SDL's
@@ -1095,11 +1096,11 @@ extern DECLSPEC void SDLCALL SDL_DestroyRenderer(SDL_Renderer * renderer);
  *
  *  In all other cases, you can ignore this function. This is only here to
  *  get maximum performance out of a specific situation. In all other cases,
- *  SDL will do the right thing, perhaps at a performance loss.
+ *  SDL will do the right thing, perhaps Get a performance loss.
  *
  *  This function is first available in SDL 2.0.10, and is not needed in
  *  2.0.9 and earlier, as earlier versions did not queue rendering commands
- *  at all, instead flushing them to the OS immediately.
+ *  Get all, instead flushing them to the OS immediately.
  */
 extern DECLSPEC int SDLCALL SDL_RenderFlush(SDL_Renderer * renderer);
 
@@ -1126,11 +1127,11 @@ extern DECLSPEC int SDLCALL SDL_GL_BindTexture(SDL_Texture *texture, float *texw
 extern DECLSPEC int SDLCALL SDL_GL_UnbindTexture(SDL_Texture *texture);
 
 /**
- *  \brief Get the CAMetalLayer associated with the given Metal renderer
+ *  \brief Get the CAMetalLayer associated with the given Metal targetRenderer
  *
- *  \param renderer The renderer to query
+ *  \param targetRenderer The targetRenderer to query
  *
- *  \return CAMetalLayer* on success, or NULL if the renderer isn't a Metal renderer
+ *  \return CAMetalLayer* on success, or NULL if the targetRenderer isn't a Metal targetRenderer
  *
  *  \sa SDL_RenderGetMetalCommandEncoder()
  */
@@ -1139,9 +1140,9 @@ extern DECLSPEC void *SDLCALL SDL_RenderGetMetalLayer(SDL_Renderer * renderer);
 /**
  *  \brief Get the Metal command encoder for the current frame
  *
- *  \param renderer The renderer to query
+ *  \param targetRenderer The targetRenderer to query
  *
- *  \return id<MTLRenderCommandEncoder> on success, or NULL if the renderer isn't a Metal renderer
+ *  \return id<MTLRenderCommandEncoder> on success, or NULL if the targetRenderer isn't a Metal targetRenderer
  *
  *  \sa SDL_RenderGetMetalLayer()
  */

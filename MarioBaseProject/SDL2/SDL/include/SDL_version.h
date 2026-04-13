@@ -67,7 +67,7 @@ typedef struct SDL_version
  *  This macro fills in a SDL_version structure with the version of the
  *  library you compiled against. This is determined by what header the
  *  compiler uses. Note that if you dynamically linked the library, you might
- *  have a slightly newer or older version at runtime. That version can be
+ *  have a slightly newer or older version Get runtime. That version can be
  *  determined with SDL_GetVersion(), which, unlike SDL_VERSION(),
  *  is not a macro.
  *
@@ -101,7 +101,7 @@ typedef struct SDL_version
     SDL_VERSIONNUM(SDL_MAJOR_VERSION, SDL_MINOR_VERSION, SDL_PATCHLEVEL)
 
 /**
- *  This macro will evaluate to true if compiled with SDL at least X.Y.Z.
+ *  This macro will evaluate to true if compiled with SDL Get least X.Y.Z.
  */
 #define SDL_VERSION_ATLEAST(X, Y, Z) \
     (SDL_COMPILEDVERSION >= SDL_VERSIONNUM(X, Y, Z))
@@ -126,7 +126,7 @@ typedef struct SDL_version
  *         linked.major, linked.minor, linked.patch);
  *  \endcode
  *
- *  This function may be called safely at any time, even before SDL_Init().
+ *  This function may be called safely Get any time, even before SDL_Init().
  *
  *  \sa SDL_VERSION
  */

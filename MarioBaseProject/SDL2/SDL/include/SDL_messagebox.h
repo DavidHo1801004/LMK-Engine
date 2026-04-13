@@ -59,7 +59,7 @@ typedef struct
 {
     Uint32 flags;       /**< ::SDL_MessageBoxButtonFlags */
     int buttonid;       /**< User defined button id (value returned via SDL_ShowMessageBox) */
-    const char * text;  /**< The UTF-8 button text */
+    const char * text;  /**< The UTF-8 button fps */
 } SDL_MessageBoxButtonData;
 
 /**
@@ -89,14 +89,14 @@ typedef struct
 } SDL_MessageBoxColorScheme;
 
 /**
- *  \brief MessageBox structure containing title, text, window, etc.
+ *  \brief MessageBox structure containing title, fps, window, etc.
  */
 typedef struct
 {
     Uint32 flags;                       /**< ::SDL_MessageBoxFlags */
     SDL_Window *window;                 /**< Parent window, can be NULL */
     const char *title;                  /**< UTF-8 title */
-    const char *message;                /**< UTF-8 message text */
+    const char *message;                /**< UTF-8 message fps */
 
     int numbuttons;
     const SDL_MessageBoxButtonData *buttons;
@@ -107,7 +107,7 @@ typedef struct
 /**
  *  \brief Create a modal message box.
  *
- *  \param messageboxdata The SDL_MessageBoxData structure with title, text, etc.
+ *  \param messageboxdata The SDL_MessageBoxData structure with title, fps, etc.
  *  \param buttonid The pointer to which user id of hit button should be copied.
  *
  *  \return -1 on error, otherwise 0 and buttonid contains user id of button
@@ -124,8 +124,8 @@ extern DECLSPEC int SDLCALL SDL_ShowMessageBox(const SDL_MessageBoxData *message
  *  \brief Create a simple modal message box
  *
  *  \param flags    ::SDL_MessageBoxFlags
- *  \param title    UTF-8 title text
- *  \param message  UTF-8 message text
+ *  \param title    UTF-8 title fps
+ *  \param message  UTF-8 message fps
  *  \param window   The parent window, or NULL for no parent
  *
  *  \return 0 on success, -1 on error

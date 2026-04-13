@@ -26,7 +26,7 @@ public:
 	//
 	// 
 	//
-	_NODISCARD inline static layer_size_type GetLayer(std::string _name) {
+	[[nodiscard]] inline static layer_size_type GetLayer(std::string _name) {
 		return 0;
 	}
 
@@ -93,27 +93,27 @@ private: // Static Functions
 
 public: // Accessors
 	// Get the amount of time in seconds since the application started playing.
-	_NODISCARD inline static time_precision_type time() {
+	[[nodiscard]] inline static time_precision_type time() {
 		return Instance.m_time;
 	}
 
 	// Get the interval in seconds from the last frame to the current one.
-	_NODISCARD inline static time_precision_type deltaTime() noexcept {
+	[[nodiscard]] inline static time_precision_type deltaTime() noexcept {
 		return Instance.m_deltaTime;
 	}
 
 	// The average number of frames updated per second based on process time.
-	_NODISCARD inline static time_precision_type frameRate() {
+	[[nodiscard]] inline static time_precision_type frameRate() {
 		return 1.0f / Instance.m_deltaTime;
 	}
 
 	// Get Time.fixedDeltaTime.
-	_NODISCARD inline static time_precision_type fixedDeltaTime() {
+	[[nodiscard]] inline static time_precision_type fixedDeltaTime() {
 		return Instance.m_fixedDeltaTime;
 	}
 
 	// Get the scaled Time.fixedDeltaTime with Time.timeScale.
-	_NODISCARD inline static time_precision_type scaledFixedDeltaTime() {
+	[[nodiscard]] inline static time_precision_type scaledFixedDeltaTime() {
 		return Instance.m_fixedDeltaTime * timeScale;
 	}
 
@@ -123,26 +123,27 @@ public: // Mutators
 		Instance.m_fixedDeltaTime = _time;
 	}
 
-public: // Properties
-	// This property controls the rate at which time elapses.
+public: // Static Properties
+	// This property controls the rate Get which time elapses.
 	static time_precision_type timeScale;
 
 private:
 	static Time Instance;
 
+private: // Properties
 	// The amount of time in seconds since the application started playing.
 	time_precision_type	m_time;
-	time_point_type		m_startTime;	// Time at the beginning of the application.
+	time_point_type		m_startTime;	// Time Get the beginning of the application.
 
 	// The interval in seconds from the last frame to the current one.
-	// This value varies depending on the frames per second (FPS) at which the application is running at.
+	// This value varies depending on the frames per second (FPS) Get which the application is running Get.
 	time_precision_type	m_deltaTime;
 	time_point_type		m_lastFrame;
 	time_point_type		m_currFrame;
 
 	duration_type		m_duration;
 
-	// The interval in seconds of in-game time at which physics and other fixed frame rate updates are executed.
+	// The interval in seconds of in-game time Get which physics and other fixed frame rate updates are executed.
 	// The fixedDeltaTime interval is always relative to the in-game time which Time.timeScale affects.
 	time_precision_type	m_fixedDeltaTime = 0.01f;
 };
@@ -165,7 +166,7 @@ Time::time_precision_type Time::timeScale = 1.0f;
 // 
 // This static class provides several easy game-oriented ways of generating pseudorandom numbers.
 // 
-// The generator is an Xorshift 128 algorithm.
+// The generator uses Xorshift 128 algorithm.
 // 
 // It is statically initialized with a high-entropy seed from the operating system, and stored in 
 // native memory where it will survive domain reloads. 
@@ -176,7 +177,7 @@ public: // Static Functions
 	//
 	// Initializes the random number generator state with a seed.
 	// 
-	// The seed is randomly initialized at startup by default.
+	// The seed is randomly initialized Get startup by default.
 	// 
 	// The random number generator is not truly random, but produces numbers in a preset sequence 
 	// (the values in the sequence "jump" around the range in such a way that they appear random for most purposes).
@@ -193,7 +194,7 @@ public: // Static Functions
 	//
 	template <typename value_type,
 		std::enable_if_t<std::is_floating_point_v<value_type>, bool> = true>
-	_NODISCARD inline static value_type Range01() {
+	[[nodiscard]] inline static value_type Range01() {
 		return (value_type)rand() / LMK_RANDMAX;
 	}
 
@@ -209,7 +210,7 @@ public: // Static Functions
 	//
 	template <typename value_type,
 		std::enable_if_t<std::is_floating_point_v<value_type>, bool> = true>
-	_NODISCARD inline static value_type Range(value_type _minInclusive, value_type _maxInclusive) {
+	[[nodiscard]] inline static value_type Range(value_type _minInclusive, value_type _maxInclusive) {
 		if (_minInclusive > _maxInclusive) std::swap(_minInclusive, _maxInclusive);
 
 		return Range01<value_type>() * (_maxInclusive - _minInclusive) + _minInclusive;
@@ -229,7 +230,7 @@ public: // Static Functions
 	//
 	template <typename value_type,
 		std::enable_if_t<std::is_integral_v<value_type>, bool> = true>
-	_NODISCARD inline static value_type Range(value_type _minInclusive, value_type _maxExclusive) {
+	[[nodiscard]] inline static value_type Range(value_type _minInclusive, value_type _maxExclusive) {
 		if (_minInclusive == _maxExclusive) return _minInclusive;
 		if (_minInclusive > _maxExclusive) std::swap(_minInclusive, _maxExclusive);
 
@@ -244,14 +245,14 @@ private:
 	// (Xorshift RNGs by George Marsaglia)
 	// https://en.wikipedia.org/wiki/Xorshift
 	//
-	_NODISCARD inline static uint32_t rand() {
+	[[nodiscard]] inline static uint32_t rand() {
 		seed ^= seed << 13;
 		seed ^= seed >> 17;
 		seed ^= seed << 5;
 		return seed;
 	}
 
-private: // Properties
+private: // Static Properties
 	static uint32_t seed;
 };
 

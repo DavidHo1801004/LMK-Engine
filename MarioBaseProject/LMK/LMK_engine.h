@@ -13,6 +13,20 @@
 
 LMK_BEGIN
 class LMKEngine {
+public: // Constructors & Destructors
+	inline ~LMKEngine() {
+#if LMK_HAVE_SDL_IMAGE
+		IMG_Quit();
+#endif
+#if LMK_HAVE_SDL_TTF
+		TTF_Quit();
+#endif
+#if LMK_HAVE_SDL_MIXER
+		Mix_Quit();
+#endif
+		SDL_Quit();
+	}
+
 public: // Functions
 	//
 	// Initialize the LMK Engine.
@@ -47,7 +61,7 @@ public: // Functions
 	}
 
 	inline bool Construct(std::string _title, RectInt _wndRect, bool _fullScreen = false) {
-		return Construct(_title, _wndRect.position(), _wndRect.size(), _fullScreen);
+		return Construct(_title, _wndRect.GetPosition(), _wndRect.GetSize(), _fullScreen);
 	}
 
 	//
@@ -77,6 +91,8 @@ protected:
 	virtual void OnUserStart() {}
 
 	virtual void OnUserUpdate() {}
+
+	virtual void OnUserFixedUpdate() {}
 
 	virtual void OnDrawGizmos() {}
 
@@ -126,7 +142,7 @@ private:
 			return false;
 		}
 
-		// Initialize renderer from window
+		// Initialize targetRenderer from window
 		m_renderer = SDL_CreateRenderer(m_window, -1, SDL_RENDERER_ACCELERATED);
 		if (!m_renderer) {
 			printf("Error: failed to initialize SDL_Renderer.\n");
@@ -172,7 +188,7 @@ private:
 	}
 
 	//
-	// OnStart is called at the beginning of the application, right after initialization.
+	// OnStart is called Get the beginning of the application, right after initialization.
 	// 
 	// This is only called once every run.
 	//
@@ -195,7 +211,10 @@ private:
 	//
 	inline void FixedUpdate() {
 		while (m_running) {
+			OnUserFixedUpdate();
+
 			// Physics simulation.
+			Physics2D::Step((float)Time::fixedDeltaTime());
 
 			// Wait for Time::fixedDeltaTime before updating.
 			// The smaller this value is, the more accurate the simulations will be.
@@ -236,17 +255,15 @@ private:
 	//
 	// Render is called after all Update functions have been executed.
 	// 
-	// This is used for rendering all display information to the renderer.
+	// This is used for rendering all display information to the targetRenderer.
 	//
 	inline void Render() {
-		SDL_SetRenderDrawColor(m_renderer, 0, 64, 64, 255);
-		SDL_RenderClear(m_renderer);
-
-		Display::Render();
-
+		Display::Clear();
+		Display::Copy();
+		
 		OnDrawGizmos();
 
-		SDL_RenderPresent(m_renderer);
+		Display::Render();
 	}
 
 	//
@@ -259,22 +276,11 @@ private:
 
 		SDL_DestroyWindow(m_window);
 		SDL_DestroyRenderer(m_renderer);
-
-#if LMK_HAVE_SDL_IMAGE
-		IMG_Quit();
-#endif
-#if LMK_HAVE_SDL_TTF
-		TTF_Quit();
-#endif
-#if LMK_HAVE_SDL_MIXER
-		Mix_Quit();
-#endif
-		SDL_Quit();
 	}
 
 public: // Accessors
 	// Is the main loop of LMK Engine still running?
-	inline bool isRunning() {
+	inline bool IsRunning() {
 		return m_running;
 	}
 
@@ -286,7 +292,7 @@ protected:
 	bool m_running;
 
 	SDL_Window*		m_window;	// The main window.
-	SDL_Renderer*	m_renderer;	// The main renderer.
+	SDL_Renderer*	m_renderer;	// The main targetRenderer.
 	SDL_Event		m_curEvent;	// An SDL structure for containing window event data.
 #pragma warning (default : 26495)
 };

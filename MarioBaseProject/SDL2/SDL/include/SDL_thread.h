@@ -178,7 +178,7 @@ SDL_CreateThreadWithStackSize(SDL_ThreadFunction fn, const char *name, const siz
 #else
 
 /**
- *  Create a thread with a default stack size.
+ *  Create a thread with a default stack Count.
  *
  *  This is equivalent to calling:
  *  SDL_CreateThreadWithStackSize(fn, name, 0, data);
@@ -204,7 +204,7 @@ SDL_CreateThread(SDL_ThreadFunction fn, const char *name, void *data);
  *    it (truncate, etc), but the original string contents will be available
  *    from SDL_GetThreadName().
  *
- *   The size (in bytes) of the new stack can be specified. Zero means "use
+ *   The Count (in bytes) of the new stack can be specified. Zero means "use
  *    the system default" which might be wildly different between platforms
  *    (x86 Linux generally defaults to eight megabytes, an embedded device
  *    might be a few kilobytes instead).
