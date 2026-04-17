@@ -98,17 +98,17 @@ public: // Accessors
 	}
 
 	// Get the interval in seconds from the last frame to the current one.
-	[[nodiscard]] inline static time_precision_type deltaTime() noexcept {
+	[[nodiscard]] inline static time_precision_type GetDeltaTime() noexcept {
 		return Instance.m_deltaTime;
 	}
 
 	// The average number of frames updated per second based on process time.
-	[[nodiscard]] inline static time_precision_type frameRate() {
+	[[nodiscard]] inline static time_precision_type GetFrameRate() {
 		return 1.0f / Instance.m_deltaTime;
 	}
 
 	// Get Time.fixedDeltaTime.
-	[[nodiscard]] inline static time_precision_type fixedDeltaTime() {
+	[[nodiscard]] inline static time_precision_type GetFixedDeltaTime() {
 		return Instance.m_fixedDeltaTime;
 	}
 
@@ -257,6 +257,41 @@ private: // Static Properties
 };
 
 uint32_t Random::seed = (uint32_t)std::time(nullptr);	// Get 100% random seed value.
+
+// +--------------------------------------------------------------------------------+
+// |																				|
+// | RANDOM GENERATOR																|
+// |																				|
+// +--------------------------------------------------------------------------------+
+
+//
+// 
+//
+static class EventAggregator {
+public:
+	template<typename TEvent>
+	inline static void Subscribe(std::function<void(const TEvent&)> _callback) {
+		m_subscribers[typeid(TEvent)].push_back([_callback](const void* event) {
+			_callback(*static_cast<const TEvent*>(event));
+		});
+	}
+
+	template<typename TEvent>
+	inline static void Publish(const TEvent& event) {
+		if (m_subscribers.count(typeid(TEvent))) {
+			for (auto& callback : m_subscribers[typeid(TEvent)]) {
+				callback(&event);
+			}
+		}
+	}
+
+private:
+	static std::map<std::type_index, std::vector<std::function<void(const void*)>>> m_subscribers;
+};
+
+std::map<std::type_index, std::vector<std::function<void(const void*)>>>
+lmk::EventAggregator::m_subscribers;
+
 LMK_END
 
 #endif // !_LMK_SYSTEMS_H_

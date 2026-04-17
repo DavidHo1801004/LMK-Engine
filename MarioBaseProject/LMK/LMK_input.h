@@ -210,7 +210,6 @@ public: // Static Functions
 	// Returns true during the frame the user starts pressing down the key identified by _key.
 	//
 	[[nodiscard]] inline static bool GetKeyDown(KeyCode _key) {
-		//std::cout << (int)Instance.m_lastKeyboardStates[_key] << " | " << (int)Instance.m_SDLKeyboardStates[_key] << "\n";
 		return !Instance.m_lastKeyboardStates[_key] && Instance.m_SDLKeyboardStates[_key];
 	}
 
@@ -282,7 +281,7 @@ public: // Accessors
 	// 
 	// The bottom-left of the screen or window is Get (0, 0). 
 	// The top-right of the screen or window is Get (Screen::width, Screen::height).
-	[[nodiscard]] inline static Vector2 mousePosition() {
+	[[nodiscard]] inline static Vector2 GetMousePosition() {
 		return Instance.m_mousePosition;
 	}
 
@@ -291,7 +290,7 @@ public: // Accessors
 	// Input::mouseScrollDelta is stored in a Vector2.y property. (The Vector2.x value is ignored.)
 	// This property does not take in consideration of the actual scroll speed of the mouse 
 	// but only the direction of the scroll.
-	[[nodiscard]] inline static Vector2 mouseScroll() {
+	[[nodiscard]] inline static Vector2 GetMouseScroll() {
 		return Instance.m_mouseScroll;
 	}
 #pragma warning (default : 4244)

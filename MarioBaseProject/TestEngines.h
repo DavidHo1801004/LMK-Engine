@@ -2,7 +2,7 @@
 #define _TEST_ENGINES_H_
 
 #define LMK_INCLUDE_ALL
-#include "LMK/LMK.h"
+#include "LMK.h"
 
 using namespace lmk;
 
@@ -45,9 +45,9 @@ public:
 
 	inline void OnUserUpdate() override {
 		if (Input::GetKeyDown(KeyCode::F11)) {
-			std::cout << Screen::width() << " : " << Screen::height() << "\n";
+			std::cout << Screen::GetWidth() << " : " << Screen::GetHeight() << "\n";
 
-			if (Screen::fullScreen()) {
+			if (Screen::IsFullScreen()) {
 				Screen::SetFullScreenMode(FullScreenMode::Windowed);
 			}
 			else {
@@ -57,16 +57,16 @@ public:
 
 		// Camera controls
 		if (Input::GetKeyDown(KeyCode::P)) {
-			camera.transform->setLocalPosition(Vector2::zero);
-			camera.transform->setLocalRotation(0);
+			camera.transform->SetLocalPosition(Vector2::zero);
+			camera.transform->SetLocalRotation(0);
 		}
 
 		if (Input::GetKeyDown(KeyCode::O)) {
-			camera.transform->setParent(nullptr);
+			camera.transform->SetParent(nullptr);
 		}
 
 		if (Input::GetMouseButtonDown(MouseButton::Middle)) {
-			lastMousePos = Input::mousePosition();
+			lastMousePos = Input::GetMousePosition();
 			panning = true;
 		}
 		else if (Input::GetMouseButtonUp(MouseButton::Middle)) {
@@ -74,7 +74,7 @@ public:
 		}
 
 		if (Input::GetMouseButtonDown(MouseButton::Right)) {
-			lastMousePos = Input::mousePosition();
+			lastMousePos = Input::GetMousePosition();
 			rotating = true;
 		}
 		else if (Input::GetMouseButtonUp(MouseButton::Right)) {
@@ -83,17 +83,17 @@ public:
 
 		// Update camera properties
 		if (panning) {
-			moveDirection = camera.transform->InverseTransformDirection(lastMousePos - Input::mousePosition()) / camera.pixelsPerUnit();
-			lastMousePos = Input::mousePosition();
+			moveDirection = camera.transform->InverseTransformDirection(lastMousePos - Input::GetMousePosition()) / camera.GetPixelsPerUnit();
+			lastMousePos = Input::GetMousePosition();
 		}
 		if (rotating) {
-			targetAngle = Vector2::SignedAngle(Input::mousePosition().normalized(), lastMousePos.normalized());
-			lastMousePos = Input::mousePosition();
+			targetAngle = Vector2::SignedAngle(Input::GetMousePosition().GetNormalized(), lastMousePos.GetNormalized());
+			lastMousePos = Input::GetMousePosition();
 		}
 
-		camera.setSize(camera.size() - Input::mouseScroll().y * Time::deltaTime() * zoomSpeed);
-		camera.transform->setLocalPosition(camera.transform->localPosition() + moveDirection);
-		camera.transform->setLocalRotation(camera.transform->localRotation() + targetAngle * 2);
+		camera.SetSize(camera.GetSize() - Input::mouseScroll().y * Time::deltaTime() * zoomSpeed);
+		camera.transform->SetLocalPosition(camera.transform->GetLocalPosition() + moveDirection);
+		camera.transform->SetLocalRotation(camera.transform->GetLocalRotation() + targetAngle * 2);
 		camera.RecalculateViewMatrix();
 	}
 
@@ -103,9 +103,9 @@ public:
 		text.Display(m_renderer, Vector2Int(30, 30), Color::yellow);
 	}
 };
+#endif
 
-
-
+#if false
 class RigidbodyTest : public LMKEngine {
 private: // Properties
 	TTFont font;
@@ -140,16 +140,16 @@ public: // Functions
 	inline void OnUserUpdate() override {
 		// Camera controls
 		if (Input::GetKeyDown(KeyCode::P)) {
-			camera.transform->setPosition(Vector2::zero);
-			camera.transform->setRotation(0);
+			camera.transform->SetPosition(Vector2::zero);
+			camera.transform->SetRotation(0);
 		}
 
 		if (Input::GetKeyDown(KeyCode::O)) {
-			camera.transform->setParent(nullptr);
+			camera.transform->SetParent(nullptr);
 		}
 
 		if (Input::GetMouseButtonDown(MouseButton::Middle)) {
-			lastMousePos = Input::mousePosition();
+			lastMousePos = Input::GetMousePosition();
 			panning = true;
 		}
 		else if (Input::GetMouseButtonUp(MouseButton::Middle)) {
@@ -157,7 +157,7 @@ public: // Functions
 		}
 
 		if (Input::GetMouseButtonDown(MouseButton::Right)) {
-			lastMousePos = Input::mousePosition();
+			lastMousePos = Input::GetMousePosition();
 			rotating = true;
 		}
 		else if (Input::GetMouseButtonUp(MouseButton::Right)) {
@@ -166,23 +166,23 @@ public: // Functions
 
 		// Update camera properties
 		if (panning) {
-			moveDirection = camera.transform->InverseTransformDirection(lastMousePos - Input::mousePosition()) / camera.pixelsPerUnit();
-			lastMousePos = Input::mousePosition();
+			moveDirection = camera.transform->InverseTransformDirection(lastMousePos - Input::GetMousePosition()) / camera.GetPixelsPerUnit();
+			lastMousePos = Input::GetMousePosition();
 		}
 		if (rotating && !lockRotation) {
-			targetAngle = Vector2::SignedAngle(Input::mousePosition().normalized(), lastMousePos.normalized());
-			lastMousePos = Input::mousePosition();
+			targetAngle = Vector2::SignedAngle(Input::GetMousePosition().GetNormalized(), lastMousePos.GetNormalized());
+			lastMousePos = Input::GetMousePosition();
 		}
 
-		camera.setSize(camera.size() - (camera.size() * Input::mouseScroll().y * Time::deltaTime() * zoomSpeed));
+		camera.SetSize(camera.GetSize() - (camera.GetSize() * Input::GetMouseScroll().y * Time::GetDeltaTime() * zoomSpeed));
 
-		camera.transform->setLocalPosition(camera.transform->localPosition() + moveDirection);
-		camera.transform->setLocalRotation(camera.transform->localRotation() + targetAngle * 2);
+		camera.transform->SetLocalPosition(camera.transform->GetLocalPosition() + moveDirection);
+		camera.transform->SetLocalRotation(camera.transform->GetLocalRotation() + targetAngle * 2);
 		camera.RecalculateViewMatrix();
 
 		if (Input::GetMouseButtonDown(MouseButton::Left)) {
 			staticBodies.push_back(CreateCollider(
-				camera.ScreenToWorldPoint(Input::mousePosition()), 
+				camera.ScreenToWorldPoint(Input::GetMousePosition()), 
 				Random::Range(0.0f, 360.0f),
 				Vector2::one,
 				Random::Range(3, 6)));
@@ -190,7 +190,7 @@ public: // Functions
 
 		if (Input::GetMouseButtonDown(MouseButton::Right)) {
 			dynamicBodies.push_back(CreateCollider(
-				camera.ScreenToWorldPoint(Input::mousePosition()),
+				camera.ScreenToWorldPoint(Input::GetMousePosition()),
 				Random::Range(0.0f, 360.0f),
 				Vector2::one,
 				Random::Range(3, 6)));
@@ -211,19 +211,19 @@ public: // Functions
 		// Display colliders
 		for (size_t i = 0; i < dynamicBodies.size(); i++) {
 			if (overlap[i]) {
-				Gizmos::setColor(Color::red);
+				Gizmos::SetColor(Color::red);
 			}
 			else {
-				Gizmos::setColor(Color::white);
+				Gizmos::SetColor(Color::white);
 			}
 			std::vector<Vector2> transformedVertices;
-			for (auto vertex : dynamicBodies[i]->vertices()) {
+			for (auto vertex : dynamicBodies[i]->) {
 				transformedVertices.push_back(camera.WorldToScreenPoint(vertex));
 			}
 			Gizmos::DrawPolygon(transformedVertices);
 		}
 
-		Gizmos::setColor(Color::yellow);
+		Gizmos::SetColor(Color::yellow);
 		for (auto body : staticBodies) {
 			std::vector<Vector2> transformedVertices;
 			for (auto vertex : body->vertices()) {
@@ -265,7 +265,7 @@ private:
 
 		while (isRunning())
 		{
-			text.text = "FPS: " + std::to_string(Time::frameRate());
+			text.text = "FPS: " + std::to_string(Time::GetFrameRate());
 			std::this_thread::sleep_for(0.15s);
 		}
 	}
@@ -312,7 +312,7 @@ protected: // Functions
 		if (count == 10) {
 			count = 0;
 			std::stringstream ss;
-			ss << std::fixed << std::setprecision(2) << Time::frameRate();
+			ss << std::fixed << std::setprecision(2) << Time::GetFrameRate();
 			fpsText.text = "FPS: " + ss.str();
 		}
 	}
@@ -330,9 +330,9 @@ private:
 		font.LoadFont("Assets/Fonts/visitor2.ttf", 40);
 	}
 };
+#endif
 
-
-
+#if false
 #define TEST_CLOSEST 0
 #define TEST_PROJECTION 0
 #define TEST_DISTANCE 1
@@ -385,16 +385,16 @@ public: // Functions
 	inline void OnUserUpdate() override {
 		// Camera controls
 		if (Input::GetKeyDown(KeyCode::P)) {
-			camera.transform->setPosition(Vector2::zero);
-			camera.transform->setRotation(0);
+			camera.transform->SetPosition(Vector2::zero);
+			camera.transform->SetRotation(0);
 		}
 
 		if (Input::GetKeyDown(KeyCode::O)) {
-			camera.transform->setParent(nullptr);
+			camera.transform->SetParent(nullptr);
 		}
 
 		if (Input::GetMouseButtonDown(MouseButton::Middle)) {
-			lastMousePos = Input::mousePosition();
+			lastMousePos = Input::GetMousePosition();
 			panning = true;
 		}
 		else if (Input::GetMouseButtonUp(MouseButton::Middle)) {
@@ -402,7 +402,7 @@ public: // Functions
 		}
 
 		if (Input::GetMouseButtonDown(MouseButton::Right)) {
-			lastMousePos = Input::mousePosition();
+			lastMousePos = Input::GetMousePosition();
 			rotating = true;
 		}
 		else if (Input::GetMouseButtonUp(MouseButton::Right)) {
@@ -415,28 +415,28 @@ public: // Functions
 
 		// Update camera properties
 		if (panning) {
-			moveDirection = camera.transform->InverseTransformDirection(lastMousePos - Input::mousePosition()) / camera.pixelsPerUnit();
-			lastMousePos = Input::mousePosition();
+			moveDirection = camera.transform->InverseTransformDirection(lastMousePos - Input::GetMousePosition()) / camera.GetPixelsPerUnit();
+			lastMousePos = Input::GetMousePosition();
 		}
 		if (rotating && !lockRotation) {
-			targetAngle = Vector2::SignedAngle(Input::mousePosition().normalized(), lastMousePos.normalized());
-			lastMousePos = Input::mousePosition();
+			targetAngle = Vector2::SignedAngle(Input::GetMousePosition().GetNormalized(), lastMousePos.GetNormalized());
+			lastMousePos = Input::GetMousePosition();
 		}
 
-		camera.setSize(camera.size() - (camera.size() * Input::mouseScroll().y * Time::deltaTime() * zoomSpeed));
+		camera.SetSize(camera.GetSize() - (camera.GetSize() * Input::GetMouseScroll().y * Time::GetDeltaTime() * zoomSpeed));
 
 		camera.transform->Translate(moveDirection);
 		camera.transform->Rotate(targetAngle * 2);
 		camera.RecalculateViewMatrix();
 
 		// Get mouse world position
-		mouseWorldPos = camera.ScreenToWorldPoint(Input::mousePosition());
-		projAxis = (mouseWorldPos - Vector2::zero).normalized();
+		mouseWorldPos = camera.ScreenToWorldPoint(Input::GetMousePosition());
+		projAxis = (mouseWorldPos - Vector2::zero).GetNormalized();
 
 		// Generate colliders
 		if (Input::GetMouseButtonDown(MouseButton::Left)) {
 			staticBodies.push_back(CreateCollider(
-				camera.ScreenToWorldPoint(Input::mousePosition()),
+				camera.ScreenToWorldPoint(Input::GetMousePosition()),
 				Random::Range(0.0f, 360.0f),
 				Vector2::one,
 				Random::Range(3, 6)));
@@ -480,8 +480,8 @@ public: // Functions
 				staticBodies[i]->RecalculateVertices();
 			}
 			else {
-				movementTrace[i].push_back(staticBodies[i]->transform->position());
-				staticBodies[i]->transform->Translate(distances[i].distance * distances[i].normal * Time::deltaTime());
+				movementTrace[i].push_back(staticBodies[i]->transform->GetPosition());
+				staticBodies[i]->transform->Translate(distances[i].distance * distances[i].normal * Time::GetDeltaTime());
 				staticBodies[i]->RecalculateVertices();
 			}
 		}
@@ -492,34 +492,34 @@ public: // Functions
 
 #if TEST_DISTANCE
 		// Display center collider
-		Gizmos::setColor(Color::yellow);
+		Gizmos::SetColor(Color::yellow);
 		Gizmos::DrawPolygonWorld(camera, centerCollider->vertices());
 #endif
 
 		// Display colliders
 		for (size_t i = 0; i < staticBodies.size(); i++) {
 			if (overlapMouse[i]) {
-				Gizmos::setColor(Color::red);
+				Gizmos::SetColor(Color::red);
 			}
 			else {
-				Gizmos::setColor(Color::white);
+				Gizmos::SetColor(Color::white);
 			}
 			Gizmos::DrawPolygonWorld(camera, staticBodies[i]->vertices());
 
 #if TEST_CLOSEST
-			Gizmos::setColor(Color::white);
+			Gizmos::SetColor(Color::white);
 			Gizmos::DrawLineWorld(camera, mouseWorldPos, closest[i]);
-			Gizmos::setColor(Color::cyan);
+			Gizmos::SetColor(Color::cyan);
 			Gizmos::DrawRectWorld(camera, closest[i], Vector2(0.1f, 0.1f));
 #endif
 #if TEST_PROJECTION
 			// Display polygon projection
 			Vector2 minProj = projections[i].minDis * projAxis;
 			Vector2 maxProj = projections[i].maxDis * projAxis;
-			Gizmos::setColor(Color::cyan);
+			Gizmos::SetColor(Color::cyan);
 			Gizmos::DrawLineWorld(camera, projections[i].minPoint, minProj);
 			Gizmos::DrawLineWorld(camera, projections[i].maxPoint, maxProj);
-			Gizmos::setColor(Color::magenta);
+			Gizmos::SetColor(Color::magenta);
 			Gizmos::DrawRectWorld(camera, projections[i].minPoint, Vector2(0.1f, 0.1f));
 			Gizmos::DrawRectWorld(camera, projections[i].maxPoint, Vector2(0.1f, 0.1f));
 			Gizmos::DrawRectWorld(camera, minProj, Vector2(0.1f, 0.1f));
@@ -527,19 +527,19 @@ public: // Functions
 #endif
 #if TEST_DISTANCE
 			if (distances[i].isOverlapped) {
-				Gizmos::setColor(Color::red);
+				Gizmos::SetColor(Color::red);
 			}
 			else {
-				Gizmos::setColor(Color::green);
+				Gizmos::SetColor(Color::green);
 			}
 			Gizmos::DrawLineWorld(camera, distances[i].pointA, distances[i].pointB);
-			Gizmos::setColor(Color::cyan);
+			Gizmos::SetColor(Color::cyan);
 			Gizmos::DrawRectWorld(camera, distances[i].pointA, Vector2(0.1f, 0.1f));
-			Gizmos::setColor(Color::magenta);
+			Gizmos::SetColor(Color::magenta);
 			Gizmos::DrawRectWorld(camera, distances[i].pointB, Vector2(0.15f, 0.15f));
 #endif
 #if TEST_MOVEMENT
-			Gizmos::setColor(Color::white);
+			Gizmos::SetColor(Color::white);
 			for (auto point : movementTrace[i]) {
 				Gizmos::DrawRect(camera.WorldToScreenPoint(point), Vector2(2, 2));
 			}
@@ -548,7 +548,7 @@ public: // Functions
 
 		// Display projecting axis
 #if TEST_PROJECTION
-		Gizmos::setColor(Color::yellow);
+		Gizmos::SetColor(Color::yellow);
 		Gizmos::DrawLineWorld(camera, projAxis * -100, projAxis * 100);
 #endif
 
@@ -563,7 +563,8 @@ public: // Functions
 	}
 
 private:
-	[[nodiscard]] inline std::unique_ptr<PolygonCollider2D> CreateCollider(Vector2 _position, float _rotation, Vector2 _scale, size_t _edges) const {
+	[[nodiscard]] 
+	inline std::unique_ptr<PolygonCollider2D> CreateCollider(Vector2 _position, float _rotation, Vector2 _scale, size_t _edges) const {
 		auto collider = std::make_unique<PolygonCollider2D>(CreatePolygon(_edges, 2));
 		collider->transform = new Transform(_position, _rotation, _scale);
 		collider->RecalculateVertices();
@@ -585,16 +586,16 @@ private:
 	inline void UpdateText() {
 		using namespace std::literals::chrono_literals;
 
-		while (isRunning())
+		while (IsRunning())
 		{
-			fps.text = "FPS: " + std::to_string(Time::frameRate());
+			fps.text = "FPS: " + std::to_string(Time::GetFrameRate());
 			std::this_thread::sleep_for(0.15s);
 		}
 	}
 };
+#endif
 
-
-
+#if false
 #define TEST_MINKOWSKI 0
 #define TEST_BOUND 0
 class GJKTest : public LMKEngine {
@@ -620,7 +621,7 @@ private: // Properties
 	std::unique_ptr<PolygonCollider2D> polyCollider;
 	bool resolving;
 
-	ColliderDistance2D gjkResult;
+	ColliderDistance2D* gjkResult;
 
 	// GJK
 	std::vector<Vector2> supports;
@@ -644,7 +645,7 @@ public: // Functions
 		controllerCollider = std::make_unique<BoxCollider2D>();
 		controllerCollider->transform = new Transform();
 		controllerCollider->transform->name = "Box Collider";
-		controllerCollider->transform->setPosition(Vector2(0.5f, 1.5f));
+		controllerCollider->transform->SetPosition(Vector2(0.5f, 1.5f));
 		controllerCollider->RecalculateVertices();
 
 		polyCollider = CreateCollider(Vector2(1.5f, 0.5f), 0, Vector2::one, 5);
@@ -664,7 +665,7 @@ public: // Functions
 		}
 
 		if (Input::GetMouseButtonDown(MouseButton::Middle)) {
-			lastMousePos = Input::mousePosition();
+			lastMousePos = Input::GetMousePosition();
 			panning = true;
 		}
 		else if (Input::GetMouseButtonUp(MouseButton::Middle)) {
@@ -672,7 +673,7 @@ public: // Functions
 		}
 
 		if (Input::GetMouseButtonDown(MouseButton::Right)) {
-			lastMousePos = Input::mousePosition();
+			lastMousePos = Input::GetMousePosition();
 			rotating = true;
 		}
 		else if (Input::GetMouseButtonUp(MouseButton::Right)) {
@@ -685,15 +686,15 @@ public: // Functions
 
 		// Update camera properties
 		if (panning) {
-			moveDirection = camera.transform->InverseTransformDirection(lastMousePos - Input::mousePosition()) / camera.pixelsPerUnit();
-			lastMousePos = Input::mousePosition();
+			moveDirection = camera.transform->InverseTransformDirection(lastMousePos - Input::GetMousePosition()) / camera.pixelsPerUnit();
+			lastMousePos = Input::GetMousePosition();
 		}
 		if (rotating && !lockRotation) {
-			targetAngle = Vector2::SignedAngle(Input::mousePosition().normalized(), lastMousePos.normalized());
-			lastMousePos = Input::mousePosition();
+			targetAngle = Vector2::SignedAngle(Input::GetMousePosition().normalized(), lastMousePos.normalized());
+			lastMousePos = Input::GetMousePosition();
 		}
 
-		camera.setSize(camera.size() - (camera.size() * Input::mouseScroll().y * Time::deltaTime() * zoomSpeed));
+		camera.setSize(camera.size() - (camera.size() * Input::GetMouseScroll().y * Time::GetDeltaTime() * zoomSpeed));
 
 		camera.transform->setLocalPosition(camera.transform->localPosition() + moveDirection);
 		camera.transform->setLocalRotation(camera.transform->localRotation() + targetAngle * 2);
@@ -712,15 +713,15 @@ public: // Functions
 			resolving = !resolving;
 		}
 
-		controllerCollider->transform->setPosition(camera.ScreenToWorldPoint(Input::mousePosition()));
-		controllerCollider->transform->Rotate(rotateDirection * rotationSpeed * Time::deltaTime());
+		controllerCollider->transform->SetPosition(camera.ScreenToWorldPoint(Input::GetMousePosition()));
+		controllerCollider->transform->Rotate(rotateDirection * rotationSpeed * Time::GetDeltaTime());
 		controllerCollider->RecalculateVertices();
 
 		// GJK result
 		gjkResult = polyCollider->Distance(*controllerCollider);
 
 		if (resolving) {
-			polyCollider->transform->Translate((gjkResult.distance + Physics2D::contactOffset()) * gjkResult.normal);
+			polyCollider->transform->Translate((gjkResult->distance + Physics2D::contactOffset()) * gjkResult->normal);
 			polyCollider->RecalculateVertices();
 		}
 
@@ -806,31 +807,36 @@ private:
 
 		while (isRunning())
 		{
-			fps.text = "FPS: " + std::to_string(Time::frameRate());
+			fps.text = "FPS: " + std::to_string(Time::GetFrameRate());
 			std::this_thread::sleep_for(0.15s);
 		}
 	}
 };
+#endif
 
-
-
+#if false
 class CameraTest : public LMKEngine {
 private:
+	std::shared_ptr<Scene> scene;
+
 	TTFont font;
 	TextGUI text;
 	std::thread updateFPS;
 
 	// Sprite Renderer
-	Texture2D texture;
-	Sprite spriteA;
-	SpriteRenderer rendererA;
+	std::shared_ptr<Texture2D> texture;
+	std::shared_ptr<Sprite> spriteA;
+	SpriteRenderer* rendererA;
+
 	Vector2 rendererScaleValue;
 	float scaleSpeed = 5;
 	Vector2 rendererMoveDirection;
 	float moveSpeed = 10;
+	float rendererRotateDirection;
+	float rotateSpeed = 90;
 
 	// Camera 
-	Camera2D camera{ 10 };
+	Camera2D* camera;
 	Vector2 moveDirection;
 	float targetAngle;
 	float zoomSpeed = 400; // Pixels
@@ -846,27 +852,34 @@ public:
 		font.LoadFont("Assets/Fonts/visitor2.ttf", 40);
 		text.font = font;
 
+		scene = std::make_shared<Scene>();
+
 		// Setup camera
-		camera.transform = new Transform();
-		camera.RecalculateAspect();
+		auto camGO = scene->CreateGameObject("Main Camera");
+		camera = camGO->AddComponent<Camera2D>();
+		camera->transform = new Transform();
+		camera->RecalculateAspect();
 
 		// Setup renderer
-		texture.LoadRawTextureData("Assets/Images/Koopa.png");
+		texture = std::make_shared<Texture2D>();
+		texture->LoadRawTextureData("Assets/Images/Koopa.png");
 
-		spriteA.InitSprite(texture, RectInt{ Vector2Int::zero(), Vector2Int(32, 30) });
-		spriteA.setPixelsPerUnit(30);
+		spriteA = std::make_shared<Sprite>();
+		spriteA->InitSprite(*texture, RectInt{ Vector2Int::zero, Vector2Int(32, 30) });
+		spriteA->SetPixelsPerUnit(30);
 
-		rendererA.transform = new Transform();
-		rendererA.transform->setPosition(Vector2(1, 1));
-		rendererA.setSprite(spriteA);
+		auto renderGO = scene->CreateGameObject("Renderer A");
+		rendererA = renderGO->AddComponent<SpriteRenderer>();
+		rendererA->transform->SetPosition(Vector2(1, 1));
+		rendererA->SetSprite(*spriteA);
 
-		camera.transform->setParent(rendererA.transform);
+		camera->transform->SetParent(rendererA->transform);
 	}
 
 	inline void OnUserUpdate() override {
 		// Screen controls
 		if (Input::GetKeyDown(KeyCode::F11)) {
-			if (Screen::fullScreen()) {
+			if (Screen::IsFullScreen()) {
 				Screen::SetFullScreenMode(FullScreenMode::Windowed);
 			}
 			else {
@@ -889,6 +902,14 @@ public:
 			rendererMoveDirection.x -= 1;
 		}
 
+		rendererRotateDirection = 0;
+		if (Input::GetKey(KeyCode::Q)) {
+			rendererRotateDirection += 1;
+		}
+		if (Input::GetKey(KeyCode::E)) {
+			rendererRotateDirection -= 1;
+		}
+
 		rendererScaleValue = Vector2::zero;
 		if (Input::GetKey(KeyCode::R)) {
 			rendererScaleValue += Vector2::one;
@@ -899,16 +920,16 @@ public:
 
 		// Camera controls
 		if (Input::GetKeyDown(KeyCode::P)) {
-			camera.transform->setLocalPosition(Vector2::zero);
-			camera.transform->setLocalRotation(0);
+			camera->transform->SetLocalPosition(Vector2::zero);
+			camera->transform->SetLocalRotation(0);
 		}
 
 		if (Input::GetKeyDown(KeyCode::O)) {
-			camera.transform->setParent(nullptr);
+			camera->transform->SetParent(nullptr);
 		}
 
 		if (Input::GetMouseButtonDown(MouseButton::Left)) {
-			lastMousePos = Input::mousePosition();
+			lastMousePos = Input::GetMousePosition();
 			panning = true;
 		}
 		else if (Input::GetMouseButtonUp(MouseButton::Left)) {
@@ -916,7 +937,7 @@ public:
 		}
 
 		if (Input::GetMouseButtonDown(MouseButton::Right)) {
-			lastMousePos = Input::mousePosition();
+			lastMousePos = Input::GetMousePosition();
 			rotating = true;
 		}
 		else if (Input::GetMouseButtonUp(MouseButton::Right)) {
@@ -925,30 +946,31 @@ public:
 
 		// Update camera properties
 		if (panning) {
-			moveDirection = camera.transform->InverseTransformDirection(lastMousePos - Input::mousePosition()) / camera.pixelsPerUnit();
-			lastMousePos = Input::mousePosition();
+			moveDirection = camera->transform->TransformDirection(lastMousePos - Input::GetMousePosition()) / camera->GetPixelsPerUnit();
+			lastMousePos = Input::GetMousePosition();
 		}
 		if (rotating) {
-			targetAngle = Vector2::SignedAngle(Input::mousePosition().normalized(), lastMousePos.normalized());
-			lastMousePos = Input::mousePosition();
+			targetAngle = Vector2::SignedAngle(Input::GetMousePosition().GetNormalized(), lastMousePos.GetNormalized());
+			lastMousePos = Input::GetMousePosition();
 		}
 
-		camera.setSize(camera.size() - Input::mouseScroll().y * Time::deltaTime() * zoomSpeed);
-		camera.transform->Translate(moveDirection);
-		camera.transform->Rotate(targetAngle * 2);
-		camera.RecalculateViewMatrix();
+		camera->SetSize(camera->GetSize() - Input::GetMouseScroll().y * Time::GetDeltaTime() * zoomSpeed);
+		camera->transform->Translate(moveDirection);
+		camera->transform->Rotate(targetAngle * 2);
+		camera->RecalculateViewMatrix();
 
 		// Update renderers transforms
-		rendererA.transform->Translate(rendererMoveDirection.normalized() * moveSpeed * Time::deltaTime());
-		rendererA.transform->AddScale(rendererScaleValue * scaleSpeed * Time::deltaTime());
+		rendererA->transform->Translate(rendererMoveDirection.GetNormalized() * moveSpeed * Time::GetDeltaTime());
+		rendererA->transform->AddScale(rendererScaleValue * scaleSpeed * Time::GetDeltaTime());
+		rendererA->transform->Rotate(rendererRotateDirection * rotateSpeed * Time::GetDeltaTime());
 	}
 
 	inline void OnDrawGizmos() override {
-		Gizmos::DrawWorldGrid(camera);
+		Gizmos::DrawWorldGrid(*camera);
 
 		// Render sprites
-		Gizmos::setColor(Color::green);
-		Gizmos::DrawRectWorld(camera,rendererA.transform->position(), Vector2(0.05f, 0.05f));
+		Gizmos::SetColor(Color::green);
+		Gizmos::DrawRectWorld(*camera, rendererA->transform->GetPosition(), Vector2(0.05f, 0.05f));
 
 		// Render UI
 		text.Display(m_renderer, Vector2Int(50, 50), Color::yellow);
@@ -962,15 +984,15 @@ private:
 	inline void UpdateFPSText() {
 		using namespace std::literals::chrono_literals;
 
-		while (isRunning()) {
-			text.text = std::to_string(Time::frameRate());
+		while (IsRunning()) {
+			text.text = std::to_string(Time::GetFrameRate());
 			std::this_thread::sleep_for(0.1s);
 		}
 	}
 };
+#endif
 
-
-
+#if false
 class RenderTest : public LMKEngine {
 private:
 	Scene scene;
@@ -1060,7 +1082,7 @@ public:
 		}
 
 		if (Input::GetMouseButtonDown(MouseButton::Left)) {
-			lastMousePos = Input::mousePosition();
+			lastMousePos = Input::GetMousePosition();
 			panning = true;
 		}
 		else if (Input::GetMouseButtonUp(MouseButton::Left)) {
@@ -1068,7 +1090,7 @@ public:
 		}
 
 		if (Input::GetMouseButtonDown(MouseButton::Right)) {
-			lastMousePos = Input::mousePosition();
+			lastMousePos = Input::GetMousePosition();
 			rotating = true;
 		}
 		else if (Input::GetMouseButtonUp(MouseButton::Right)) {
@@ -1077,12 +1099,12 @@ public:
 
 		// Update camera properties
 		if (panning) {
-			moveDirection = camera.transform->InverseTransformDirection(lastMousePos - Input::mousePosition()) / camera.pixelsPerUnit();
-			lastMousePos = Input::mousePosition();
+			moveDirection = camera.transform->InverseTransformDirection(lastMousePos - Input::GetMousePosition()) / camera.pixelsPerUnit();
+			lastMousePos = Input::GetMousePosition();
 		}
 		if (rotating) {
-			targetAngle = Vector2::SignedAngle(Input::mousePosition().normalized(), lastMousePos.normalized());
-			lastMousePos = Input::mousePosition();
+			targetAngle = Vector2::SignedAngle(Input::GetMousePosition().normalized(), lastMousePos.normalized());
+			lastMousePos = Input::GetMousePosition();
 		}
 
 		camera.setSize(camera.size() - Input::mouseScroll().y * Time::deltaTime() * zoomSpeed);
@@ -1330,7 +1352,7 @@ private:
 		}
 
 		if (Input::GetMouseButtonDown(MouseButton::Left)) {
-			lastMousePos = Input::mousePosition();
+			lastMousePos = Input::GetMousePosition();
 			panning = true;
 		}
 		else if (Input::GetMouseButtonUp(MouseButton::Left)) {
@@ -1338,7 +1360,7 @@ private:
 		}
 
 		if (Input::GetMouseButtonDown(MouseButton::Right)) {
-			lastMousePos = Input::mousePosition();
+			lastMousePos = Input::GetMousePosition();
 			rotating = true;
 		}
 		else if (Input::GetMouseButtonUp(MouseButton::Right)) {
@@ -1347,12 +1369,12 @@ private:
 
 		// Update camera properties
 		if (panning) {
-			moveDirection = _camera.transform->InverseTransformDirection((lastMousePos - Input::mousePosition()) / _camera.pixelsPerUnit());
-			lastMousePos = Input::mousePosition();
+			moveDirection = _camera.transform->InverseTransformDirection((lastMousePos - Input::GetMousePosition()) / _camera.pixelsPerUnit());
+			lastMousePos = Input::GetMousePosition();
 		}
 		if (rotating) {
-			targetAngle = Vector2::SignedAngle(Input::mousePosition().normalized(), lastMousePos.normalized());
-			lastMousePos = Input::mousePosition();
+			targetAngle = Vector2::SignedAngle(Input::GetMousePosition().normalized(), lastMousePos.normalized());
+			lastMousePos = Input::GetMousePosition();
 		}
 
 		_camera.setSize(_camera.size() - Input::mouseScroll().y * Time::deltaTime() * zoomSpeed);
@@ -1438,9 +1460,9 @@ public:
 			AudioManager::PlayOneShot(clip);
 	}
 };
+#endif
 
-
-
+#if false
 #define DEBUG_GIZMOS 0
 class MarioTest : public LMKEngine {
 public:
@@ -1456,7 +1478,7 @@ private:
 	AudioClip backgroundMusic;
 
 	// Scene Setup
-	Scene level1{ "Scene 1" };
+	Scene level1 { "Scene 1" };
 
 	// Components
 	Camera2D* camera;
@@ -1505,12 +1527,12 @@ public:
 		texture.LoadRawTextureData("Assets/Images/NES - Mario Bros - General Sprites.png");
 
 		playerSprite.InitSprite(texture, RectInt{ Vector2Int(4, 603), Vector2Int(16, 21) });
-		playerSprite.setPivot(Vector2(0.5f, 0.0f));
-		playerSprite.setPixelsPerUnit(21);
+		playerSprite.SetPivot(Vector2(0.5f, 0.0f));
+		playerSprite.SetPixelsPerUnit(21);
 
 		groundSprite.InitSprite(texture, RectInt{ Vector2Int(5, 293), Vector2Int(256, 15) });
-		groundSprite.setPivot(Vector2(0.5f, 1.0f));
-		groundSprite.setPixelsPerUnit(15);
+		groundSprite.SetPivot(Vector2(0.5f, 1.0f));
+		groundSprite.SetPixelsPerUnit(15);
 
 		// Setup scene.
 		auto& mainCamera = level1.CreateGameObject("MainCamera");
@@ -1597,7 +1619,7 @@ public:
 
 		// Update velocity
 		float targetSpeed = horizontalDirection * maxMoveSpeed;
-		velocity.x = Mathf::MoveTowards(velocity.x, targetSpeed, moveSpeedAccel * Time::deltaTime());
+		velocity.x = Mathf::MoveTowards(velocity.x, targetSpeed, moveSpeedAccel * Time::GetDeltaTime());
 		if (jumped) {
 			velocity.y = jumpPower;
 			AudioManager::PlayOneShot(jumpClip, 0.7f);
@@ -1610,7 +1632,7 @@ public:
 			playerRenderer->flipX = true;
 		}
 
-		playerColldier->transform->Translate(velocity * Time::deltaTime());
+		playerColldier->transform->Translate(velocity * Time::GetDeltaTime());
 		playerColldier->RecalculateVertices();
 		groundCheckCollider->RecalculateVertices();
 
@@ -1657,7 +1679,7 @@ public:
 
 private:
 	inline void UpdateGravity() {
-		velocity.y += Physics2D::gravity().y * Time::deltaTime();
+		velocity.y += Physics2D::gravity().y * Time::GetDeltaTime();
 	}
 
 	inline bool IsGrounded() {
@@ -1670,7 +1692,7 @@ private:
 		using namespace std::literals::chrono_literals;
 
 		while (isRunning()) {
-			text.text = std::to_string(Time::frameRate());
+			text.text = std::to_string(Time::GetFrameRate());
 			std::this_thread::sleep_for(0.1s);
 		}
 	}
@@ -1701,7 +1723,7 @@ private:
 		}
 
 		if (Input::GetMouseButtonDown(MouseButton::Left)) {
-			lastMousePos = Input::mousePosition();
+			lastMousePos = Input::GetMousePosition();
 			panning = true;
 		}
 		else if (Input::GetMouseButtonUp(MouseButton::Left)) {
@@ -1709,7 +1731,7 @@ private:
 		}
 
 		if (Input::GetMouseButtonDown(MouseButton::Right)) {
-			lastMousePos = Input::mousePosition();
+			lastMousePos = Input::GetMousePosition();
 			rotating = true;
 		}
 		else if (Input::GetMouseButtonUp(MouseButton::Right)) {
@@ -1718,34 +1740,42 @@ private:
 
 		// Update camera properties
 		if (panning) {
-			moveDirection = _camera.transform->InverseTransformDirection(lastMousePos - Input::mousePosition()) / _camera.pixelsPerUnit();
-			lastMousePos = Input::mousePosition();
+			moveDirection = _camera.transform->InverseTransformDirection(lastMousePos - Input::GetMousePosition()) / _camera.pixelsPerUnit();
+			lastMousePos = Input::GetMousePosition();
 		}
 		if (rotating) {
-			targetAngle = Vector2::SignedAngle(Input::mousePosition().normalized(), lastMousePos.normalized());
-			lastMousePos = Input::mousePosition();
+			targetAngle = Vector2::SignedAngle(Input::GetMousePosition().normalized(), lastMousePos.normalized());
+			lastMousePos = Input::GetMousePosition();
 		}
 
 		_camera.transform->Translate(moveDirection);
 		_camera.transform->Rotate(targetAngle * 2);
-		_camera.setSize(camera->size() - Input::mouseScroll().y * Time::deltaTime() * zoomSpeed);
+		_camera.setSize(camera->size() - Input::mouseScroll().y * Time::GetDeltaTime() * zoomSpeed);
 		_camera.RecalculateViewMatrix();
 	}
 };
 #pragma warning(default : 4244)
 #endif
 
+#if false
 class PolygonDecompositionTest : public LMKEngine {
 private:
-	Scene scene1;
+	std::shared_ptr<Scene> scene;
+
+	Camera2D* camera;
 
 	PolygonCollider2D* collider;
 
 public:
 	inline void OnUserStart() override {
-		auto& go = scene1.CreateGameObject("Object");
+		scene = std::make_shared<Scene>();
 
-		collider = go.AddComponent<PolygonCollider2D>();
+		auto goCam = scene->CreateGameObject("Main Camera");
+		camera = goCam->AddComponent<Camera2D>();
+		camera->backgroundColor = Color::grey;
+
+		auto go = scene->CreateGameObject("Polygon");
+		collider = go->AddComponent<PolygonCollider2D>();
 	}
 
 	inline void OnUserUpdate() override {
@@ -1760,5 +1790,373 @@ public:
 
 	}
 };
+#endif
+
+#if true
+#include "Examples/flatctrl.h"
+#include "Examples/mousectrl.h"
+
+#include <format>
+
+class PhysicsResponseTest : public LMKEngine {
+private:
+	std::shared_ptr<Scene> scene;
+
+	Camera2D* camera;
+
+	PolygonCollider2D* colliderA;
+	Rigidbody2D* bodyA;
+
+	BoxCollider2D* colliderB;
+	Rigidbody2D* bodyB;
+
+	std::shared_ptr<Physics2D::ContactManifold> manifold;
+
+	bool applyingImpulse;
+	Vector2 startPosition;
+
+public:
+	inline void OnUserStart() override {
+		scene = std::make_shared<Scene>();
+
+		auto goCam = scene->CreateGameObject("Main Camera");
+		camera = goCam->AddComponent<Camera2D>();
+		camera->backgroundColor = Color(25, 25, 25, 1);
+
+		auto goA = scene->CreateGameObject("Polygon A");
+		goA->transform->SetPosition(Vector2(0, 2));
+		goA->AddComponent<FlatControlBehaviour>();
+		colliderA = goA->AddComponent<PolygonCollider2D>();
+		colliderA->AddPath(CreatePolygon(7, 0.8f));
+		bodyA = goA->AddComponent<Rigidbody2D>();
+		bodyA->RegisterCollider(colliderA);
+		bodyA->gravityScale = 0;
+		bodyA->angularDamping = 0.2f;
+		bodyA->linearDamping = 0.2f;
+
+		auto goB = scene->CreateGameObject("Polygon B");
+		colliderB = goB->AddComponent<BoxCollider2D>();
+		bodyB = goB->AddComponent<Rigidbody2D>();
+		bodyB->RegisterCollider(colliderB);
+		bodyB->bodyType = RigidbodyType2D::Static;
+	}
+
+	inline void OnUserUpdate() override {
+		manifold = Physics2D::CollisionDetection_GJK(*colliderA, *colliderB, 1, 2);
+
+		if (Input::GetMouseButtonDown(MouseButton::Left)) {
+			if (applyingImpulse) {
+				applyingImpulse = false;
+
+				bodyA->ApplyImpulse(camera->ScreenToWorldPoint(Input::GetMousePosition()) - startPosition, startPosition);
+			}
+			else {
+				applyingImpulse = true;
+				startPosition = camera->ScreenToWorldPoint(Input::GetMousePosition());
+			}
+		}
+
+		if (Input::GetKeyDown(KeyCode::Space)) {
+			bodyA->linearVelocity = Vector2::zero;
+		}
+	}
+
+	inline void OnDrawGizmos() override {
+		Gizmos::DrawWorldGrid(*camera);
+
+		if (applyingImpulse) {
+			Gizmos::SetColor(Color::white);
+			Gizmos::DrawLineWorld(*camera, startPosition, camera->ScreenToWorldPoint(Input::GetMousePosition()));
+		}
+
+#if true
+		// Bounds
+		colliderA->RecalculateBounds();
+		colliderB->RecalculateBounds();
+		Color color = Color::green;
+		color.a = 50;
+		Gizmos::SetColor(color);
+		Gizmos::DrawRectWorld(*camera, colliderA->GetBounds()->GetCenter(), colliderA->GetBounds()->GetExtents());
+		Gizmos::DrawRectWorld(*camera, colliderB->GetBounds()->GetCenter(), colliderB->GetBounds()->GetExtents());
+#endif
+
+		// Collider
+		auto verts = colliderA->GetShapes()->GetShapeVertices(0);
+		colliderA->transform->TransformPoints(verts);
+		Gizmos::SetColor(Color::yellow);
+		Gizmos::DrawPolygonWorld(*camera, verts);
+
+		verts = colliderB->GetShapes()->GetShapeVertices(0);
+		colliderB->transform->TransformPoints(verts);
+		Gizmos::SetColor(Color::white);
+		Gizmos::DrawPolygonWorld(*camera, verts);
+
+		// Collision data
+		if (manifold) {
+			for (size_t i = 0; i < manifold->pointCount; i++) {
+				const auto& contact = (*manifold)[i];
+
+				Gizmos::SetColor(Color::red);
+				Gizmos::DrawRectWorld(*camera, contact->point, Vector2(0.08f, 0.08f));
+			}
+
+			std::vector<Physics2D::Polygon> polysA, polysB;
+			Physics2D::PopulatePolygonsFromCollider(*colliderA, polysA);
+			Physics2D::PopulatePolygonsFromCollider(*colliderB, polysB);
+
+			Gizmos::SetColor(Color(200, 200, 200, 255));
+			Gizmos::DrawLineWorld(*camera, colliderA->transform->GetPosition(), colliderA->transform->GetPosition() + manifold->normal);
+
+			// Edge selection
+			Vector2 normal = manifold->normal.GetNormalized();
+
+			Physics2D::Segment edgeA = Physics2D::GetBestEdge(polysA[0], normal);
+			Physics2D::Segment edgeB = Physics2D::GetBestEdge(polysB[0], -normal);
+
+			float dotA = std::abs(Vector2::Dot(edgeA.GetForward(), normal));
+			float dotB = std::abs(Vector2::Dot(edgeB.GetForward(), normal));
+			Physics2D::Segment *refEdge, *incEdge;
+			if (dotA <= dotB)
+			{
+				refEdge = &edgeA;
+				incEdge = &edgeB;
+			}
+			else
+			{
+				refEdge = &edgeB;
+				incEdge = &edgeA;
+			}
+
+			Gizmos::SetColor(Color::green);
+			Gizmos::DrawLineWorld(*camera, refEdge->v1.position, refEdge->v2.position);
+			Gizmos::DrawRectWorld(*camera, refEdge->v1.position, Vector2(0.05f, 0.05f));
+			Gizmos::SetColor(Color::magenta);
+			Gizmos::DrawRectWorld(*camera, refEdge->v2.position, Vector2(0.05f, 0.05f));
+
+			Vector2 sideNormal1 = refEdge->GetForward();
+			Vector2 sideNormal2 = refEdge->GetBackward();
+			float offset1 = Vector2::Dot(refEdge->v2.position, sideNormal1);
+			float offset2 = Vector2::Dot(refEdge->v1.position, sideNormal2);
+			Physics2D::ClipSegmentToLine(*incEdge, sideNormal1, offset1);
+			Physics2D::ClipSegmentToLine(*incEdge, sideNormal2, offset2);
+
+			Gizmos::SetColor(Color::red);
+			Gizmos::DrawLineWorld(*camera, incEdge->v1.position, incEdge->v2.position);
+		}
+	}
+
+private:
+	inline std::vector<Vector2> CreatePolygon(size_t _corners, float _radius) const {
+		float rotationIter = -360.0f / _corners;
+		std::vector<Vector2> vertices = { Vector2(0, _radius) };
+		for (size_t i = 1; i < _corners; i++) {
+			vertices.push_back(Vector2(
+				-1 * _radius * std::sinf(LMK_DtoR(rotationIter * i)),
+				_radius * std::cosf(LMK_DtoR(rotationIter * i)))
+			);
+		}
+		return vertices;
+	}
+};
+
+class EqualityConstraintsTest: public LMKEngine {
+
+	std::shared_ptr<Scene> scene;
+
+	Camera2D* camera;
+
+	Vector2 startPosition;
+	Rigidbody2D* lastBody;
+
+	std::vector<Rigidbody2D*> bodies;
+	std::vector<EqualityConstraint*> constraints;
+
+public:
+	inline void OnUserStart() override {
+		scene = std::make_shared<Scene>();
+
+		auto goCam = scene->CreateGameObject("Main Camera");
+		camera = goCam->AddComponent<Camera2D>();
+		camera->backgroundColor = Color(25, 25, 25, 1);
+
+		auto go = scene->CreateGameObject("Base Collider");
+		go->transform->SetPosition(Vector2(0, 4));
+		auto collider = go->AddComponent<BoxCollider2D>();
+		collider->isTrigger = true;
+		auto body = go->AddComponent<Rigidbody2D>();
+		body->RegisterCollider(collider);
+		body->bodyType = RigidbodyType2D::Static;
+		body->gravityScale = 0;
+		body->angularDamping = 0.5f;
+		body->linearDamping = 0.5f;
+
+		lastBody = body;
+		bodies.push_back(body);
+		AddColliderAttachedTo(lastBody, lastBody->GetPosition() -
+			(lastBody->transform->UpDirection() + lastBody->transform->RightDirection()) * 0.5f);
+	}
+
+	inline void OnUserUpdate() override {
+		if (Input::GetMouseButtonDown(MouseButton::Left)) {
+			startPosition = camera->ScreenToWorldPoint(Input::GetMousePosition());
+		}
+		if (Input::GetMouseButtonUp(MouseButton::Left)) {
+			Vector2 impulse = (camera->ScreenToWorldPoint(Input::GetMousePosition()) - startPosition) * 5.f;
+			for (auto& body : bodies)
+				body->ApplyImpulse(impulse, startPosition);
+		}
+
+		if (Input::GetKeyDown(KeyCode::Space)) {
+			AddColliderAttachedTo(lastBody, lastBody->GetPosition() - 
+				(lastBody->transform->UpDirection() + lastBody->transform->RightDirection()) * 0.5f);
+		}
+	}
+
+	inline void OnDrawGizmos() override {
+		Gizmos::DrawWorldGrid(*camera, 0.5f);
+
+		Gizmos::SetColor(Color::white);
+		for (const auto& c : bodies) {
+			auto verts = c->GetCollider()->GetShapes()->GetShapeVertices(0);
+			c->transform->TransformPoints(verts);
+			Gizmos::DrawPolygonWorld(*camera, verts);
+		}
+
+		for (const auto& c : constraints) {
+			Gizmos::SetColor(Color::yellow);
+			Gizmos::DrawRectWorld(*camera, c->GetWorldA(), Vector2(0.05f, 0.05f));
+			Gizmos::SetColor(Color::cyan);
+			Gizmos::DrawRectWorld(*camera, c->GetWorldB(), Vector2(0.05f, 0.05f));
+		}
+	}
+
+private:
+	inline void AddColliderAttachedTo(Rigidbody2D*& _parentBody, Vector2 _worldPoint) {
+		auto go = scene->CreateGameObject("Chain Collider");
+		go->transform->SetPosition(_worldPoint - (go->transform->UpDirection() + go->transform->RightDirection()) * 0.5f);
+		auto collider = go->AddComponent<BoxCollider2D>();
+		collider->isTrigger = false;
+		auto body = go->AddComponent<Rigidbody2D>();
+		body->RegisterCollider(collider);
+		body->mass = Random::Range(10.f, 20.f);
+		body->inertia = body->mass;
+		body->gravityScale = 1.f;
+		body->angularDamping = 0.5f;
+		body->linearDamping = 0.5f;
+
+		EqualityConstraint* constraint = new EqualityConstraint(_parentBody, body, _worldPoint);
+		Physics2D::GetScene()->Register(constraint);
+
+		bodies.push_back(body);
+		constraints.push_back(constraint);
+
+		_parentBody = body;
+	}
+};
+
+class ContactConstraintsTest : public LMKEngine {
+
+	std::shared_ptr<Scene> scene;
+
+	Camera2D* camera;
+
+	Rigidbody2D* lastBody;
+	Vector2 startPosition;
+
+	std::vector<Rigidbody2D*> bodies;
+
+public:
+	inline void OnUserStart() override {
+		scene = std::make_shared<Scene>();
+
+		auto goCam = scene->CreateGameObject("Main Camera");
+		camera = goCam->AddComponent<Camera2D>();
+		camera->backgroundColor = Color(25, 25, 25, 1);
+
+		auto go = scene->CreateGameObject("Base Collider");
+		go->transform->SetPosition(Vector2(0, -3));
+		auto collider = go->AddComponent<BoxCollider2D>();
+		collider->scale = Vector2(10.f, 2.f);
+		auto body = go->AddComponent<Rigidbody2D>();
+		body->RegisterCollider(collider);
+		body->bodyType = RigidbodyType2D::Static;
+		body->gravityScale = 0;
+		body->angularDamping = 0.5f;
+		body->linearDamping = 0.5f;
+		auto flat = go->AddComponent<FlatControlBehaviour>();
+		flat->targetBody = body;
+
+		lastBody = body;
+		bodies.push_back(body);
+	}
+
+	inline void OnUserUpdate() override {
+		if (Input::GetMouseButtonDown(MouseButton::Left)) {
+			startPosition = camera->ScreenToWorldPoint(Input::GetMousePosition());
+		}
+		if (Input::GetMouseButtonUp(MouseButton::Left)) {
+			Vector2 impulse = (camera->ScreenToWorldPoint(Input::GetMousePosition()) - startPosition);
+			lastBody->ApplyImpulse(impulse * lastBody->mass, startPosition);
+		}
+
+		if (Input::GetMouseButtonDown(MouseButton::Right)) {
+			AddBody(GetMousePosWorld(), RigidbodyType2D::Dynamic);
+		}
+
+		if (Input::GetMouseButtonDown(MouseButton::Middle)) {
+			AddBody(GetMousePosWorld(), RigidbodyType2D::Static);
+		}
+	}
+
+	inline void OnDrawGizmos() override {
+		Gizmos::DrawWorldGrid(*camera, 0.5f);
+
+		// colliders
+		Color boundsColor = Color::green;
+		boundsColor.a = 40;
+		for (const auto& b : bodies) {
+			auto bounds = b->GetCollider()->GetBounds();
+			Gizmos::SetColor(boundsColor);
+			Gizmos::DrawRectWorld(*camera, bounds->GetCenter(), bounds->GetExtents());
+
+			auto verts = b->GetCollider()->GetWorldVertices(0);
+			Gizmos::SetColor(b->bodyType == RigidbodyType2D::Static ? Color::yellow : Color::white);
+			Gizmos::DrawPolygonWorld(*camera, verts);
+		}
+
+		// constrains
+		Gizmos::SetColor(Color::cyan);
+		for (const auto& c : Physics2D::GetScene()->GetContacts()) {
+			if (!c) continue;
+
+			Gizmos::DrawRectWorld(*camera, c->GetWorldContactPointB(), Vector2(0.05f, 0.05f));
+		}
+	}
+
+private:
+	inline void AddBody(Vector2 _worldPoint, RigidbodyType2D _bodyType) {
+		static int count = 0;
+
+		auto go = scene->CreateGameObject("Collider " + std::to_string(count));
+		go->transform->SetPosition(_worldPoint);
+		auto collider = go->AddComponent<BoxCollider2D>();
+		auto body = go->AddComponent<Rigidbody2D>();
+		body->RegisterCollider(collider);
+		body->bodyType = _bodyType;
+		body->gravityScale = 1.f;
+		body->angularDamping = 0.5f;
+		body->linearDamping = 0.5f;
+
+		bodies.push_back(body);
+		lastBody = body;
+
+		count++;
+	}
+
+	inline Vector2 GetMousePosWorld() {
+		return camera->ScreenToWorldPoint(Input::GetMousePosition());
+	}
+};
+#endif
 
 #endif // !_TEST_ENGINES_H_

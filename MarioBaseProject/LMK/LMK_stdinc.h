@@ -88,14 +88,19 @@
 //
 #if LMK_HAVE_SDL
 	#include <SDL.h>
+	#pragma comment(lib, "SDL2.lib")
+	#pragma comment(lib, "SDL2main.lib")
 	#if LMK_HAVE_SDL_IMAGE
 		#include <SDL_image.h>
+		#pragma comment(lib, "SDL2_image.lib")
 	#endif
 	#if LMK_HAVE_SDL_TTF
 		#include <SDL_ttf.h>
+		#pragma comment(lib, "SDL2_ttf.lib")
 	#endif
 	#if LMK_HAVE_SDL_MIXER
 		#include <SDL_mixer.h>
+		#pragma comment(lib, "SDL2_mixer.lib")
 	#endif
 #endif
 

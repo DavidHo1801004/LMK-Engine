@@ -202,6 +202,8 @@ private:
 		Time::Update();
 
 		OnUserStart();
+
+		EventAggregator::Publish(EngineStartCallback{});
 	}
 
 	//
@@ -214,11 +216,11 @@ private:
 			OnUserFixedUpdate();
 
 			// Physics simulation.
-			Physics2D::Step((float)Time::fixedDeltaTime());
+			Physics2D::Step((float)Time::GetFixedDeltaTime());
 
-			// Wait for Time::fixedDeltaTime before updating.
-			// The smaller this value is, the more accurate the simulations will be.
-			std::this_thread::sleep_for(std::chrono::duration<double> { Time::fixedDeltaTime() });
+			// Wait for Time::GetFixedDeltaTime before updating.
+			// The smaller this value is, the more accurate the simulation will be.
+			std::this_thread::sleep_for(std::chrono::duration<double> { Time::GetFixedDeltaTime() });
 		}
 	}
 
@@ -241,6 +243,8 @@ private:
 		OnHandleEvents();
 
 		OnUserUpdate();
+
+		EventAggregator::Publish(EngineUpdateCallback{});
 	}
 
 	//

@@ -34,7 +34,8 @@ private: // Typedef
 
 public: // Constructors & Destructors
 	inline Simplex()
-		: m_verts({}), m_size(0) {}
+		: m_verts({}), m_size(0) {
+	}
 
 public: // Operators Overloads
 	inline operator std::vector<Vector2>() const {
@@ -70,17 +71,17 @@ public: // Functions
 	}
 
 	[[nodiscard]]
-    inline iterator begin() noexcept {
+	inline iterator begin() noexcept {
 		return m_verts.begin();
 	}
 
 	[[nodiscard]]
-    inline iterator end() noexcept {
+	inline iterator end() noexcept {
 		return m_verts.end() - (3 - m_size);
 	}
 
 	[[nodiscard]]
-    inline size_type size() const noexcept {
+	inline size_type size() const noexcept {
 		return m_size;
 	}
 
@@ -169,8 +170,8 @@ struct PhysicsShape2D {
 //
 class PhysicsShapeGroup2D {
 private: // Typedef
-	using vertices_storage	= std::vector<Vector2>;
-	using shapes_storage	= std::vector<PhysicsShape2D>;
+	using vertices_storage = std::vector<Vector2>;
+	using shapes_storage = std::vector<PhysicsShape2D>;
 
 protected:
 	friend class Collider2D;
@@ -202,7 +203,7 @@ public: // Functions
 			m_vertices.insert(m_vertices.end(), vertexStartIter, vertexStartIter + shape.vertexCount);
 
 			// Modify shape.vertexStartIndex to the corresponding index in the vertex list of the current group.
-			shape.vertexStartIndex = m_vertices.size();	
+			shape.vertexStartIndex = m_vertices.size();
 
 			// Push physics shape to current shape list and look up table.
 			m_shapes.push_back(shape);
@@ -228,7 +229,7 @@ public: // Functions
 	//		This index is used as the main reference when retrieving a shape.
 	//
 	inline int AddCircle(Vector2 _center, float _radius) {
-		m_shapes.push_back(PhysicsShape2D {
+		m_shapes.push_back(PhysicsShape2D{
 			PhysicsShapeType2D::Circle,	// Shape type
 			1,							// Vertex count
 			m_vertices.size(),			// Vertex start index
@@ -311,10 +312,10 @@ public: // Functions
 		Vector2 halfSize = _size / 2;
 		Matrix3x3 rotateMatrix = Matrix3x3::Rotate(_angle);
 		std::array<Vector2, 4> vertices = {
-			Vector2{ _center.x - halfSize.x, _center.y + halfSize.y } * rotateMatrix,	// Top Left
-			Vector2{ _center.x + halfSize.x, _center.y + halfSize.y } * rotateMatrix,	// Top Right
-			Vector2{ _center.x + halfSize.x, _center.y - halfSize.y } * rotateMatrix,	// Bottom Right
-			Vector2{ _center.x - halfSize.x, _center.y - halfSize.y } * rotateMatrix,	// Bottom Left
+			Vector2{ _center.x - halfSize.x, _center.y + halfSize.y } *rotateMatrix,	// Top Left
+			Vector2{ _center.x + halfSize.x, _center.y + halfSize.y } *rotateMatrix,	// Top Right
+			Vector2{ _center.x + halfSize.x, _center.y - halfSize.y } *rotateMatrix,	// Bottom Right
+			Vector2{ _center.x - halfSize.x, _center.y - halfSize.y } *rotateMatrix,	// Bottom Left
 		};
 
 		m_vertices.insert(m_vertices.end(), vertices.begin(), vertices.end());
@@ -359,15 +360,14 @@ public: // Functions
 	// @param _shapeIndex:
 	//		The index of the shape stored in the PhysicsShapeGroup2D.
 	//
-	inline void DeleteShape(size_t _shapeIndex) {
-		LMK_CORE_ASSERT(_shapeIndex >= m_shapes.size(),
-			"lmk::PhysicsShapeGroup2D: GetShapeVertex() - _shapeIndex: Index out of range.");
+	inline bool DeleteShape(size_t _shapeIndex) {
+		if (_shapeIndex < 0 || _shapeIndex >= m_shapes.size()) return false;
 
-		auto temp = m_shapes[_shapeIndex];
+		auto& temp = m_shapes[_shapeIndex];
 		m_shapes.erase(m_shapes.begin() + _shapeIndex);
 
 		// Update shapes' vertexStartIndex.
-		// All shapes that have 
+		// All shapes that have was added after the given shape
 		auto shapeIter = m_startVertIndexMap.lower_bound(temp.vertexStartIndex);
 
 		for (auto iter = shapeIter; iter != m_startVertIndexMap.end(); iter++) {
@@ -375,6 +375,8 @@ public: // Functions
 		}
 
 		m_startVertIndexMap.erase(shapeIter);
+
+		return true;
 	}
 
 	//
@@ -403,8 +405,8 @@ public: // Accessors
 	//		Returns the PhysicsShape2D stored at the specified _shapeIndex.
 	//
 	[[nodiscard]]
-    inline PhysicsShape2D GetShape(size_t _shapeIndex) const {
-		LMK_CORE_ASSERT(_shapeIndex >= m_shapes.size(),
+	inline const PhysicsShape2D& GetShape(size_t _shapeIndex) const {
+		LMK_CORE_ASSERT(_shapeIndex < m_shapes.size(),
 			"lmk::PhysicsShapeGroup2D: GetShapeVertex() - _shapeIndex: Index out of range.");
 
 		return m_shapes[_shapeIndex];
@@ -435,10 +437,10 @@ public: // Accessors
 	//		Returns the specified shape vertex.
 	//
 	[[nodiscard]]
-    inline Vector2 GetShapeVertex(size_t _shapeIndex, size_t _vertexIndex) const {
-		LMK_CORE_ASSERT(_shapeIndex >= m_shapes.size(), 
+	inline Vector2 GetShapeVertex(size_t _shapeIndex, size_t _vertexIndex) const {
+		LMK_CORE_ASSERT(_shapeIndex < m_shapes.size(),
 			"lmk::PhysicsShapeGroup2D: GetShapeVertex() - _shapeIndex: Index out of range.");
-		LMK_CORE_ASSERT(_vertexIndex >= m_shapes[_shapeIndex].vertexCount, 
+		LMK_CORE_ASSERT(_vertexIndex < m_shapes[_shapeIndex].vertexCount,
 			"lmk::PhysicsShapeGroup2D: GetShapeVertex() - _vertexIndex: Index out of range.");
 
 		return m_vertices[m_shapes[_shapeIndex].vertexStartIndex + _vertexIndex];
@@ -459,8 +461,8 @@ public: // Accessors
 	//		A list contains a copy of all the vertices of the given shape in the PhysicsShapeGroup2D.
 	//
 	[[nodiscard]]
-    inline vertices_storage GetShapeVertices(size_t _shapeIndex) const {
-		LMK_CORE_ASSERT(_shapeIndex >= m_shapes.size(),
+	inline vertices_storage GetShapeVertices(size_t _shapeIndex) const {
+		LMK_CORE_ASSERT(_shapeIndex < m_shapes.size(),
 			"lmk::PhysicsShapeGroup2D: GetShapeVertex() - _shapeIndex: Index out of range.");
 
 		auto firstIter = m_vertices.begin() + m_shapes[_shapeIndex].vertexStartIndex;
@@ -522,13 +524,13 @@ public: // Mutators
 public: // Accessors
 	// Get the total number of vertices in the shape group used to represent all PhysicsShape2D within it.
 	[[nodiscard]]
-    inline size_t VertexCount() const noexcept {
+	inline size_t VertexCount() const noexcept {
 		return m_vertices.size();
 	}
 
 	// Get the total number of PhysicsShape2D in the shape group.
 	[[nodiscard]]
-    inline size_t ShapeCount() const noexcept {
+	inline size_t GetShapeCount() const noexcept {
 		return m_shapes.size();
 	}
 
@@ -537,7 +539,7 @@ public: // Properties
 	// 
 	// When retrieving a PhysicsShapeGroup2D via Rigidbody2D.GetShapes or Collider2D.GetShapes, 
 	// this matrix will be set to the pose of the Rigidbody2D.
-	// In case a Rigidbody2D is not available, the matrix it set to Matrix4x4.identity.
+	// In case a Rigidbody2D is not available, the matrix it set to Matrix3x3.identity.
 	Matrix3x3 localToWorldMatrix = Matrix3x3::identity;
 
 private:
@@ -591,7 +593,7 @@ struct ColliderDistance2D {
 	// 
 	// Scaling this property with the distance will produce a vector that can be used to move the Collider2D so that 
 	// they are no longer overlapped (if the distance is negative) or so they are touching (if the distance is positive).
-	Vector2	normal;		
+	Vector2	normal;
 
 	// A point on a Collider2D that is a specific distance away from pointB.
 	// 
@@ -623,34 +625,20 @@ struct ColliderDistance2D {
 // |																				|
 // +--------------------------------------------------------------------------------+
 
-// Forward declaration of Rigidbody2D
 class Rigidbody2D;
 
 //
 // Base class for collider types used with 2D physics.
 //
 class Collider2D : public Behaviour {
-protected: // Typedef
-	struct ProjectionResult {
-		float minDis;	// The minimum distance on the projection axis.
-		float maxDis;	// The maximum distance on the projection axis.
-	};
-
-	struct Polygon {
-		inline explicit Polygon(float _radius, const std::vector<Vector2>& _vertices)
-			: radius(_radius), vertices(_vertices) {}
-
-		float radius;					// The edge radius value of the polygon.
-		std::vector<Vector2> vertices;	// The vertices of the polygon.
-	};
-
 public: // Constructors & Destructors
 	//
 	// Copy constructor.
 	//
 	inline Collider2D(const Collider2D& _other) {
-		m_shapes = new PhysicsShapeGroup2D{ *_other.m_shapes };
-		m_bounds = new Bounds{ *_other.m_bounds };
+		m_shapes->Add(*_other.m_shapes);
+
+		RecalculateBounds();
 	}
 
 	//
@@ -658,143 +646,17 @@ public: // Constructors & Destructors
 	//
 	inline Collider2D() = default;
 
-	inline ~Collider2D() {
-		delete m_shapes;
-		delete m_bounds;
-		m_shapes = nullptr;
-		m_bounds = nullptr;
-	}
-
 public: // Functions
 	//
-	// Calculates the minimum separation of this collider against another collider.
-	// 
-	// A valid collider must be provided for the ColliderDistance2D to be valid. 
-	// 
-	// If there are any problems with collider or this Collider2D such as they are disabled or 
-	// do not contain any collision shapes then the separation will be invalid as indicated by ColliderDistance2D.isValid.
-	//
-	[[nodiscard]]
-    inline ColliderDistance2D Distance(const Collider2D& _other) {
-		ColliderDistance2D resultDistance;
-		impl::Simplex resultSimplex;
-
-		if (CollisionDetection_GJK(*this, _other, resultSimplex)) {
-			resultDistance = EPA(*this, _other, resultSimplex, 30);
-			resultDistance.isOverlapped = true;
-		}
-		else {
-			resultDistance.isOverlapped = false;
-		}
-
-		resultDistance.isValid =
-			this->IsActiveAndEnabled() &&
-			_other.IsActiveAndEnabled() &&
-			this->m_shapes->VertexCount() > 0 &&
-			_other.m_shapes->VertexCount() > 0;
-
-		return resultDistance;
-	}
-
-	//
-	// Check if a collider overlaps a point in space.
+	// Gets all the PhysicsShape2D used by the Collider2D.
 	// 
 	// @return
-	//		True if _point overlap the collider, otherwise false.
+	//		A PhysicsShapeGroup2D composed of all PhysicsShape2D retrieved from the Collider2D.
 	//
-	[[nodiscard]]
-    inline bool OverlapPoint(Vector2 _point) const {
-		bool overlap = false;
-
-		// We convert the point to local space since vertices of the polygon(s)
-		// are stored in local space. 
-		Vector2 localPoint = transform->InverseTransformPoint(_point);
-
-		for (size_t shapeID = 0; shapeID < m_shapes->ShapeCount(); shapeID++) {
-			auto vertices = m_shapes->GetShapeVertices(shapeID);
-			size_t n = vertices.size();
-
-			for (size_t i = 0; i < n; i++) {
-				Vector2 pointA = vertices[i];
-				Vector2 pointB = vertices[(i + 1) % n];
-
-				// Check if point is inside edge radius of the current edge.
-				if ((localPoint - ClosestPointOnLineSegment(localPoint, pointA, pointB)).GetMagnitude() 
-					<= m_shapes->GetShape(shapeID).radius)
-					return true;
-
-				// Check if point is inside polygon disregarding edge radius.
-				if (((pointA.y > localPoint.y) != (pointB.y > localPoint.y)) &&
-					(localPoint.x < (pointB.x - pointA.x) * (localPoint.y - pointA.y) / (pointB.y - pointA.y) + pointA.x))
-					overlap = !overlap;
-			}
-
-			if (overlap) return true;
-		}
-
-		return false;
+	inline const PhysicsShapeGroup2D* GetShapes() const {
+		return m_shapes.get();
 	}
 
-	//
-	// Checking if for overlapping colliders using GJK (Gilbert-Johnson-Keerthi) algorithm.
-	// 
-	// @param _other:
-	//		The other collider to check against.
-	// 
-	// @return
-	//		True if _other overlap the collider, otherwise false.
-	//
-	[[nodiscard]]
-    inline bool OverlapCollider(const Collider2D& _other) const {
-		// If the bounding box of the colliders do not overlap -> abort.
-		if (!m_bounds->Intersects(*_other.m_bounds)) return false;
-
-		// SAT is slightly faster than GJK in most cases with non-complex 2D polygons,
-		// and since this function only need to check for overlap, we prefer SAT over GJK.
-		return CollisionDetection_SAT(*this, _other);
-	}
-
-	//
-	// Find a point on or in this collider that is closest to the specified position.
-	// 
-	// @param _point:
-	//		The position from which to find the closest point on this collider.
-	// @param _perimeterOnly:
-	//		If true, this will only checks for points on the perimeter of this collider.
-	// 
-	// @return 
-	//		A point on or in this collider that is closest to the specified position.
-	//
-	[[nodiscard]]
-    inline Vector2 ClosetPoint(Vector2 _point, bool _perimeterOnly = true) const {
-		// If we are checking for points inside the collider.
-		if (!_perimeterOnly) {
-			// If the polygon contains the point -> it is the closest point to itself.
-			if (OverlapPoint(_point)) return _point;
-		}
-
-		float minDistance = INFINITY;
-		Vector2 closestPoint;
-
-		for (size_t shapeID = 0; shapeID < m_shapes->ShapeCount(); shapeID++) {
-			auto vertices = m_shapes->GetShapeVertices(shapeID);
-			size_t n = vertices.size();
-
-			// Find closest point on each edge.
-			for (size_t i = 0; i < n; i++) {
-				Vector2 closest = ClosestPointOnLineSegment(_point, vertices[i], vertices[(i + 1) % n]);
-				float dist = Vector2::Distance(_point, closest);
-				if (dist < minDistance) {
-					minDistance = dist;
-					closestPoint = closest;
-				}
-			}
-		}
-
-		return closestPoint;
-	}
-
-private:
 	//
 	// Update the world space bounding box of this collider.
 	//
@@ -802,402 +664,61 @@ private:
 		Vector2 min = Vector2::positiveInfinity;
 		Vector2 max = Vector2::negativeInfinity;
 
-		for (size_t shapeID = 0; shapeID < m_shapes->ShapeCount(); shapeID++) {
-			auto shape = m_shapes->GetShape(shapeID);
-			auto vertices = m_shapes->GetShapeVertices(shapeID);
+		for (size_t shapeID = 0; shapeID < m_shapes->GetShapeCount(); shapeID++) {
+			const auto& shape = m_shapes->GetShape(shapeID);
+			auto vertices = GetWorldVertices(shapeID);
 			auto radiusVec = Vector2{ shape.radius, shape.radius };
 
-			for (auto vertex : vertices) {
+			for (const auto& vertex : vertices) {
 				min = Vector2::Min(min - radiusVec, vertex - radiusVec);
 				max = Vector2::Max(max + radiusVec, vertex + radiusVec);
 			}
 		}
 
-		m_bounds->SetMinMax(
-			transform->TransformPoint(min), 
-			transform->TransformPoint(max) 
-		);
+		m_bounds->SetMinMax(min, max);
 	}
 
-private: // Static Functions
 	//
-	// Find the closest point to _point on a line segment defined by _lineA and _lineB.
-	// 
-	// @return 
-	//		A vector represents a point on the line segment that is the closest to _point.
+	// Get all vertices of a given shape in world space, with Collider2D.scale applied.
 	//
 	[[nodiscard]]
-    inline static Vector2 ClosestPointOnLineSegment(Vector2 _point, Vector2 _lineA, Vector2 _lineB) noexcept {
-		Vector2 ap = _point - _lineA;
-		Vector2 line = _lineB - _lineA;
+	inline std::vector<Vector2> GetWorldVertices(size_t _shapeIdx) const noexcept {
+		std::vector<Vector2> result;
 
-		// This represents the position of the closest point on the line segment relative to point _lineA.
-		float t = Vector2::Dot(ap, line) / line.GetSqrMagnitude();
-
-		if (t < 0.0f) {
-			return _lineA;
-		}
-		else if (t > 1.0f) {
-			return _lineB;
-		}
-		else {
-			return _lineA + line * t;
-		}
-	}
-
-	//
-	// Project _point onto _projectAxis.
-	// 
-	// @param _point:
-	//		The point to project.
-	// @param _projectAxis:
-	//		The vector represents as the projecting axis.
-	// 
-	// @return 
-	//		A vector represents the projected point on the projecting axis.
-	//
-	[[nodiscard]]
-    inline static Vector2 ProjectPoint(Vector2 _point, Vector2 _projectAxis) noexcept {
-		float scalar = Vector2::Dot(_point, _projectAxis) / _projectAxis.GetSqrMagnitude();
-		return _projectAxis * scalar;
-	}
-
-	//
-	// Project a polygon onto a given axis (represented by a normal vector).
-	// 
-	// @param _collider:
-	//		The collider to receive vertex information from.
-	// @param _projectAxis:
-	//		The vector represents as the projecting axis.
-	// 
-	// @return 
-	//		A ProjectionResult structure represents the result of the projected polygon.
-	//
-	[[nodiscard]]
-    inline static ProjectionResult ProjectPolygon(const Polygon& _polygon, Vector2 _projectAxis) noexcept {
-		float minDis = INFINITY, maxDis = -INFINITY;
-
-		for (auto vert : _polygon.vertices) {
-			// The projected point along the projecting axis
-			float dis = Vector2::Dot(vert, _projectAxis);
-
-			minDis = LMK_Min(dis, minDis);
-			maxDis = LMK_Max(dis, maxDis);
+		Matrix3x3 mtx;
+		mtx.SetTRS(transform->GetPosition(), transform->GetRotation(), transform->GetLossyScale().Scale(scale));
+		for (const auto& v : m_shapes->GetShapeVertices(_shapeIdx)) {
+			result.push_back(mtx.MultiplyPoint(v));
 		}
 
-		return { 
-			minDis - _polygon.radius,
-			maxDis + _polygon.radius,
-		};
-	}
-
-	//
-	// Find the furthest vertex in the polygon with the given direction.
-	// 
-	// @param _polygon:
-	//		A list of Vector2 represents the vertices of the polygon.
-	// @param _edgeRadius:
-	//		
-	// @param _direction:
-	//		A vector represents the direction to check for.
-	//  
-	// @return 
-	//		The local space coordinate represents the furthest vertex in the given direction.
-	//
-	[[nodiscard]]
-	inline static Vector2 FindFurthestVertex(const Polygon& _polygon, Vector2 _direction) noexcept {
-		Vector2 maxPoint;
-		float maxDis = -INFINITY;
-
-		// Find furthest projection of vertices on _direction.
-		for (Vector2 vert : _polygon.vertices) {
-			float distance = Vector2::Dot(vert, _direction);
-			if (distance > maxDis) {
-				maxDis = distance;
-				maxPoint = vert;
-			}
-		}
-		// Add physics shape radius to the result vertex.
-		// This generalizes the function for all non-polygon shapes.
-		maxPoint += _direction.GetNormalized() * _polygon.radius;
-
-		return maxPoint;
-	}
-
-	//
-	// The support function used for GJK algorithm.
-	// 
-	// This function returns the most extreme vertex of the Minkowski differences 
-	// of the 2 polygons in the given direction.
-	// 
-	// NOTE:
-	// The direction is reversed for the second polygon.
-	// 
-	// @param _polygonA:
-	//		The first collider.
-	// @param _polygonB:
-	//		The second collider.
-	// @param _direction:
-	//		A vector represents the direction to check for.
-	// 
-	// @return 
-	//		A vector represents the support point.
-	//
-	[[nodiscard]]
-	inline static Vector2 Support(const Polygon& _polygonA, const Polygon& _polygonB, Vector2 _direction) noexcept {
-		return FindFurthestVertex(_polygonA, _direction) - FindFurthestVertex(_polygonB, -_direction);
-	}
-
-	//
-	// Implementation of SAT (Separating Axis Theorem) algorithm for overlap detection 
-	// between two simple convex polygons.
-	//
-	[[nodiscard]]
-	inline static bool SATCore(const Polygon& _polygonA, const Polygon& _polygonB) {
-		// For a detailed explanation of the Separating Axis Theorem algorithm, see:
-		// http://programmerart.weebly.com/separating-axis-theorem.html
-
-		size_t n = _polygonA.vertices.size();
-
-		// Loop through all edges of the first polygon.
-		for (size_t curVert = n - 1, nextVert = 0; nextVert < n; curVert = nextVert++) {
-			// Calculate the projecting axis.
-			// The projecting axis is a vector perpendicular to the inspecting edge.
-			Vector2 projectAxis = Vector2::Perpendicular(_polygonA.vertices[nextVert] - _polygonA.vertices[curVert]);
-
-			// Get the projected shadow length of the first polygon.
-			auto projectA = ProjectPolygon(_polygonA, projectAxis);
-			projectA.minDis -= _polygonA.radius;
-			projectA.maxDis += _polygonA.radius;
-
-			// Get the projected shadow length of the second polygon.
-			auto projectB = ProjectPolygon(_polygonB, projectAxis);
-			projectB.minDis -= _polygonB.radius;
-			projectB.maxDis += _polygonB.radius;
-
-			// Calculate distance between projected shadow polygons distance.
-			float currentDistance = LMK_Min(projectA.maxDis, projectB.maxDis) - LMK_Max(projectA.minDis, projectB.minDis);
-
-			// Negative distance means the two polygons are not overlapping.
-			if (currentDistance < 0) return false;
-		}
-	}
-
-	//
-	// Implementation of SAT (Separating Axis Theorem) algorithm for collision detection 
-	// between colliders with multiple physical shapes.
-	//
-	[[nodiscard]]
-    inline static bool CollisionDetection_SAT(const Collider2D& _colliderA, const Collider2D& _colliderB) {
-		// Loop through all shapes of the first collider.
-		for (size_t shapeIDA = 0; shapeIDA < _colliderA.m_shapes->ShapeCount(); shapeIDA++) {
-			auto shapeA = _colliderA.m_shapes->GetShape(shapeIDA);
-			auto verticesA = _colliderA.m_shapes->GetShapeVertices(shapeIDA);
-			_colliderA.transform->TransformPoints(verticesA);
-
-			// Loop through all shapes of the second collider.
-			for (size_t shapeIDB = 0; shapeIDB < _colliderB.m_shapes->ShapeCount(); shapeIDB++) {
-				auto shapeB = _colliderB.m_shapes->GetShape(shapeIDB);
-				auto verticesB = _colliderB.m_shapes->GetShapeVertices(shapeIDB);
-				_colliderB.transform->TransformPoints(verticesB);
-
-				if (SATCore(Polygon{ shapeA.radius, verticesA }, Polygon{ shapeB.radius, verticesB })) {
-					return true;
-				}
-			}
-		}
-
-		return false;
-	}
-
-	//
-	// Implementation of GJK (Gilbert�Johnson�Keerthi) algorithm for overlap detection
-	// between two polygons.
-	// 
-	// @param _resultSimplex:
-	//		The result simplex if the colliders overlapped.
-	//
-	[[nodiscrad]]
-	inline static bool GJKCore(const Polygon& _polygonA, const Polygon& _polygonB, impl::Simplex& _resultSimplex) {
-
-	}
-
-	//
-	// Implementation of GJK (Gilbert�Johnson�Keerthi) algorithm for collision detection
-	// between two colliders.
-	// 
-	// @param _resultSimplex:
-	//		The result simplex if the colliders overlapped.
-	//
-	[[nodiscard]]
-    inline static bool CollisionDetection_GJK(const Collider2D& _colliderA, const Collider2D& _colliderB, impl::Simplex& _resultSimplex) {
-		// For a detailed explanation of the Gilbert�Johnson�Keerthi algorithm, see:
-		// https://medium.com/@mbayburt/walkthrough-of-the-gjk-collision-detection-algorithm-80823ef5c774
-		// and
-		// https://winter.dev/articles/gjk-algorithm
-
-		// Get initial support point in any direction (vector (1, 0) in this case)
-		Vector2 support = Support(_colliderA, _colliderB, Vector2::right);
-
-		impl::Simplex simplex;
-		simplex.push_front(support);
-
-		// Set the next direction towards the origin.
-		Vector2 direction = -support;
-
-		while (true) {
-			support = Support(_colliderA, _colliderB, direction);
-
-			// If the support is not pass the origin.
-			if (Vector2::Dot(support, direction) <= 0) {
-				return false; // No collision
-			}
-
-			simplex.push_front(support);
-
-			if (GJK_HandleSimplex(simplex, direction)) {
-				_resultSimplex = simplex;
-				return true;
-			}
-		}
-	}
-
-	[[nodiscard]]
-    inline static bool GJK_HandleSimplex(impl::Simplex& _simplex, Vector2& _direction) {
-		if (_simplex.size() == 2)
-			return GJK_LineCase(_simplex, _direction);
-		else
-			return GJK_TriangleCase(_simplex, _direction);
-	}
-
-	[[nodiscard]]
-    inline static bool GJK_LineCase(impl::Simplex& _simplex, Vector2& _direction) {
-		Vector2 a = _simplex[0];
-		Vector2 b = _simplex[1];
-
-		Vector2 ab = b - a;
-		Vector2 ao = -a;
-
-		if (Vector2::Dot(ab, ao) > 0) {
-			// We use triple product to calculate the correct normal orientation.
-			_direction = Vector3::Cross(Vector3::Cross(ab, ao), ab);
-		}
-		else {
-			_simplex = { a };
-			_direction = ao;
-		}
-
-		return false;
-	}
-
-	[[nodiscard]]
-    inline static bool GJK_TriangleCase(impl::Simplex& _simplex, Vector2& _direction) {
-		Vector2 a = _simplex[0];
-		Vector2 b = _simplex[1];
-		Vector2 c = _simplex[2];
-
-		Vector2 ab = b - a;
-		Vector2 ac = c - a;
-		Vector2 ao = -a;
-		
-		Vector3 abc = Vector3::Cross(ab, ac);
-
-		// Origin is in region outside AC.
-		if (Vector2::Dot(Vector3::Cross(abc, ac), ao) > 0) {
-			// If AC and AO are pointing in the same general direction.
-			if (Vector2::Dot(ac, ao) > 0) {
-				// Adjust simplex to AC.
-				_simplex = { a, c };
-				_direction = Vector3::Cross(Vector3::Cross(ac, ao), ac);
-			}
-			else {
-				return GJK_LineCase(_simplex = { a, b }, _direction);
-			}
-		}
-		else {
-			// Origin is in region outside AB.
-			if (Vector2::Dot(Vector3::Cross(ab, abc), ao) > 0) {
-				return GJK_LineCase(_simplex = { a, b }, _direction);
-			}
-			// If both case was false, origin is inside triangle.
-			else {
-				return true;
-			}
-		}
-
-		return false;
-	}
-
-	[[nodiscard]]
-    inline static ColliderDistance2D EPA(const Collider2D& _colliderA, const Collider2D& _colliderB, const impl::Simplex& _simplex, int _maxIterations) noexcept {
-		size_t minIndex = 0;
-		float minDistance = INFINITY;
-		Vector2 minNormal;
-		std::vector<Vector2> polytope = _simplex;
-
-		int count = 0;
-		while (minDistance == INFINITY) {
-			count++;
-
-			// Find the closest edge from the origin.
-			size_t n = polytope.size();
-			for (size_t i = 0; i < n; i++) {
-				size_t j = (i + 1) % n;
-
-				Vector2 currVert = polytope[i];
-				Vector2 nextVert = polytope[j];
-				Vector2 normal = Vector2::Perpendicular(nextVert - currVert).GetNormalized();
-				float distance = Vector2::Dot(currVert, normal);
-
-				// If the distance is negative -> normal is facing the wrong direction -> flip normal direction.
-				if (distance < 0) {
-					distance *= -1;
-					normal *= -1;
-				}
-
-				if (distance < minDistance) {
-					minDistance = distance;
-					minNormal = normal;
-					minIndex = j;
-				}
-			}
-
-			// Get the support point in the direction of the normal. (if have)
-			Vector2 support = Support(_colliderA, _colliderB, minNormal);
-			float sDistance = Vector2::Dot(support, minNormal);
-
-			if (std::abs(sDistance - minDistance) > 0.001f && count < _maxIterations) {
-				minDistance = INFINITY;
-				polytope.insert(polytope.begin() + minIndex + 1, support);
-			}
-		}
-
-		return { minDistance, -minNormal };
+		return result;
 	}
 
 public: // Accessors
 	// Get the bounding box of this collider.
 	[[nodiscard]]
-    inline const Bounds GetBounds() {
-		return *m_bounds;
+	inline const Bounds* GetBounds() const noexcept {
+		return m_bounds.get();
 	}
 
 public: // Properties
-	bool	isTrigger	= false;	// Is this collider a trigger?
-	float	bounciness	= 0.0f;		// Get the bounciness used by the collider.
-	float	friction	= 0.5f;		// Get the friction used by the collider.
-	float	density		= 7.874f;	// The density of the collider used to calculate its mass (when auto mass is enabled).
+	bool	isTrigger = false;	// Is this collider a trigger?
+	float	bounciness = 0.0f;		// Get the bounciness used by the collider.
+	float	friction = 0.5f;		// Get the friction used by the collider.
+	float	density = 7.874f;	// The density of the collider used to calculate its mass (when auto mass is enabled).
 
-	Vector2	offset	= Vector2::zero;	// The local offset of this collider relative to the owning transform.
-	Vector2	scale	= Vector2::one;		// The Count multiplier of this collider.
+	Vector2	offset = Vector2::zero;	// The local offset of this collider relative to the owning transform.
+	Vector2	scale = Vector2::one;		// The size multiplier of this collider.
 
 protected:
-	PhysicsShapeGroup2D* m_shapes = new PhysicsShapeGroup2D();	// The original "model" of the Collider2D.
+	// The original "model" of the Collider2D.
+	std::shared_ptr<PhysicsShapeGroup2D> m_shapes = std::make_shared<PhysicsShapeGroup2D>();
 
-	Bounds*	m_bounds = new Bounds();	// The world space bounding area of the collider.
+	// The world space bounding area of the collider.
+	std::shared_ptr<Bounds>	m_bounds = std::make_shared<Bounds>();
 
 private:
-	Rigidbody2D* m_attachedRigidbody = nullptr;	// The Rigidbody2D attached to the Collider2D.
+	std::shared_ptr<Rigidbody2D> m_attachedRigidbody = nullptr;	// The Rigidbody2D attached to the Collider2D.
 };
 
 // +--------------------------------------------------------------------------------+
@@ -1217,7 +738,7 @@ public: // Constructors & Destructors
 	// @param _radius:
 	//		Radius of the circle.
 	//
-	inline CircleCollider2D(float _radius) 
+	inline CircleCollider2D(float _radius)
 		: Collider2D() {
 		m_shapes->AddCircle(Vector2::zero, _radius);
 	}
@@ -1226,7 +747,8 @@ public: // Constructors & Destructors
 	// Create a new CircleCollider2D with radius of 1.
 	//
 	inline CircleCollider2D()
-		: CircleCollider2D(1) {}
+		: CircleCollider2D(1) {
+	}
 };
 
 // +--------------------------------------------------------------------------------+
@@ -1255,10 +777,10 @@ public: // Constructors & Destructors
 	//		to fit this area. When the capsule area is a 1:1 ratio, the capsule ends will fit together exactly 
 	//		resulting in a circle only.
 	//
-	inline CapsuleCollider2D(bool _horiz, Vector2 _size) 
+	inline CapsuleCollider2D(bool _horiz, Vector2 _size)
 		: Collider2D() {
 		Vector2 vert;
-		if (_horiz) 
+		if (_horiz)
 			vert = Vector2{ LMK_Max(_size.x - _size.y, 0), 0 };
 		else
 			vert = Vector2{ 0, LMK_Max(_size.y - _size.x,  0) };
@@ -1270,7 +792,8 @@ public: // Constructors & Destructors
 	// Create a new CapsuleCollider2D with Count of (0.5, 1) and extend vertically.
 	//
 	inline CapsuleCollider2D()
-		: CapsuleCollider2D(false, Vector2(0.5f, 1)) {}
+		: CapsuleCollider2D(false, Vector2(0.5f, 1)) {
+	}
 };
 
 // +--------------------------------------------------------------------------------+
@@ -1300,7 +823,7 @@ public: // Constructors & Destructors
 	//			This results in a box with rounded corners.
 	//			NOTE: using the _edgeRadius does not effect the Rigidbody2D.mass even though the collision area has changed.
 	//
-	inline BoxCollider2D(Vector2 _size, float _edgeRadius) 
+	inline BoxCollider2D(Vector2 _size, float _edgeRadius)
 		: Collider2D() {
 		m_shapes->AddBox(Vector2::zero, _size, 0, _edgeRadius);
 	}
@@ -1308,8 +831,9 @@ public: // Constructors & Destructors
 	//
 	// Create a new BoxCollider2D with Count of (1, 1) and edge radius of 0.
 	//
-	inline BoxCollider2D() 
-		: BoxCollider2D(Vector2::one, 0) {}
+	inline BoxCollider2D()
+		: BoxCollider2D(Vector2::one, 0) {
+	}
 };
 
 // +--------------------------------------------------------------------------------+
@@ -1329,7 +853,7 @@ public: // Constructors & Destructors
 	// @param _vertices:
 	//		Corner points that define the collider's shape in local space.
 	//
-	inline PolygonCollider2D(const std::vector<Vector2>& _vertices) 
+	inline PolygonCollider2D(const std::vector<Vector2>& _vertices)
 		: Collider2D() {
 		m_shapes->AddPolygon(_vertices);
 	}
@@ -1338,9 +862,26 @@ public: // Constructors & Destructors
 	// Create a new PolygonCollider2D with no vertex data.
 	//
 	inline PolygonCollider2D()
-		: Collider2D() {}
+		: Collider2D() {
+	}
 
 public: // Functions
+	//
+	// 
+	//
+	inline void AddPath(const std::vector<Vector2>& _vertices) {
+		m_shapes->AddPolygon(_vertices);
+		RecalculateBounds();
+	}
+
+	//
+	//
+	//
+	inline bool RemovePath(int _index) {
+		bool result = m_shapes->DeleteShape(_index);
+		RecalculateBounds();
+		return result;
+	}
 
 private:
 	//
@@ -1350,7 +891,7 @@ private:
 	// 180o, and reflex otherwise.
 	//
 	[[nodiscard]]
-    inline bool IsReflex(size_t _vertexIndex) {
+	inline bool IsReflex(size_t _vertexIndex) {
 
 	}
 
@@ -1365,16 +906,8 @@ private:
 	//		the 2 indices before and after this index.
 	//
 	[[nodiscard]]
-    inline bool IsEar(size_t _pointIndex) const {
-		LMK_CORE_ASSERT(_pointIndex >= 0 && _pointIndex < m_vertices.size(),
-			"lmk::PhysicsShape2D: IsEar() - Invalid _pointIndex parameter.");
+	inline bool IsEar(size_t _pointIndex) const {
 
-		Vector2 A = m_vertices[(_pointIndex - 1)];
-		Vector2 B = m_vertices[_pointIndex];
-		Vector2 C = m_vertices[(_pointIndex - 1)];
-
-		// If the angle at the point of _pointIndex is >= 180 degree -> not an ear.
-		if (true) return false;
 
 		return true;
 	}
@@ -1387,7 +920,7 @@ private:
 	//		polygons after decomposition.
 	//
 	[[nodiscard]]
-    inline std::vector<PhysicsShape2D> FancyEarClipping() noexcept {
+	inline std::vector<PhysicsShape2D> FancyEarClipping() noexcept {
 
 	}
 
@@ -1404,7 +937,7 @@ private: // Static Functions
 	//		Is the point contained within the triangle?
 	// 
 	[[nodiscard]]
-    inline static bool TriangleContains(Vector2 _triangle[3], Vector2 _point) {
+	inline static bool TriangleContains(Vector2 _triangle[3], Vector2 _point) {
 		float crossAB = Vector2::Cross(_triangle[0] - _point, _triangle[1] - _point);
 		float crossBC = Vector2::Cross(_triangle[1] - _point, _triangle[2] - _point);
 		float crossAC = Vector2::Cross(_triangle[2] - _point, _triangle[0] - _point);
@@ -1425,12 +958,12 @@ ENUM_ENCAP_BEGIN(rgbody)
 // Use these flags to constrain motion of the Rigidbody2D.
 //
 enum RigidbodyConstraints2D {
-	None			= 0x0000,								// No constraints.
-	FreezePositionX	= 0x0001,								// Freeze motion along the X - axis.
-	FreezePositionY	= 0x0002,								// Freeze motion along the Y - axis.
-	FreezeRotation	= 0x0004,								// Freeze rotation along the Z - axis.
-	FreezePosition	= FreezePositionX | FreezePositionY,	// Freeze motion along the X - axis and Y - axis.
-	FreezeAll		= FreezeRotation | FreezePosition,		// Freeze rotation and motion along all axes.
+	None = 0x0000,										// No constraints.
+	FreezePositionX = 0x0001,							// Freeze motion along the X - axis.
+	FreezePositionY = 0x0002,							// Freeze motion along the Y - axis.
+	FreezeRotation = 0x0004,							// Freeze rotation along the Z - axis.
+	FreezePosition = FreezePositionX | FreezePositionY,	// Freeze motion along the X - axis and Y - axis.
+	FreezeAll = FreezeRotation | FreezePosition,		// Freeze rotation and motion along all axes.
 };
 
 //
@@ -1489,93 +1022,359 @@ ENUM_ENCAP_END
 USE_ENUM_NS(rgbody)
 
 //
-// Rigidbody physics component for 2D sprites.
+// Rigidbody physics component for GameObjects.
 // 
-// Adding a Rigidbody2D component to a sprite puts it under the control of the physics engine.
+// Adding a Rigidbody2D component to an object puts it under the control of the physics engine.
 //
 class Rigidbody2D : public Component {
 public: // Constructors & Destructors
-#pragma warning (disable : 26495)
-	inline Rigidbody2D(
-		RigidbodyType2D _bodyType,
-		float m_drag,
-		float m_angularDrag,
-		float m_inertia,
-		float m_mass,
-		float m_gravityScale
-	) {
-		m_attachedCollider = gameObject->GetComponent<Collider2D>();
-	}
-
+	// TODO Auto register child colliders
 	inline Rigidbody2D() = default;
-#pragma warning (default : 26495)
 
 public: // Functions
-	// 
-	// Resolve all current collisions of this body.
 	//
-	inline void ResolveCollision(const Rigidbody2D& _other) {
-		
+	// Register a new collider to this body.
+	//
+	inline bool RegisterCollider(Collider2D* _collider) {
+		m_attachedCollider = _collider;
+		return true;
 	}
 
-private:
 	//
-	// Move the body by _amount.
+	// Apply an impulse to a body.
+	// 
+	// @param _impulse:
+	//		A vector represents the direction and magnitude of the force.
+	// 
+	// @param _worldPoint:
+	//		The impact point of the force in world space;
 	//
-	inline void Move(Vector2 _amount) {
-		position += _amount;
-		
+	inline void ApplyImpulse(Vector2 _impulse, Vector2 _worldPoint) {
+		auto r = _worldPoint - GetPosition();
+		auto angularImpulse = LMK_RtoD(Vector2::Cross(r, _impulse));
+
+		linearVelocity += _impulse * GetInvMass();
+		angularVelocity += angularImpulse * GetInvInertia();
+	}
+
+protected:
+	inline void OnAttached() override;
+
+public: // Accessors
+	// The total amount of force that has been explicitly applied to this Rigidbody2D since the last physics simulation step.
+	[[nodiscard]]
+	inline float GetTotalForce() const {
+		return m_totalForce;
+	}
+
+	// The total amount of torque that has been explicitly applied to this Rigidbody2D since the last physics simulation step.
+	[[nodiscard]]
+	inline float GetTotalTorque() const {
+		return m_totalTorque;
+	}
+
+	// Position of the body in world space. Same as Transform.GetPosition() if center of mass is default to (0, 0)
+	[[nodiscard]]
+	inline Vector2 GetPosition() const {
+		return transform->GetPosition();
+	}
+
+	[[nodiscard]]
+	inline Collider2D* GetCollider() const {
+		return m_attachedCollider;
+	}
+
+	[[nodiscard]]
+	inline float GetInvMass() const {
+		if (bodyType == rgbody::Static) return 0;
+		return mass == 0 ? 0 : 1 / mass;
+	}
+
+	[[nodiscard]]
+	inline float GetInvInertia() const {
+		if (bodyType == rgbody::Static) return 0;
+		return inertia == 0 ? 0 : 1 / inertia;
 	}
 
 public: // Properties
-	RigidbodyType2D	bodyType; // A RigidbodyType2D used to define the behaviour of this body in the physics world.
+	// A RigidbodyType2D used to define the behaviour of this body in the physics world.
+	RigidbodyType2D	bodyType = rgbody::Dynamic;
 
-	Vector2	velocity;	// The general velocity of this body in world space.
-	Vector2 position;	// The position of the rigidbody.
-	float rotation;		// The rotation of the rigidbody.
+	// Controls which degrees of freedom are allowed for the simulation of this Rigidbody2D.
+	RigidbodyConstraints2D constrains = rgbody::None;
 
-	float drag;			// 
-	float angularDrag;	// 
-	float inertia;		// 
-	float mass;			// 
-	float gravityScale;	// 
+	// The linear velocity of the Rigidbody2D represents the rate of change over time of the Rigidbody2D position in world-units.
+	Vector2	linearVelocity = Vector2::zero;
 
-	bool useAutoMass = true;	// Does this body use physics to automatically calculate its body mass.
+	// The linear damping of the Rigidbody2D linear velocity.
+	float linearDamping = 0.f;
+
+	// Angular velocity in degrees per second.
+	float angularVelocity = 0;
+
+	// The angular damping of the Rigidbody2D angular velocity.
+	float angularDamping = 0.05f;
+
+	// The Rigidbody's resistance to changes in angular velocity (rotation).
+	float inertia = 1.f;
+
+	// Mass of the Rigidbody.
+	// The mass is given in arbitrary units, but the basic physical principles of mass apply.
+	float mass = 1.f;
+
+	// The degree to which this object is affected by gravity.
+	float gravityScale = 1.f;
+
+	// TODO add center of mass and update physics solver.
+
 
 private:
-	Collider2D* m_attachedCollider;
+	// TODO handle multi colliders
+	Collider2D* m_attachedCollider = nullptr;
 
-	float m_totalForce;		// The total amount of force that has been explicitly applied to this Rigidbody2D since the last physics simulation step.
-	float m_totalTorque;	// The total amount of torque that has been explicitly applied to this Rigidbody2D since the last physics simulation step.
+	// The total amount of force that has been explicitly applied to this Rigidbody2D since the last physics simulation step.
+	float m_totalForce = 0;
+
+	// The total amount of torque that has been explicitly applied to this Rigidbody2D since the last physics simulation step.
+	float m_totalTorque = 0;
 };
 
 // +--------------------------------------------------------------------------------+
 // |																				|
-// | CONTACT POINT 2D																|
+// | CONSTRAINS																		|
 // |																				|
 // +--------------------------------------------------------------------------------+
 
 //
-// Details about a specific point of contact involved in a 2D physics collision.
-// 
-// A contact point describes a point of intersection between two Collider2D. 
-// ContactPoint2D can only exist on Collider2D that are not set to be triggers as triggers do not define contact points.
 //
-struct ContactPoint2D {
-	bool enabled;				// Indicates whether the collision response or reaction is enabled or disabled.
+//
+class Constraint {
+private:
+	friend class PhysicsScene2D;
 
-	Collider2D* collider;		// The incoming Collider2D involved in the collision with the otherCollider.
-	Rigidbody2D* rigidbody;		// The incoming Rigidbody2D involved in the collision with the otherRigidbody.
+protected: // Constructors
+	inline Constraint(Rigidbody2D* _A, Rigidbody2D* _B) {
+		bodyA = _A;
+		bodyB = _B;
+	}
 
-	Collider2D* otherCollider;		// The other Collider2D involved in the collision with the collider.
-	Rigidbody2D* otherRigidbody;	// The other Rigidbody2D involved in the collision with the rigidbody.
+public: // Functions
+	//
+	// Caled each physics step before solving bodies.
+	//
+	virtual void Update() = 0;
 
-	Vector2 point;				// The point of contact between the two colliders in world space.
-	Vector2 normal;				// Surface normal Get the contact point.
-	Vector2 normalImpulse;		// Gets the impulse applied Get the contact point along the ContactPoint2D.normal.
-	Vector2 relativeVelocity;	// Gets the relative velocity of the two colliders Get the contact point(Read Only).
-	float separation;			// Gets the distance between the colliders Get the contact point.
-	float tangentImpulse;		// Gets the impulse applied Get the contact point which is perpendicular to the ContactPoint2D.normal.
+	//
+	// @param _dTime:
+	//		Number of seconds between the last physics step and this one.
+	// 
+	// @param _baumgarteFactor:
+	//		Baumgarte stabilization factor to avoid constraints driffting.
+	//
+	virtual void Solve(float _dTime, float _baumgarteFactor) = 0;
+
+protected: // Properties
+	Rigidbody2D* bodyA;
+	Rigidbody2D* bodyB;
+};
+
+//
+// 
+//
+class EqualityConstraint: public Constraint {
+public:
+	EqualityConstraint(Rigidbody2D* _A, Rigidbody2D* _B, Vector2 _worldP) 
+		: Constraint(_A, _B) {
+		m_localA = _A->transform->InverseTransformPoint(_worldP);
+		m_localB = _B->transform->InverseTransformPoint(_worldP);
+	}
+
+public:
+	inline void Update() override {
+		m_worldA = bodyA->transform->TransformPoint(m_localA);
+		m_worldB = bodyB->transform->TransformPoint(m_localB);
+		m_rA = m_worldA - bodyA->GetPosition();
+		m_rB = m_worldB - bodyB->GetPosition();
+
+		m_mA = bodyA->GetInvMass();
+		m_mB = bodyB->GetInvMass();
+		m_iA = bodyA->GetInvInertia();
+		m_iB = bodyB->GetInvInertia();
+	}
+
+	inline void Solve(float _dTime, float _baumgarteFactor) override {
+		Vector2 velA = bodyA->linearVelocity + Vector2::Perpendicular(m_rA) * LMK_DtoR(bodyA->angularVelocity);
+		Vector2 velB = bodyB->linearVelocity + Vector2::Perpendicular(m_rB) * LMK_DtoR(bodyB->angularVelocity);
+		Vector2 relVel = velB - velA;
+		Vector2 relPos = m_worldB - m_worldA;
+
+		float K[2][2]{};
+		K[0][0] = m_mA + m_mB + m_rA.y * m_rA.y * m_iA + m_rB.y * m_rB.y * m_iB;
+		K[0][1] = -m_rA.y * m_rA.x * m_iA - m_rB.y * m_rB.x * m_iB;
+		K[1][0] = K[0][1];
+		K[1][1] = m_mA + m_mB + m_rA.x * m_rA.x * m_iA + m_rB.x * m_rB.x * m_iB;
+
+		// Avoid drifting constraints
+		Vector2 bias = relPos * (_baumgarteFactor / _dTime);
+		Vector2 cwb = -(relVel + bias);
+
+		// Solve using Cramer's rule
+		float det = K[0][0] * K[1][1] - K[0][1] * K[1][0];
+		float invDet = det != 0 ? 1.f / det : 0;
+		Vector2 impulse(invDet * (K[1][1] * cwb.x - K[0][1] * cwb.y), invDet * (K[0][0] * cwb.y - K[1][0] * cwb.x));
+
+		bodyA->ApplyImpulse(-impulse, m_worldA);
+		bodyB->ApplyImpulse(impulse, m_worldB);
+	}
+
+public:
+	inline Vector2 GetWorldA() const {
+		return m_worldA;
+	}
+
+	inline Vector2 GetWorldB() const {
+		return m_worldB;
+	}
+
+private: // Properties
+	Vector2 m_worldA, m_worldB;
+	Vector2 m_localA, m_localB;
+	Vector2 m_rA, m_rB;
+
+	float m_mA, m_mB; // inverse mass
+	float m_iA, m_iB; // inverse inertia
+};
+
+//
+// 
+//
+class ContactConstraint : public Constraint {
+public:
+	ContactConstraint(Rigidbody2D* _A, Rigidbody2D* _B, Vector2 _worldP, Vector2 _normal, float _penetration)
+		: Constraint(_A, _B) {
+		m_mA = bodyA->GetInvMass();
+		m_mB = bodyB->GetInvMass();
+		m_iA = bodyA->GetInvInertia();
+		m_iB = bodyB->GetInvInertia();
+
+		m_friction = std::sqrt(bodyA->GetCollider()->friction * bodyB->GetCollider()->friction);
+		SetCollisionData(_worldP, _normal, _penetration);
+
+		std::cout << "Added: " << bodyA->gameObject->name << " -- " << bodyB->gameObject->name << "\n";
+	}
+
+	~ContactConstraint() {
+		std::cout << "Deleted: " << bodyA->gameObject->name << " -- " << bodyB->gameObject->name << "\n";
+	}
+
+public:
+	inline void SetCollisionData(Vector2 _worldP, Vector2 _normal, float _penetration) {
+		m_normal = _normal;
+		m_tangent = Vector2(_normal.y, -_normal.x); // rotate 90 degree cw
+		m_penetration = _penetration;
+		m_localA = bodyA->transform->InverseTransformPoint(_worldP);
+		m_localB = bodyB->transform->InverseTransformPoint(_worldP);
+	}
+
+	inline void Update() override {
+		m_worldA = bodyA->transform->TransformPoint(m_localA);
+		m_worldB = bodyB->transform->TransformPoint(m_localB);
+		m_rA = m_worldA - bodyA->GetPosition();
+		m_rB = m_worldB - bodyB->GetPosition();
+
+		m_mA = bodyA->GetInvMass();
+		m_mB = bodyB->GetInvMass();
+		m_iA = bodyA->GetInvInertia();
+		m_iB = bodyB->GetInvInertia();
+
+		// warm starting
+		auto normalImpulse = m_normal * m_accNormalLambda;
+		auto tangentImpulse = m_tangent * m_accFrictionLambda;
+		auto totalImpulse = normalImpulse + tangentImpulse;
+		bodyA->ApplyImpulse(-totalImpulse, m_worldA);
+		bodyB->ApplyImpulse(totalImpulse, m_worldB);
+	}
+
+	inline void Solve(float _dTime, float _baumgarteFactor) override {
+		SolveContact(_dTime, _baumgarteFactor);
+		SolveFriction();
+	}
+
+private:
+	inline void SolveContact(float _dTime, float _baumgarteFactor) {
+		Vector2 velA = bodyA->linearVelocity + Vector2::Perpendicular(m_rA) * LMK_DtoR(bodyA->angularVelocity);
+		Vector2 velB = bodyB->linearVelocity + Vector2::Perpendicular(m_rB) * LMK_DtoR(bodyB->angularVelocity);
+		Vector2 relVel = velB - velA;
+		float cp = Vector2::Dot(relVel, m_normal);
+
+		float rnA = Vector2::Cross(m_rA, m_normal);
+		float rnB = Vector2::Cross(m_rB, m_normal);
+		float eMass = m_mA + m_mB + rnA * rnA * m_iA + rnB * rnB * m_iB;
+		if (eMass < 1e-6f) return;
+
+		float allowedPenetration = 1e-4f;
+		float separation = LMK_Min(0, -m_penetration + allowedPenetration);
+		float vBias = (_baumgarteFactor / _dTime) * separation;
+
+		// normal impulse
+		float lambda = -(cp + vBias) / eMass;
+		float oldAcc = m_accNormalLambda;
+		m_accNormalLambda = LMK_Max(m_accNormalLambda + lambda, 0);
+		lambda = m_accNormalLambda - oldAcc;
+
+		if (lambda == 0) return;
+
+		Vector2 impulse = m_normal * lambda;
+		bodyA->ApplyImpulse(-impulse, m_worldA);
+		bodyB->ApplyImpulse(impulse, m_worldB);
+	}
+
+	inline void SolveFriction() {
+		if (m_friction <= 0) return;
+		Vector2 velA = bodyA->linearVelocity + Vector2::Perpendicular(m_rA) * LMK_DtoR(bodyA->angularVelocity);
+		Vector2 velB = bodyB->linearVelocity + Vector2::Perpendicular(m_rB) * LMK_DtoR(bodyB->angularVelocity);
+		Vector2 relVel = velB - velA;
+		float cp = Vector2::Dot(relVel, m_tangent);
+
+		float rtA = Vector2::Cross(m_rA, m_tangent);
+		float rtB = Vector2::Cross(m_rB, m_tangent);
+		float eMassTangent = m_mA + m_mB + rtA * rtA * m_iA + rtB * rtB * m_iB;
+		if (eMassTangent < 1e-6f) return;
+
+		float lambda = -cp / eMassTangent;
+		float maxFriction = m_friction * m_accNormalLambda;
+		float oldAcc = m_accFrictionLambda;
+		m_accFrictionLambda = LMK_Max(-maxFriction, LMK_Min(oldAcc + lambda, maxFriction));
+		lambda = m_accFrictionLambda - oldAcc;
+
+		Vector2 frictionImpulse = m_tangent * lambda;
+		bodyA->ApplyImpulse(-frictionImpulse, m_worldA);
+		bodyB->ApplyImpulse(frictionImpulse, m_worldB);
+	}
+
+public:
+	inline Vector2 GetWorldContactPointA() const {
+		return m_worldA;
+	}
+
+	inline Vector2 GetWorldContactPointB() const {
+		return m_worldB;
+	}
+
+public: // Properties
+	float m_accNormalLambda = 0;
+	float m_accFrictionLambda = 0;
+
+	Vector2 m_normal, m_tangent;
+	float m_penetration;
+	float m_friction;
+
+	Vector2 m_worldA, m_worldB;
+	Vector2 m_localA, m_localB;
+	Vector2 m_rA, m_rB;
+
+	float m_mA, m_mB; // inverse mass
+	float m_iA, m_iB; // inverse inertia
 };
 
 // +--------------------------------------------------------------------------------+
@@ -1593,6 +1392,9 @@ struct ContactPoint2D {
 // Using this, multiple independent physics Scenes can coexist.
 //
 class PhysicsScene2D {
+public:
+	friend class Physics2D;
+
 public: // Constructors & Destructors
 	inline PhysicsScene2D() = default;
 
@@ -1602,34 +1404,70 @@ public:
 	// 
 	// This body will be simulated in the next iteration.
 	//
-	inline bool Submit(Rigidbody2D* _body) {
+	inline bool Register(Rigidbody2D* _body) {
 		m_bodies.push_back(_body);
+
+		return true;
 	}
 
+	//
+	// Submit a new constraint to the physics scene.
+	// 
+	inline bool Register(Constraint* _constraint) {
+		m_constraints.push_back(_constraint);
+
+		return true;
+	}
+
+private:
 	//
 	// Advance the physics simulation by the given time.
 	// 
 	// @param _elapsedTime:
-	//		The amount of time to advance the simulation.
+	//		The number of seconds to advance the simulation.
 	//		The smaller this is, the more accurate the simulation will be.
 	//
-	inline void Step(float _elapsedTime) {
-		for (auto& body : m_bodies) {
-			// If the game object is not active -> we skip updating this body.
-			if (!body->gameObject->selfActive) continue;
+	inline void Step(float _dTime);
 
-			body->position += body->velocity * _elapsedTime;
+	inline void SolveConstraints(float _dTime) {
+		for (auto& c : m_constraints) {
+			c->Update();
+		}
 
-			for (auto& otherBody : m_bodies) {
-				if (otherBody == body) continue;
-
-				body->ResolveCollision(*otherBody);
+		for (size_t i = 0; i < m_constraintSolverIterations; i++) {
+			for (auto& c : m_constraints) {
+				c->Solve(_dTime, m_baumgarteFactor);
 			}
 		}
 	}
 
-private:
+	inline void FinalizeBodies(float _dTime) {
+		for (size_t i = 0; i < m_bodies.size(); i++) {
+			auto body = m_bodies[i];
+
+			body->transform->Translate(body->linearVelocity * _dTime);
+			body->transform->Rotate(body->angularVelocity * _dTime);
+		}
+	}
+
+public:
+	inline std::vector<ContactConstraint*> GetContacts() {
+		std::vector<ContactConstraint*> result;
+		for (auto& contact : m_contactCache) {
+			result.push_back(contact.second);
+		}
+
+		return result;
+	}
+
+private: // Properties
 	std::vector<Rigidbody2D*> m_bodies;
+	std::vector<Constraint*> m_constraints;
+	std::unordered_map<uint64_t, ContactConstraint*> m_contactCache;
+
+	size_t m_bodySolverIterations = 8;
+	size_t m_constraintSolverIterations = 10;
+	float m_baumgarteFactor = 0.05f;
 };
 
 // +--------------------------------------------------------------------------------+
@@ -1644,6 +1482,142 @@ private:
 class Physics2D {
 public: // Typedef
 	friend class LMKEngine;
+	friend class PhysicsScene2D;
+
+	// Contains projection data of a vector onto a plane.
+	struct ProjectionResult {
+		float minDis;
+		float maxDis;
+	};
+
+	// Contains a list of vertices and radius to presents rounded shapes.
+	struct Polygon {
+		inline explicit Polygon(float _radius, const std::vector<Vector2>& _vertices)
+			: radius(_radius), vertices(_vertices) {
+		}
+
+		float radius;					// The edge radius value of the polygon.
+		std::vector<Vector2> vertices;	// The vertices of the polygon.
+
+		inline int Count() const {
+			return vertices.size();
+		}
+	};
+
+	// Represents a vertex of a polygon
+	struct Vertex {
+		Vector2 position;
+
+		// Index in polygon
+		size_t id;
+	};
+
+	// Represents an edge/line segment
+	struct Segment {
+		Vertex v1; // first vertex
+		Vertex v2; // second vertex
+
+		Vector2 GetForward() const {
+			return (v2.position - v1.position).GetNormalized();
+		}
+
+		Vector2 GetBackward() const {
+			return (v1.position - v2.position).GetNormalized();
+		}
+
+		Vector2 GetMidPoint() const {
+			return v2.position + (v1.position - v2.position) / 2.f;
+		}
+
+		inline Vertex& operator[](size_t _index) {
+			LMK_CORE_ASSERT(_index <= 1,
+				"lmk::Physics2D::Segment: operator[]() - Index out of range. (index in range [0..1] expected)")
+
+			return _index == 0 ? v1 : v2;
+		}
+
+		inline const Vertex& operator[](size_t _index) const {
+			LMK_CORE_ASSERT(_index <= 1,
+				"lmk::Physics2D::Segment: operator[]() - Index out of range. (index in range [0..1] expected)")
+
+			return _index == 0 ? v1 : v2;
+		}
+	};
+
+	// Contains all the detail related to the geometry and dynamics of the contact. 
+	// Use ManifoldPoint.totalNormalImpulse to determine if there was an interaction during the time step.
+	struct ManifoldPoint {
+		// Uniquely identifies a contact point between two shapes.
+		int id;
+
+		// Location of the contact point relative to shapeA's origin in world space.
+		Vector2 anchorA;
+
+		// Location of the contact point relative to shapeB's origin in world space.
+		Vector2 anchorB;
+
+		// Location of the contact point in world space. Subject to precision loss at large coordinates. 
+		// This point lags behind when contact recycling is used. 
+		// Preference should be to use anchorA and/or anchorB for game logic. This is also known as the "clip" point.
+		Vector2 point;
+
+		// The impulse along the manifold normal vector.
+		float normalImpulse;
+
+		// Relative normal velocity pre - solve. Used for hit events.
+		// If the normal impulse is zero then there was no hit.
+		// Negative means shapes are approaching.
+		float normalVelocity;
+
+		// The friction impulse.
+		float tangentImpulse;
+
+		// The total normal impulse applied across sub-stepping and restitution. 
+		// This includes the warm starting impulse, the sub-step delta impulse, and the restitution impulse. 
+		// This can be used to identify speculative contact points that had an interaction during the simulation step.
+		float totalNormalImpulse;
+
+		// Did this contact point exist the previous step?
+		bool persisted;
+
+		// The separation of the contact point, negative if penetrating.
+		float separation;
+
+		// Is the contact point speculative i.e. not currently interacting?
+		bool speculative;
+	};
+
+	// Fixed-sized manifold point array.
+	struct ManifoldPointArray {
+		std::shared_ptr<ManifoldPoint> contactInfo0 = nullptr;
+		std::shared_ptr<ManifoldPoint> contactInfo1 = nullptr;
+
+		inline std::shared_ptr<ManifoldPoint>& operator[](size_t _index) {
+			LMK_CORE_ASSERT(_index <= 1,
+				"lmk::Physics2D::ManifoldPointArray: operator[]() - Index out of range. (index in range [0..1] expected)")
+
+			return _index == 0 ? contactInfo0 : contactInfo1;
+		}
+	};
+
+	// A contact manifold describes the contact points between colliding shapes. 
+	struct ContactManifold {
+		// The unit normal vector in world space, points from shape A to bodyB
+		Vector2 normal;
+
+		// The number of manifold points available, in the range [0, 2].
+		int pointCount;
+
+		// The manifold points, up to two are possible.
+		ManifoldPointArray points;
+
+		// Angular impulse applied for rolling resistance (N " m " s = kg * m^2 / s).
+		float rollingImpulse;
+
+		inline std::shared_ptr<ManifoldPoint>& operator[](size_t _index) {
+			return points[_index];
+		}
+	};
 
 public: // Constructors & Destructors
 #pragma region Singleton
@@ -1665,13 +1639,13 @@ public:
 
 public: // Static Functions
 	//
-	// Check for overlapping bounding circle.s
+	// Check for overlapping bounding circles.
 	//
 	inline static bool OverlapBoundingCircle(Vector2 _centerA, float _radiusA, Vector2 _centerB, float _radiusB) {
 		return Vector2::Distance(_centerA, _centerB) < _radiusA + _radiusB;
 	}
 
-private:
+public:
 	//
 	// Advance the physics simulation by _elapsedTime seconds.
 	// 
@@ -1681,20 +1655,650 @@ private:
 		Instance.m_physicsScene->Step(_elapsedTime);
 	}
 
-public: // Accessors
-	// 
-	inline static float ContactOffset() {
-		return Instance.m_contactOffset;
+	//
+	// Helper function for retrieving polygons from a collider's shape group.
+	//
+	inline static void PopulatePolygonsFromCollider(const Collider2D& _collider, std::vector<Polygon>& _polygons) {
+		auto shapes = _collider.GetShapes();
+
+		for (size_t i = 0; i < shapes->GetShapeCount(); i++) {
+			auto verts = _collider.GetWorldVertices(i);
+			_polygons.emplace_back(shapes->GetShape(i).radius, verts);
+		}
 	}
 
+	//
+	// Standard implementation of SAT (Separating Axis Theorem) between 2 colliders.
+	//
+	[[deprecated("Use CollisionDetection_GJK instead")]]
+	inline static ColliderDistance2D CollisionDetection_SAT(const Collider2D& _colliderA, const Collider2D& _colliderB) {
+		std::vector<Polygon> polysA, polysB;
+		PopulatePolygonsFromCollider(_colliderA, polysA);
+		PopulatePolygonsFromCollider(_colliderB, polysB);
+
+		ColliderDistance2D best;
+		best.distance = FLT_MAX;
+		best.isValid = false;
+
+		for (auto& polyA : polysA) {
+			for (auto& polyB : polysB) {
+				auto result = SAT(polyA, polyB);
+
+				if (!result.isValid) continue;
+
+				// If separated → early out (optional)
+				if (!result.isOverlapped)
+					return result;
+
+				if (!best.isValid || result.distance > best.distance) {
+					best = result;
+					best.isValid = true;
+				}
+			}
+		}
+
+		return best;
+	}
+
+	//
+	// Standard implementation of GJK (Gilbert-Johnson-Keerthi) algorithm for collision detection
+	// between 2 colliders.
+	// 
+	// @return
+	//		A contact manifold containing contact data.
+	//
+	inline static std::shared_ptr<ContactManifold> CollisionDetection_GJK(
+		const Collider2D& _colliderA, 
+		const Collider2D& _colliderB,
+		size_t _idColA,
+		size_t _idColB) {
+
+		if (!_colliderA.GetBounds()->Intersects(*(_colliderB.GetBounds()))) return nullptr;
+
+		std::vector<Polygon> polysA, polysB;
+		PopulatePolygonsFromCollider(_colliderA, polysA);
+		PopulatePolygonsFromCollider(_colliderB, polysB);
+
+		// Test all shape pairs
+		impl::Simplex simplex;
+		for (size_t i = 0; i < polysA.size(); i++) {
+			auto& polyA = polysA[i];
+
+			for (size_t j = 0; j < polysA.size(); j++) {
+				auto& polyB = polysB[i];
+
+				if (!GJKCore(polyA, polyB, simplex)) continue;
+
+				auto epa = EPACore(polyA, polyB, simplex, 32);
+				auto manifold = GenerateContactManifold(
+					_colliderA, _colliderB, polyA, polyB, epa.normal,
+					_idColA, _idColB, i, j);
+
+				// TODO Handling multi pair collision
+				if (manifold)
+					return manifold;
+			}
+		}
+
+		return nullptr;
+	}
+
+public:
+#pragma region SAT Algorithm
+	//
+	// Project _point onto _projectAxis.
+	// 
+	// @param _point:
+	//		The point to project.
+	// @param _projectAxis:
+	//		The vector represents as the projecting axis.
+	// 
+	// @return 
+	//		A vector represents the projected point on the projecting axis.
+	//
+	[[nodiscard]]
+	inline static Vector2 ProjectPoint(Vector2 _point, Vector2 _projectAxis) noexcept {
+		float scalar = Vector2::Dot(_point, _projectAxis) / _projectAxis.GetSqrMagnitude();
+		return _projectAxis * scalar;
+	}
+
+	//
+	// Project a polygon onto a given axis (represented by a normal vector).
+	// 
+	// @param _collider:
+	//		The collider to receive vertex information from.
+	// @param _projectAxis:
+	//		The vector represents as the projecting axis.
+	// 
+	// @return 
+	//		A ProjectionResult structure represents the result of the projected polygon.
+	//
+	[[nodiscard]]
+	inline static ProjectionResult ProjectPolygon(const Polygon& _polygon, Vector2 _projectAxis) noexcept {
+		float minDis = INFINITY, maxDis = -INFINITY;
+
+		for (auto vert : _polygon.vertices) {
+			// The projected point along the projecting axis
+			float dis = Vector2::Dot(vert, _projectAxis);
+
+			minDis = LMK_Min(dis, minDis);
+			maxDis = LMK_Max(dis, maxDis);
+		}
+
+		return {
+			minDis - _polygon.radius,
+			maxDis + _polygon.radius,
+		};
+	}
+
+	//
+	// 
+	//
+	static ColliderDistance2D SAT(const Polygon& _A, const Polygon& _B) {
+		ColliderDistance2D result;
+		result.distance = FLT_MAX;
+		result.isValid = true;
+
+		auto testAxes = [&](const Polygon& _P1, const Polygon& _P2) -> bool {
+			size_t n = _P1.vertices.size();
+
+			for (size_t cur = n - 1, next = 0; next < n; cur = next++) {
+				Vector2 edge = _P1.vertices[next] - _P1.vertices[cur];
+				Vector2 axis = Vector2::Perpendicular(edge).GetNormalized();
+
+				auto proj1 = ProjectPolygon(_P1, axis);
+				auto proj2 = ProjectPolygon(_B, axis);
+
+				float overlap = std::min(proj1.maxDis, proj2.maxDis) -
+					std::max(proj1.minDis, proj2.minDis);
+
+				// Separation -> positive distance
+				if (overlap < 0) {
+					result.distance = overlap; // negative overlap means separation
+					result.normal = axis;
+					result.isOverlapped = false;
+					return false;
+				}
+
+				// Track minimum penetration
+				if (overlap < -result.distance || result.distance > 0) {
+					result.distance = -overlap; // negative = penetration
+					result.normal = axis;
+				}
+			}
+
+			return true;
+			};
+
+		if (!testAxes(_A, _B)) return result;
+		if (!testAxes(_B, _A)) return result;
+
+		result.isOverlapped = true;
+		return result;
+	}
+#pragma endregion
+
+#pragma region GJK Algorithm
+	//
+	// Find the furthest vertex in the polygon with the given direction.
+	// 
+	// @param _polygon:
+	//		A list of Vector2 represents the vertices of the polygon.
+	// @param _edgeRadius:
+	//		
+	// @param _direction:
+	//		A vector represents the direction to check for.
+	//  
+	// @return 
+	//		The local space coordinate represents the furthest vertex in the given direction.
+	//
+	[[nodiscard]]
+	inline static Vertex FindFurthestVertex(const Polygon& _polygon, Vector2 _direction) noexcept {
+		Vector2 maxPoint;
+		size_t maxId = 0;
+		float maxDis = -INFINITY;
+
+		// Find furthest projection of vertices on _direction.
+		for (size_t i = 0; i < _polygon.Count(); i++) {
+			auto& vert = _polygon.vertices[i];
+			float distance = Vector2::Dot(vert, _direction);
+			if (distance > maxDis) {
+				maxDis = distance;
+				maxPoint = vert;
+				maxId = i;
+			}
+		}
+		// Add physics shape radius to the result vertex.
+		// This generalizes the function for all non-polygon shapes.
+		maxPoint += _direction.GetNormalized() * _polygon.radius;
+
+		return Vertex{ maxPoint, maxId };
+	}
+
+	//
+	// The support function used for GJK algorithm.
+	// 
+	// This function returns the most extreme vertex of the Minkowski differences 
+	// of the 2 polygons in the given direction.
+	// 
+	// NOTE:
+	// The direction is reversed for the second polygon.
+	// 
+	// @param _polygonA:
+	//		The first collider.
+	// @param _polygonB:
+	//		The second collider.
+	// @param _direction:
+	//		A vector represents the direction to check for.
+	// 
+	// @return 
+	//		A vector represents the support point.
+	//
+	[[nodiscard]]
+	inline static Vector2 GJKSupport(const Polygon& _polygonA, const Polygon& _polygonB, Vector2 _direction) noexcept {
+		auto vertexA = FindFurthestVertex(_polygonA, _direction);
+		auto vertexB = FindFurthestVertex(_polygonB, -_direction);
+		return vertexA.position - vertexB.position;
+	}
+
+	//
+	// Implementation of GJK (Gilbert-Johnson-Keerthi) algorithm for overlap detection
+	// between two polygons.
+	// 
+	// @param _resultSimplex:
+	//		The result simplex if the colliders overlapped.
+	//
+	[[nodiscard]]
+	inline static bool GJKCore(const Polygon& _polygonA, const Polygon& _polygonB, impl::Simplex& _resultSimplex) {
+		// For a detailed explanation of the Gilbert�Johnson�Keerthi algorithm, see:
+		// https://medium.com/@mbayburt/walkthrough-of-the-gjk-collision-detection-algorithm-80823ef5c774
+		// and
+		// https://winter.dev/articles/gjk-algorithm
+
+		// Get initial support point in any direction (vector (1, 0) in this case)
+		Vector2 support = GJKSupport(_polygonA, _polygonB, Vector2::right);
+
+		impl::Simplex simplex;
+		simplex.push_front(support);
+
+		// Set the next direction towards the origin.
+		Vector2 direction = -support;
+
+		while (true) {
+			support = GJKSupport(_polygonA, _polygonB, direction);
+
+			// If the support is not pass the origin.
+			if (Vector2::Dot(support, direction) <= 0) {
+				return false; // No collision
+			}
+
+			simplex.push_front(support);
+
+			if (GJK_HandleSimplex(simplex, direction)) {
+				_resultSimplex = simplex;
+				return true;
+			}
+		}
+	}
+
+	//
+	// Case handler for 2D simplex.
+	//
+	[[nodiscard]]
+	inline static bool GJK_HandleSimplex(impl::Simplex& _simplex, Vector2& _direction) {
+		if (_simplex.size() == 2)
+			return GJK_LineCase(_simplex, _direction);
+		else
+			return GJK_TriangleCase(_simplex, _direction);
+	}
+
+	//
+	// Standard solver for GJK line case.
+	//
+	[[nodiscard]]
+	inline static bool GJK_LineCase(impl::Simplex& _simplex, Vector2& _direction) {
+		Vector2 a = _simplex[0];
+		Vector2 b = _simplex[1];
+
+		Vector2 ab = b - a;
+		Vector2 ao = -a;
+
+		if (Vector2::Dot(ab, ao) > 0) {
+			// We use triple product to calculate the correct normal orientation.
+			_direction = Vector3::Cross(Vector3::Cross(ab, ao), ab);
+
+			if (_direction.GetSqrMagnitude() < 1e-6f) {
+				_direction = Vector2::Perpendicular(ab);
+			}
+		}
+		else {
+			_simplex = { a };
+			_direction = ao;
+		}
+
+		return false;
+	}
+
+	//
+	// Standard solver for GJK triangle case.
+	//
+	[[nodiscard]]
+	inline static bool GJK_TriangleCase(impl::Simplex& _simplex, Vector2& _direction) {
+		Vector2 a = _simplex[0];
+		Vector2 b = _simplex[1];
+		Vector2 c = _simplex[2];
+
+		Vector2 ab = b - a;
+		Vector2 ac = c - a;
+		Vector2 ao = -a;
+
+		Vector3 abc = Vector3::Cross(ab, ac);
+
+		// Origin is in region outside AC.
+		if (Vector2::Dot(Vector3::Cross(abc, ac), ao) > 0) {
+			// If AC and AO are pointing in the same general direction.
+			if (Vector2::Dot(ac, ao) > 0) {
+				// Adjust simplex to AC.
+				_simplex = { a, c };
+				_direction = Vector3::Cross(Vector3::Cross(ac, ao), ac);
+			}
+			else {
+				return GJK_LineCase(_simplex = { a, b }, _direction);
+			}
+		}
+		else {
+			// Origin is in region outside AB.
+			if (Vector2::Dot(Vector3::Cross(ab, abc), ao) > 0) {
+				return GJK_LineCase(_simplex = { a, b }, _direction);
+			}
+			// If both case was false, origin is inside triangle.
+			else {
+				return true;
+			}
+		}
+
+		return false;
+	}
+#pragma endregion
+
+#pragma region EPA Resolution
+	//
+	// EPA (Expanding Polytope Algorithm) collision resolution between 2 polygons.
+	//
+	[[nodiscard]]
+	inline static ColliderDistance2D EPACore(const Polygon& _polygonA, const Polygon& _polygonB, const impl::Simplex& _simplex, int _maxIterations) noexcept {
+		constexpr float ep = 1e-4f; // epsilon
+		constexpr float epd = 1e-6f; // duplicated epsilon
+
+		size_t minIndex = 0;
+		float minDistance = INFINITY;
+		Vector2 minNormal;
+		std::vector<Vector2> polytope = _simplex;
+
+		auto SamePoint = [&](const Vector2& a, const Vector2& b) {
+			return (a - b).GetSqrMagnitude() < epd * epd;
+			};
+
+		// To ensure CCW winding
+		auto SignedArea = [&](const std::vector<Vector2>& pts) {
+			float area = 0.0f;
+			for (size_t i = 0; i < pts.size(); i++) {
+				const Vector2& p = pts[i];
+				const Vector2& q = pts[(i + 1) % pts.size()];
+				area += (p.x * q.y - q.x * p.y);
+			}
+			return area * 0.5f;
+			};
+
+		if (SignedArea(polytope) < 0.0f) {
+			std::reverse(polytope.begin(), polytope.end());
+		}
+
+		// --- Main EPA loop ---
+		for (int iter = 0; iter < _maxIterations; iter++) {
+
+			// Find closest edge
+			float minDistance = INFINITY;
+			Vector2 bestNormal;
+			int bestIndex = 0;
+
+			for (size_t i = 0; i < polytope.size(); i++) {
+				size_t j = (i + 1) % polytope.size();
+
+				const Vector2& a = polytope[i];
+				const Vector2& b = polytope[j];
+
+				Vector2 edge = b - a;
+
+				// Degenerate edge check
+				if (edge.GetSqrMagnitude() < epd) continue;
+
+				// Outward normal for CCW polygon
+				Vector2 normal(edge.y, -edge.x);
+				normal = normal.GetNormalized();
+
+				float distance = Vector2::Dot(a, normal);
+
+				if (distance < minDistance) {
+					minDistance = distance;
+					bestNormal = normal;
+					bestIndex = (int)j;
+				}
+			}
+
+			// Get support point
+			Vector2 support = GJKSupport(_polygonA, _polygonB, bestNormal);
+			float supportDistance = Vector2::Dot(support, bestNormal);
+
+			// Convergence check
+			if (supportDistance - minDistance < ep) {
+				return { minDistance, bestNormal };
+			}
+
+			// Duplicate check
+			bool isDuplicate = false;
+			for (const auto& p : polytope) {
+				if (SamePoint(p, support)) {
+					isDuplicate = true;
+					break;
+				}
+			}
+
+			if (isDuplicate) {
+				// Can't expand further safely
+				return { minDistance, bestNormal };
+			}
+
+			// Insert new point
+			polytope.insert(polytope.begin() + bestIndex, support);
+		}
+
+		// Fallback (best known edge)
+		minDistance = INFINITY;
+		Vector2 bestNormal;
+
+		for (size_t i = 0; i < polytope.size(); i++) {
+			size_t j = (i + 1) % polytope.size();
+
+			const Vector2& a = polytope[i];
+			const Vector2& b = polytope[j];
+
+			Vector2 edge = b - a;
+			if (edge.GetSqrMagnitude() < 1e-6f) continue;
+
+			Vector2 normal(edge.y, -edge.x);
+			normal = normal.GetNormalized();
+
+			float distance = Vector2::Dot(a, normal);
+
+			if (distance < minDistance) {
+				minDistance = distance;
+				bestNormal = normal;
+			}
+		}
+
+		return { minDistance, bestNormal };
+	}
+#pragma endregion
+
+#pragma region Contacts Manifold
+	//
+	// Get the furthest vertex in a given direction, and returns an adjacent edge that 
+	// is the most perpendicular to the given direction.
+	//
+	inline static Segment GetBestEdge(const Polygon& _poly, const Vector2& _dir) {
+		auto support = FindFurthestVertex(_poly, _dir);
+
+		// Get adjacent vertices
+		Vector2 p = support.position;
+
+		size_t prevId = (support.id - 1 + _poly.Count()) % _poly.Count();
+		size_t nextId = (support.id + 1) % _poly.Count();
+		Vector2 prevP = _poly.vertices[prevId];
+		Vector2 nextP = _poly.vertices[nextId];
+
+		// Pick most perpendicular edge to normal
+		Vector2 prevV = (p - prevP).GetNormalized();
+		Vector2 nextV = (nextP - p).GetNormalized();
+
+		if (std::abs(Vector2::Dot(prevV, _dir)) > std::abs(Vector2::Dot(nextV, _dir))) {
+			return { support, Vertex{ nextP, nextId } };
+		}
+		else {
+			return { Vertex{ prevP, prevId }, support };
+		}
+	}
+
+	//
+	// Clip a line segment to only include points inside a half-space
+	// define from a given normal and offset.
+	//
+	inline static int ClipSegmentToLine(Segment& _segment, const Vector2& _normal, float _offset) {
+		Segment out = _segment;
+		int numOut = 0;
+
+		float dist0 = Vector2::Dot(_segment.v1.position, _normal) - _offset;
+		float dist1 = Vector2::Dot(_segment.v2.position, _normal) - _offset;
+
+		// Keep points inside
+		if (dist0 <= 0) out[numOut++].position = _segment.v1.position;
+		if (dist1 <= 0) out[numOut++].position = _segment.v2.position;
+
+		// If segment crosses plane, compute intersection
+		if (dist0 * dist1 < 0)
+		{
+			float t = dist0 / (dist0 - dist1);
+			out[numOut++].position = _segment.v1.position + t * (_segment.v2.position - _segment.v1.position);
+		}
+
+		_segment.v1 = out.v1;
+		_segment.v2 = out.v2;
+
+		return numOut;
+	}
+
+	//
+	// Core function to generate contact manifold with a given contact normal.
+	//
+	inline static std::shared_ptr<ContactManifold> GenerateContactManifold(
+		const Collider2D& _colliderA,
+		const Collider2D& _colliderB,
+		const Polygon& _polygonA, 
+		const Polygon& _polygonB, 
+		const Vector2& _inputNormal,
+		size_t _idColA,
+		size_t _idColB,
+		size_t _idPolyA,
+		size_t _idPolyB) {
+
+		std::shared_ptr<ContactManifold> contactManifold = std::make_shared<ContactManifold>();
+		contactManifold->normal = _inputNormal;
+
+		Vector2 normal = _inputNormal.GetNormalized();
+
+		Segment edgeA = GetBestEdge(_polygonA, normal);
+		Segment edgeB = GetBestEdge(_polygonB, -normal);
+
+		// Ref edge is the more perpendicular edge to contact normal.
+		float dotA = std::abs(Vector2::Dot(edgeA.GetForward(), normal));
+		float dotB = std::abs(Vector2::Dot(edgeB.GetForward(), normal));
+		Segment *refEdge, *incEdge;
+		size_t refColID, incColID, refPolyID, incPolyID; // used for generate feature id.
+		if (dotA <= dotB)
+		{
+			refEdge = &edgeA;
+			incEdge = &edgeB;
+			refColID = _idColA;
+			incColID = _idColB;
+			refPolyID = _idPolyA;
+			incPolyID = _idPolyB;
+		}
+		else
+		{
+			refEdge = &edgeB;
+			incEdge = &edgeA;
+			refColID = _idColB;
+			incColID = _idColA;
+			refPolyID = _idPolyB;
+			incPolyID = _idPolyA;
+		}
+
+		// Side planes to clip off irrelevant segments
+		Vector2 sideNormal1 = refEdge->GetForward();
+		Vector2 sideNormal2 = refEdge->GetBackward();
+		float offset1 = Vector2::Dot(refEdge->v2.position, sideNormal1);
+		float offset2 = Vector2::Dot(refEdge->v1.position, sideNormal2);
+
+		if (ClipSegmentToLine(*incEdge, sideNormal1, offset1) < 2) return contactManifold;
+		if (ClipSegmentToLine(*incEdge, sideNormal2, offset2) < 2) return contactManifold;
+
+		// Face edge reference to define which contact point is penetrating
+		Vector2 faceNormal = Vector2::Perpendicular(refEdge->GetForward());
+		float refOffset = Vector2::Dot(refEdge->v1.position, faceNormal);
+
+		int contactCount = 0;
+		for (int i = 0; i < 2; ++i)	
+		{
+			float separation = Vector2::Dot((*incEdge)[i].position, faceNormal) - refOffset;
+
+			if (separation <= 1e-6f)
+			{
+				// feature IDs combine body/collider and shape IDs with vertex indices
+				auto featureIds = 
+					refColID << 49 | 
+					incColID << 33 |
+					refPolyID << 25 |
+					incPolyID << 17 |
+					refEdge->v1.id << 9 |
+					incEdge->v1.id << 1 |
+					i;
+
+				(*contactManifold)[contactCount] = std::make_shared<ManifoldPoint>();
+				(*contactManifold)[contactCount]->id = featureIds;
+				(*contactManifold)[contactCount]->point = (*incEdge)[i].position;
+				(*contactManifold)[contactCount]->separation = separation;
+				contactCount++;
+			}
+		}
+
+		contactManifold->normal = normal;
+		contactManifold->pointCount = contactCount;
+
+		return contactManifold;
+	}
+#pragma endregion
+
+public: // Accessors
 	// Get the gravitational acceleration applied to the physics world.
-	inline static Vector2 Gravity() {
+	inline static Vector2 GetGravity() {
 		return Instance.m_gravity;
 	}
 
-public: // Static Properties
+	inline static PhysicsScene2D* GetScene() {
+		return Instance.m_physicsScene;
+	}
 
-private: 
+private: // Static Properties
 	static Physics2D Instance;
 
 private: // Properties
@@ -1705,6 +2309,100 @@ private: // Properties
 };
 
 Physics2D	Physics2D::Instance;
+
+
+// 0========================================================================================================0
+// |																										|
+// | SEPERATE IMPLEMENTATION																				|
+// |																										|
+// 0========================================================================================================0
+
+inline void Rigidbody2D::OnAttached() {
+	RegisterCollider(gameObject->GetComponent<Collider2D>());
+
+	Physics2D::GetScene()->Register(this);
+}
+
+inline void PhysicsScene2D::Step(float _dTime)
+{
+	// Prepare
+	for (auto& body : m_bodies) {
+		body->GetCollider()->RecalculateBounds();
+
+		if (body->bodyType != RigidbodyType2D::Static)
+			body->linearVelocity += Physics2D::GetGravity() * body->gravityScale * _dTime;
+
+		body->linearVelocity *= (1.0f - body->linearDamping * _dTime);
+		body->angularVelocity *= (1.0f - body->angularDamping * _dTime);
+	}
+
+	// Generate contacts
+	std::unordered_set<uint64_t> activeContacts;
+
+	for (size_t i = 0; i < m_bodies.size(); i++) {
+		auto& current = m_bodies[i];
+		auto currentCol = current->GetCollider();
+
+		if (currentCol->isTrigger) continue;
+
+		for (size_t j = i + 1; j < m_bodies.size(); j++) {
+			auto& other = m_bodies[j];
+			auto otherCol = other->GetCollider();
+
+			if (otherCol->isTrigger) continue;
+
+			auto manifold = Physics2D::CollisionDetection_GJK(*currentCol, *otherCol, i, j);
+
+			if (!manifold) continue;
+
+			for (size_t c = 0; c < manifold->pointCount; c++) {
+				auto& mp = (*manifold)[c];
+
+				activeContacts.insert(mp->id);
+
+				auto it = m_contactCache.find(mp->id);
+				if (it != m_contactCache.end()) {
+					it->second->SetCollisionData(
+						mp->point,
+						manifold->normal,
+						-mp->separation
+					);
+				}
+				else {
+					ContactConstraint* contact = new ContactConstraint(
+						current, other,
+						mp->point,
+						manifold->normal,
+						-mp->separation
+					);
+
+					m_contactCache[mp->id] = contact;
+					Register(contact);
+				}
+			}
+		}
+	}
+
+	// Remove dead contacts
+	for (auto it = m_contactCache.begin(); it != m_contactCache.end(); ) {
+		if (activeContacts.find(it->first) == activeContacts.end()) {
+			m_constraints.erase(
+				std::remove(m_constraints.begin(), m_constraints.end(), it->second), 
+				m_constraints.end());
+
+			delete it->second;
+			it = m_contactCache.erase(it);
+		}
+		else {
+			++it;
+		}
+	}
+	
+	SolveConstraints(_dTime);
+
+	FinalizeBodies(_dTime);
+}
+
 LMK_END
 
 #endif // !_LMK_PHYSICS_2D_H_

@@ -459,7 +459,7 @@ public: // Functions
 
 	//
 	// Transforms a point from screen space into world space, where world space 
-	// is defined as the coordinate system Get the very top of the game's hierarchy. 
+	// is defined as the coordinate system at the very top of the game's hierarchy. 
 	// 
 	[[nodiscard]] inline Vector2 ScreenToWorldPoint(Vector2 _point) const {
 		// Transform screen space to view space.
@@ -501,8 +501,8 @@ private:
 
 public: // Static function
 	// Get the first instantiated Camera2D.
-	[[nodiscard]] inline static Camera2D& GetMainCamera() noexcept {
-		return *m_mainCamera;
+	[[nodiscard]] inline static Camera2D* GetMainCamera() noexcept {
+		return m_mainCamera;
 	}
 
 public: // Accessors
@@ -1052,13 +1052,13 @@ public: // Static Functions
 	// @param _size:
 	//		Half the Count of the rectangle.
 	//
-	inline static void DrawRect(Vector2 _center, Vector2 _size) {
+	inline static void DrawRect(Vector2 _center, Vector2 _extents) {
 		std::vector<Vector2> verts = {
-			_center - _size,
-			_center - Vector2(_size.x, -_size.y),
-			_center + _size,
-			_center - Vector2(-_size.x, _size.y),
-			_center - _size,
+			_center - _extents,
+			_center - Vector2(_extents.x, -_extents.y),
+			_center + _extents,
+			_center - Vector2(-_extents.x, _extents.y),
+			_center - _extents,
 		};
 		DrawPolygon(verts);
 	}
@@ -1071,10 +1071,10 @@ public: // Static Functions
 	// @param _size:
 	//		Half the Count of the rectangle.
 	//
-	inline static void DrawRectWorld(const Camera2D& _camera, Vector2 _center, Vector2 _size) {
+	inline static void DrawRectWorld(const Camera2D& _camera, Vector2 _center, Vector2 _extents) {
 		_center = _camera.WorldToScreenPoint(_center);
-		_size *= _camera.GetPixelsPerUnit();
-		DrawRect(_center, _size);
+		_extents *= _camera.GetPixelsPerUnit();
+		DrawRect(_center, _extents);
 	}
 
 	//
@@ -1134,7 +1134,7 @@ public: // Static Functions
 	//		Size of the reticle to draw in pixels.
 	//
 	inline static void DrawCameraOrigin(float _size = 10.0f, float _opacity = 0.75f) {
-		Vector2 screenCenter = Vector2{ Screen::GetHeight(), Screen::GetWidth() };
+		Vector2 screenCenter = Vector2{ (float)Screen::GetHeight(), (float)Screen::GetWidth() } / 2.0f;
 
 		SetColor(Color::white * _opacity);
 		DrawLine(screenCenter + Vector2{ _size, 0 }, screenCenter + Vector2{ -_size, 0 });

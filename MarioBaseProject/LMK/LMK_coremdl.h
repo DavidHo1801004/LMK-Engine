@@ -326,7 +326,7 @@ public: // Functions
 	// Makes this vector have a magnitude of 1.
 	//		
 	// When normalized, a vector keeps the same direction but its length is 1.0.
-	// NOTE: This function will change the current vector. If you want to keep the current vector unchanged, use normalized().
+	// NOTE: This function will change the current vector. If you want to keep the current vector unchanged, use GetNormalized().
 	//		
 	inline Vector2& Normalize() {
 		*this /= GetMagnitude();
@@ -405,11 +405,7 @@ public: // Static Functions
 
 	// 
 	// Cross Product of two vectors.
-	// 
-	// The returned value of a cross product between 2D vectors is represented 
-	// as scalar instead of vector.
-	// 
-	// To get the perpendicular vector of 2D vectors, use Vector3::Cross instead.
+	// Short hand writing for Vector2::Cross(_lhs.Perpendicular(), _rhs);
 	//	
 	// @return
 	//		Returns (_lhs x _rhs).
@@ -2751,7 +2747,7 @@ public: // Mutators
 	// Set the position of the minimum corner of the rectangle.
 	// Setting this property will resize the rectangle and preserve the position of the Max coordinate.
 	inline void SetMin(vector_type _minPos) noexcept {
-		setMin(_minPos.x, _minPos.y);
+		SetMin(_minPos.x, _minPos.y);
 	}
 
 	// Set the maximum X coordinate of the rectangle. 
@@ -2780,7 +2776,7 @@ public: // Mutators
 	// Set the position of the maximum corner of the rectangle.
 	// Setting this property will resize the rectangle and preserve the position of the Min coordinate.
 	inline void SetMax(vector_type _maxPos) noexcept {
-		setMax(_maxPos.x, _maxPos.y);
+		SetMax(_maxPos.x, _maxPos.y);
 	}
 
 	// Set the X and Y position of the rectangle. 
@@ -3128,18 +3124,18 @@ public: // Functions
 	// Does another bounding box intersect with this bounding box?
 	//
 	[[nodiscard]]
-    inline bool Intersects(const Bounds& _bounds) const noexcept {
-		return (m_min.x < _bounds.m_max.x) 
-			&& (m_max.x > _bounds.m_min.x)
-			&& (m_min.y < _bounds.m_max.y)
-			&& (m_max.y > _bounds.m_min.y);
+    inline bool Intersects(const Bounds& _other) const noexcept {
+		return (m_min.x < _other.m_max.x) 
+			&& (m_max.x > _other.m_min.x)
+			&& (m_min.y < _other.m_max.y)
+			&& (m_max.y > _other.m_min.y);
 	}
 
 	//
 	// Does _ray intersect this bounding box?
 	//
 	[[nodiscard]]
-    inline bool IntersectRay(Ray& _ray) noexcept {
+    inline bool IntersectRay(const Ray& _ray) noexcept {
 		// For the original formula of box - ray intersection, see:
 		// https://tavianator.com/2022/ray_box_boundary.html
 
@@ -3386,29 +3382,34 @@ public: // Static Functions
 	//
 	[[nodiscard]]
     inline static Color HSVToRGB(float _h, float _s, float _v) {
-		// For a reference to the original formula of this conversion, see: 
-		// https://web.archive.org/web/20090102212804/http://en.wikipedia.org/wiki/HSL_color_space
+		float chroma = _v * _s;
+		float hPrime = _h * 360.f / 60.f;
+		float x = chroma * (1 - std::abs(fmod(hPrime, 2.0f) - 1));
 
-		uint8_t hi = LMK_RoundToInt(_h * 6) % 6;
-		float f = _h * 6 - LMK_RoundToInt(_h * 6);
-		float p = _v * (1 - f);
-		float q = _v * (1 - f * _s);
-		float t = _v * (1 - (1 - f) * _s);
+		float r = 0, g = 0, b = 0;
 
-		switch (hi) {
-		case 0:
-			return Color(std::round(_v * 255), std::round(t * 255), std::round(p * 255), 1);
-		case 1:
-			return Color(std::round(q * 255), std::round(_v * 255), std::round(p * 255), 1);
-		case 2:
-			return Color(std::round(p * 255), std::round(_v * 255), std::round(t * 255), 1);
-		case 3:
-			return Color(std::round(p * 255), std::round(q * 255), std::round(_v * 255), 1);
-		case 4:
-			return Color(std::round(t * 255), std::round(p * 255), std::round(_v * 255), 1);
-		case 5:
-			return Color(std::round(_v * 255), std::round(p * 255), std::round(q * 255), 1);
+		if (0 <= hPrime && hPrime < 1) {
+			r = chroma; g = x; b = 0;
 		}
+		else if (1 <= hPrime && hPrime < 2) {
+			r = x; g = chroma; b = 0;
+		}
+		else if (2 <= hPrime && hPrime < 3) {
+			r = 0; g = chroma; b = x;
+		}
+		else if (3 <= hPrime && hPrime < 4) {
+			r = 0; g = x; b = chroma;
+		}
+		else if (4 <= hPrime && hPrime < 5) {
+			r = x; g = 0; b = chroma;
+		}
+		else if (5 <= hPrime && hPrime < 6) {
+			r = chroma; g = 0; b = x;
+		}
+
+		float m = _v - chroma;
+
+		return Color( (r + m) * 255.f, (g + m) * 255.f, (b + m) * 255.f, 255.f);
 	}
 
 	//
@@ -3499,7 +3500,7 @@ public: // Properties
 	uint8_t r;	// Red component of the color.
 	uint8_t g;	// Green component of the color.
 	uint8_t b;	// Blue component of the color.
-	uint8_t a;	// Alpha component of the color (0 is transparent, 1 is opaque).
+	uint8_t a;	// Alpha component of the color (0 is transparent, 255 is opaque).
 };
 
 // Static Properties Initialization

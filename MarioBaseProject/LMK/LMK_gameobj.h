@@ -50,14 +50,27 @@ class Scene;
 // Base class for everything attached to a GameObject.
 //
 class Component : public Object {
-public: // Constructors & Destructors
+protected:
+	friend class GameObject;
+
+protected: // Constructors & Destructors
 	inline Component() = default;
 
+public:
 	virtual ~Component() = default;
 
+protected:
+	//
+	// Called once when first attached to a GameObject.
+	//
+	virtual void OnAttached() {}
+
 public: // Properties
-	GameObject* gameObject = nullptr;	// The game object this component is attached to. A component is always attached to a game object.
-	Transform* transform = nullptr;		// The Transform attached to this GameObject.
+	// The game object this component is attached to. A component is always attached to a game object.
+	GameObject* gameObject = nullptr;
+
+	// The Transform attached to this GameObject.
+	Transform* transform = nullptr;
 };
 
 // +--------------------------------------------------------------------------------+
@@ -84,7 +97,8 @@ public: // Functions
 	//		If a GameObject is active and has an enabled behaviour then isActiveAndEnabled will return true. 
 	//		Otherwise return false.
 	//
-	[[nodiscard]] inline bool IsActiveAndEnabled() const noexcept;
+	[[nodiscard]] 
+	inline bool IsActiveAndEnabled() const noexcept;
 
 public: // Properties
 	bool enable = true;	// Enabled Behaviours are Updated, disabled Behaviours are not.
@@ -96,20 +110,40 @@ public: // Properties
 // |					 															|
 // +--------------------------------------------------------------------------------+
 
+class EngineUpdateCallback {};
+class EngineStartCallback {};
+
 //
 // 
 //
 class MonoBehaviour : public Behaviour {
+protected: // Constructors & Destructors
+	inline MonoBehaviour() {
+		EventAggregator::Subscribe<EngineStartCallback>(
+			[this](const EngineStartCallback& _callback) {
+				if (IsActiveAndEnabled())
+					OnStart();
+			});
+
+		EventAggregator::Subscribe<EngineUpdateCallback>(
+			[this](const EngineUpdateCallback& _callback) { 
+				if (IsActiveAndEnabled())
+					OnUpdate(); 
+			});
+	}
+
+	inline ~MonoBehaviour() = default;
+
+protected: // Functions
+	//
+	// 
+	// 
+	virtual void OnStart() {}
 
 	//
-	// Polymorphism might slow down the application.
-	// Might need refactor in future development.
+	// Update is called every frame, if the MonoBehaviour is enabled.
 	//
-
-public: // Functions
-	virtual void Start() = 0;
-
-	virtual void Update() = 0;
+	virtual void OnUpdate() {}
 };
 
 // +--------------------------------------------------------------------------------+
@@ -701,6 +735,8 @@ class GameObject final : public Object {
 private:
 	using component_id_type = std::size_t;
 
+	friend class Component;
+
 public: // Constructors & Destructors
 	//
 	// Create a new GameObject and attach it to 
@@ -758,7 +794,10 @@ public: // Functions
 		component->gameObject = this;
 		component->transform = transform;
 
-		m_components[GetComponentID<Type>()] = static_cast<Component*>(component);
+		auto casted = static_cast<Component*>(component);
+		casted->OnAttached();
+
+		m_components[GetComponentID<Type>()] = casted;
 
 		return component;
 	}
@@ -775,7 +814,8 @@ public: // Functions
 	//		If not, return nullptr instead.
 	//
 	template <typename Type>
-	[[nodiscard]] inline Type* GetComponent() {
+	[[nodiscard]] 
+	inline Type* GetComponent() {
 		LMK_CORE_ASSERT(IsComponent<Type>(),
 			"lmk::GameObject: GetComponent() - Invalid component type. Type must derived from lmk::Component.");
 
@@ -811,8 +851,21 @@ public: // Functions
 	//		For a Type to be valid, it have to be derived from lmk::Component class.
 	//
 	template <typename Type>
-	bool HasComponent() {
+	inline bool HasComponent() {
 		return m_components.find(GetComponentID<Type>()) != m_components.end();
+	}
+
+	//
+	// The active state of the GameObject in the Scene hierarchy. True if active, false if inactive.
+	// 
+	// A GameObject is active in the scene hierarchy if GameObject.activeSelf is true for the object and all parent object
+	//
+	inline bool IsActiveInHierarchy() const {
+		auto parent = transform->GetParent();
+		if (parent)
+			return parent->gameObject->IsActiveInHierarchy() && selfActive;
+
+		return selfActive;
 	}
 
 private:
@@ -892,10 +945,10 @@ public: // Functions
 	//
 	// Create a new GameObject an attach it to the current Scene.
 	//
-	inline GameObject& CreateGameObject(const std::string& _name = std::string()) {
+	inline GameObject* CreateGameObject(const std::string& _name = std::string()) {
 		GameObject* newObject = new GameObject{ this, _name };
 		m_objects.push_back(newObject);
-		return *newObject;
+		return newObject;
 	}
 
 	//
@@ -907,10 +960,10 @@ public: // Functions
 	// @return
 	//		A reference to the instantiated clone of _original.
 	//
-	inline GameObject& Instantiate(const GameObject& _original) {
+	inline GameObject* Instantiate(const GameObject& _original) {
 		GameObject* newObject = new GameObject(_original);
 		m_objects.push_back(newObject);
-		return *newObject;
+		return newObject;
 	}
 
 	// -------------------- TEMPORARY IMPLEMENTATION -------------------- //
@@ -1017,7 +1070,7 @@ SceneManager SceneManager::Instance;
 // +--------------------------------------------------------------------------------+
 
 [[nodiscard]] inline bool Behaviour::IsActiveAndEnabled() const noexcept {
-	return enable && gameObject->selfActive;
+	return enable && gameObject->IsActiveInHierarchy();
 }
 
 LMK_END
