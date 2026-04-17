@@ -814,7 +814,9 @@ private:
 };
 #endif
 
-#if false
+#if true
+#include "Examples/flatctrl.h"
+
 class CameraTest : public LMKEngine {
 private:
 	std::shared_ptr<Scene> scene;
@@ -824,14 +826,11 @@ private:
 	std::thread updateFPS;
 
 	// Sprite Renderer
-	std::shared_ptr<Texture2D> texture;
-	std::shared_ptr<Sprite> spriteA;
-	SpriteRenderer* rendererA;
+	std::vector<Sprite*> sprites;
+	std::vector<Transform*> transforms;
 
 	Vector2 rendererScaleValue;
 	float scaleSpeed = 5;
-	Vector2 rendererMoveDirection;
-	float moveSpeed = 10;
 	float rendererRotateDirection;
 	float rotateSpeed = 90;
 
@@ -841,6 +840,9 @@ private:
 	float targetAngle;
 	float zoomSpeed = 400; // Pixels
 	Vector2 lastMousePos;
+
+	float maxScale;
+	float minScale;
 
 	bool panning;
 	bool rotating;
@@ -856,24 +858,39 @@ public:
 
 		// Setup camera
 		auto camGO = scene->CreateGameObject("Main Camera");
+		camGO->AddComponent<FlatControlBehaviour>();
 		camera = camGO->AddComponent<Camera2D>();
-		camera->transform = new Transform();
-		camera->RecalculateAspect();
+		camera->backgroundColor = Color(120, 120, 120, 255);
 
 		// Setup renderer
-		texture = std::make_shared<Texture2D>();
+		Texture2D* texture;
+		Sprite* sprite;
+
+		texture = new Texture2D;
 		texture->LoadRawTextureData("Assets/Images/Koopa.png");
+		sprite = new Sprite;
+		sprite->InitSprite(*texture, RectInt{ Vector2Int::zero, Vector2Int(32, 30) });
+		sprite->SetPixelsPerUnit(30);
+		sprites.push_back(sprite);
 
-		spriteA = std::make_shared<Sprite>();
-		spriteA->InitSprite(*texture, RectInt{ Vector2Int::zero, Vector2Int(32, 30) });
-		spriteA->SetPixelsPerUnit(30);
+		sprite = new Sprite;
+		sprite->InitSprite(*texture, RectInt{ Vector2Int(33, 0), Vector2Int(32, 30)});
+		sprite->SetPixelsPerUnit(30);
+		sprites.push_back(sprite);
 
-		auto renderGO = scene->CreateGameObject("Renderer A");
-		rendererA = renderGO->AddComponent<SpriteRenderer>();
-		rendererA->transform->SetPosition(Vector2(1, 1));
-		rendererA->SetSprite(*spriteA);
+		texture = new Texture2D;
+		texture->LoadRawTextureData("Assets/Images/Mario.png");
+		sprite = new Sprite;
+		sprite->InitSprite(*texture, RectInt{ Vector2Int::zero, Vector2Int(31, 41) });
+		sprite->SetPixelsPerUnit(30);
+		sprites.push_back(sprite);
 
-		camera->transform->SetParent(rendererA->transform);
+		texture = new Texture2D;
+		texture->LoadRawTextureData("Assets/Images/Luigi.png");
+		sprite = new Sprite;
+		sprite->InitSprite(*texture, RectInt{ Vector2Int::zero, Vector2Int(31, 41) });
+		sprite->SetPixelsPerUnit(30);
+		sprites.push_back(sprite);
 	}
 
 	inline void OnUserUpdate() override {
@@ -887,90 +904,16 @@ public:
 			}
 		}
 
-		// Renderer controls
-		rendererMoveDirection = Vector2::zero;
-		if (Input::GetKey(KeyCode::W)) {
-			rendererMoveDirection.y += 1;
-		}
-		if (Input::GetKey(KeyCode::S)) {
-			rendererMoveDirection.y -= 1;
-		}
-		if (Input::GetKey(KeyCode::D)) {
-			rendererMoveDirection.x += 1;
-		}
-		if (Input::GetKey(KeyCode::A)) {
-			rendererMoveDirection.x -= 1;
-		}
-
-		rendererRotateDirection = 0;
-		if (Input::GetKey(KeyCode::Q)) {
-			rendererRotateDirection += 1;
-		}
-		if (Input::GetKey(KeyCode::E)) {
-			rendererRotateDirection -= 1;
-		}
-
-		rendererScaleValue = Vector2::zero;
-		if (Input::GetKey(KeyCode::R)) {
-			rendererScaleValue += Vector2::one;
-		}
-		if (Input::GetKey(KeyCode::F)) {
-			rendererScaleValue -= Vector2::one;
-		}
-
-		// Camera controls
-		if (Input::GetKeyDown(KeyCode::P)) {
-			camera->transform->SetLocalPosition(Vector2::zero);
-			camera->transform->SetLocalRotation(0);
-		}
-
-		if (Input::GetKeyDown(KeyCode::O)) {
-			camera->transform->SetParent(nullptr);
-		}
-
-		if (Input::GetMouseButtonDown(MouseButton::Left)) {
-			lastMousePos = Input::GetMousePosition();
-			panning = true;
-		}
-		else if (Input::GetMouseButtonUp(MouseButton::Left)) {
-			panning = false;
-		}
-
-		if (Input::GetMouseButtonDown(MouseButton::Right)) {
-			lastMousePos = Input::GetMousePosition();
-			rotating = true;
-		}
-		else if (Input::GetMouseButtonUp(MouseButton::Right)) {
-			rotating = false;
-		}
-
-		// Update camera properties
-		if (panning) {
-			moveDirection = camera->transform->TransformDirection(lastMousePos - Input::GetMousePosition()) / camera->GetPixelsPerUnit();
-			lastMousePos = Input::GetMousePosition();
-		}
-		if (rotating) {
-			targetAngle = Vector2::SignedAngle(Input::GetMousePosition().GetNormalized(), lastMousePos.GetNormalized());
-			lastMousePos = Input::GetMousePosition();
-		}
-
 		camera->SetSize(camera->GetSize() - Input::GetMouseScroll().y * Time::GetDeltaTime() * zoomSpeed);
-		camera->transform->Translate(moveDirection);
-		camera->transform->Rotate(targetAngle * 2);
 		camera->RecalculateViewMatrix();
 
-		// Update renderers transforms
-		rendererA->transform->Translate(rendererMoveDirection.GetNormalized() * moveSpeed * Time::GetDeltaTime());
-		rendererA->transform->AddScale(rendererScaleValue * scaleSpeed * Time::GetDeltaTime());
-		rendererA->transform->Rotate(rendererRotateDirection * rotateSpeed * Time::GetDeltaTime());
+		if (Input::GetMouseButtonDown(MouseButton::Left)) {
+			SpawnSpriteRenderer(camera->ScreenToWorldPoint(Input::GetMousePosition()));
+		}
 	}
 
 	inline void OnDrawGizmos() override {
-		Gizmos::DrawWorldGrid(*camera);
-
-		// Render sprites
-		Gizmos::SetColor(Color::green);
-		Gizmos::DrawRectWorld(*camera, rendererA->transform->GetPosition(), Vector2(0.05f, 0.05f));
+		Gizmos::DrawWorldGrid(*camera, 0.4f);
 
 		// Render UI
 		text.Display(m_renderer, Vector2Int(50, 50), Color::yellow);
@@ -981,6 +924,15 @@ public:
 	}
 
 private:
+	inline void SpawnSpriteRenderer(Vector2 _worldPos) {
+		auto go = scene->CreateGameObject("Renderer");
+		go->transform->SetPosition(_worldPos);
+		go->transform->SetRotation(Random::Range(0, 360));
+		go->transform->SetLossyScale(Vector2::one * Random::Range(1.f, 2.f));
+		auto renderer = go->AddComponent<SpriteRenderer>();
+		renderer->SetSprite(*sprites.at(Random::Range((size_t)0, sprites.size())));
+	}
+
 	inline void UpdateFPSText() {
 		using namespace std::literals::chrono_literals;
 
@@ -2140,6 +2092,7 @@ private:
 		auto go = scene->CreateGameObject("Collider " + std::to_string(count));
 		go->transform->SetPosition(_worldPoint);
 		auto collider = go->AddComponent<BoxCollider2D>();
+		collider->scale = Vector2(Random::Range(1, 3), Random::Range(1, 3));
 		auto body = go->AddComponent<Rigidbody2D>();
 		body->RegisterCollider(collider);
 		body->bodyType = _bodyType;
